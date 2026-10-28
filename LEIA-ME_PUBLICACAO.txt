@@ -1,0 +1,10 @@
+PACOTE DE PUBLICAÇÃO FIREBASE
+
+1. Publique primeiro as regras pelo Console Firebase usando o arquivo firestore.rules.
+2. Instale Node.js e Firebase CLI.
+3. Abra esta pasta no terminal.
+4. Execute firebase login
+5. Execute firebase use ld-imoveis
+6. Execute firebase deploy --only hosting
+
+A pasta public não contém CSVs, backups ou planilhas de contratos.

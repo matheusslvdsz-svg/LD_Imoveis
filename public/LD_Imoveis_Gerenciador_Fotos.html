@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LD Imóveis - Gerenciador de Fotos</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root { --bg-dark:#050505; --bg-panel:#0f0f0f; --bg-card:#1a1a1a; --bg-input:#101010;
+          --border:#2a2a2a; --text:#fff; --muted:#999; --red:#ff0000; --red-dark:#cc0000;
+          --green:#00cc66; --blue:#3399ff; --yellow:#ffcc00; --red-glow:rgba(255,0,0,0.35); }
+  * { box-sizing:border-box; margin:0; padding:0; font-family:'Inter',sans-serif; }
+  body { background:var(--bg-dark); color:var(--text); min-height:100vh; padding:26px 16px 60px; display:flex; justify-content:center; }
+  .wrap { width:100%; max-width:1200px; }
+  .brand { text-align:center; margin-bottom:20px; }
+  .brand h1 { font-family:'Montserrat',sans-serif; font-weight:900; font-size:2rem; letter-spacing:1px; }
+  .brand h1 span { color:var(--red); }
+  .brand p { color:var(--muted); font-size:0.85rem; margin-top:6px; }
+  .card { background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:16px; }
+  .card h2 { font-size:1.05rem; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  .card h2 i { color:var(--red); }
+  h3.mini { font-size:0.8rem; text-transform:uppercase; color:var(--muted); letter-spacing:0.6px; margin:16px 0 8px; }
+  label { display:block; color:var(--muted); font-size:0.82rem; margin-bottom:6px; }
+  input[type=email], input[type=password], input[type=text], input[type=search], select {
+      background:var(--bg-input); border:1px solid var(--border); color:#fff; border-radius:8px;
+      padding:11px 12px; outline:none; font-size:0.92rem; width:100%; }
+  input:focus, select:focus { border-color:var(--red); }
+  .btn { border:none; border-radius:8px; padding:11px 16px; cursor:pointer; display:inline-flex;
+         align-items:center; gap:8px; font-weight:700; font-size:0.88rem; color:#fff; transition:0.2s; }
+  .btn-primary { background:var(--red); }
+  .btn-primary:hover:not(:disabled) { background:var(--red-dark); box-shadow:0 4px 15px var(--red-glow); }
+  .btn-outline { background:transparent; border:1px solid var(--border); color:#fff; }
+  .btn-outline:hover:not(:disabled) { border-color:var(--red); color:var(--red); }
+  .btn-verde { background:var(--green); color:#00240f; }
+  .btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .topo { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+  .email { color:var(--muted); font-size:0.82rem; }
+  .link { color:var(--red); font-size:0.82rem; cursor:pointer; text-decoration:underline; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+  .kpi { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--red); border-radius:9px; padding:13px; }
+  .kpi h4 { font-size:0.66rem; text-transform:uppercase; color:var(--muted); letter-spacing:0.5px; }
+  .kpi .v { font-family:'Montserrat',sans-serif; font-size:1.45rem; font-weight:800; margin-top:3px; }
+  .barra-ferramentas { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:16px 0; }
+  .barra-ferramentas input[type=search] { flex:1; min-width:200px; }
+  .barra-ferramentas select { width:auto; min-width:150px; }
+  .grade { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; }
+  .item { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; overflow:hidden; display:flex; flex-direction:column; transition:0.2s; }
+  .item:hover { border-color:var(--red); transform:translateY(-3px); }
+  .item .foto { height:130px; background:#000; position:relative; }
+  .item .foto img { width:100%; height:100%; object-fit:cover; }
+  .item .chip { position:absolute; left:8px; top:8px; background:rgba(0,0,0,0.7); border:1px solid var(--border);
+                border-radius:16px; padding:2px 9px; font-size:0.66rem; font-weight:700; }
+  .item .chip.on { color:var(--green); border-color:rgba(0,204,102,0.4); }
+  .item .chip.off { color:var(--yellow); border-color:rgba(255,204,0,0.3); }
+  .item .corpo { padding:10px 12px 12px; display:flex; flex-direction:column; gap:4px; flex:1; }
+  .item .cod { color:var(--red); font-size:0.78rem; font-weight:800; }
+  .item .end { font-size:0.74rem; color:var(--muted); line-height:1.35; flex:1; }
+  .item button { margin-top:8px; }
+  .rolagem { overflow-x:auto; border:1px solid var(--border); border-radius:9px; background:var(--bg-card); }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+  th, td { padding:9px 10px; border-bottom:1px solid var(--border); text-align:left; }
+  th { color:var(--muted); text-transform:uppercase; font-size:0.64rem; }
+  td select { padding:6px 8px; font-size:0.8rem; }
+  .tag { display:inline-block; padding:2px 9px; border-radius:12px; font-size:0.66rem; font-weight:700; white-space:nowrap; }
+  .t-ok { background:rgba(0,204,102,0.15); color:var(--green); }
+  .t-erro { background:rgba(255,0,0,0.15); color:#ff8080; }
+  .t-parcial { background:rgba(255,204,0,0.12); color:var(--yellow); }
+  .aviso { border-radius:8px; padding:11px 13px; font-size:0.83rem; margin-bottom:12px; }
+  .aviso.ok { background:rgba(0,204,102,0.12); border:1px solid var(--green); color:#7ef0b2; }
+  .aviso.err { background:rgba(255,0,0,0.12); border:1px solid var(--red); color:#ff9c9c; }
+  .aviso.info { background:rgba(51,153,255,0.10); border:1px solid var(--blue); color:#9ecbff; }
+  .aviso.alerta { background:rgba(255,204,0,0.10); border:1px solid var(--yellow); color:#ffe28a; }
+  .barra { height:12px; background:var(--bg-input); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:12px 0 8px; }
+  .barra div { height:100%; width:0%; background:var(--red); transition:width 0.25s; }
+  .log { background:var(--bg-input); border:1px solid var(--border); border-radius:8px; padding:12px;
+         font-size:0.78rem; color:var(--muted); max-height:150px; overflow-y:auto; white-space:pre-wrap; font-family:Consolas,monospace; }
+  .escondido { display:none !important; }
+  .rodape { text-align:center; color:var(--muted); font-size:0.75rem; margin-top:8px; line-height:1.6; }
+  /* modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.86); display:none; align-items:center; justify-content:center; z-index:2000; padding:16px; }
+  .modal-overlay.active { display:flex; }
+  .modal-card { width:100%; max-width:820px; max-height:90vh; overflow-y:auto; background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; }
+  .modal-h { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .modal-h h2 { margin:0; }
+  .modal-b { padding:20px; }
+  .modal-f { padding:16px 20px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .miniaturas { display:flex; gap:10px; flex-wrap:wrap; }
+  .miniaturas .m { position:relative; }
+  .miniaturas img { width:104px; height:104px; object-fit:cover; border-radius:9px; border:1px solid var(--border); cursor:pointer; }
+  .miniaturas .x { position:absolute; top:-7px; right:-7px; width:24px; height:24px; border:none; border-radius:50%;
+                   background:var(--red); color:#fff; cursor:pointer; line-height:1; font-weight:700; }
+  #toastBox { position:fixed; right:18px; bottom:18px; z-index:4000; }
+  .toast { background:var(--green); color:#00240f; font-weight:700; padding:13px 18px; border-radius:8px; margin-top:8px; font-size:0.85rem; }
+  .toast.erro { background:var(--red); color:#fff; }
+  .toast.info { background:var(--blue); color:#fff; }
+  @media (max-width:640px){ .brand h1 { font-size:1.5rem; } .card { padding:16px; } }
+
+/* ===== PADRÃO VISUAL LD 2026 — atualização geral ===== */
+html{scroll-behavior:smooth}body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,.btn,input,select,textarea,a{transition:border-color .18s ease,background-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)}
+button:focus-visible,.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--red-main,var(--red,#e50914));outline-offset:2px}
+.card,.kpi-card,.table-container,.modal-card,.login-box{box-shadow:0 12px 34px rgba(0,0,0,.16)}
+table{width:100%}th{letter-spacing:.35px}td,th{vertical-align:middle}
+img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:#0a0a0a}::-webkit-scrollbar-thumb{background:#3a3a3a;border:2px solid #0a0a0a;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:var(--red-main,var(--red,#d90b16))}
+.ld-versao{position:fixed;right:8px;bottom:6px;z-index:2;font-size:8px;letter-spacing:.7px;color:#666;pointer-events:none;text-transform:uppercase}
+@media(max-width:760px){.content{padding-left:12px!important;padding-right:12px!important}.header{gap:12px}.header h1{font-size:clamp(1.55rem,7vw,2.1rem)}.form-grid{grid-template-columns:1fr!important}.form-full{grid-column:auto!important}.modal-card{width:96vw!important;max-height:94vh!important}.table-container{overflow-x:auto}.topbar{padding-left:12px!important;padding-right:12px!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media print{.ld-versao{display:none!important}button,.btn{box-shadow:none!important}}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">
+    <h1>L<span>D</span> IMÓVEIS</h1>
+    <p>Gerenciador de Fotos dos imóveis - simples um a um ou em massa (por pasta)</p>
+  </div>
+
+  <!-- ========================= LOGIN ========================= -->
+  <div class="card" id="caixaLogin">
+    <h2><i class="fas fa-lock"></i> Entre com o seu usuário do sistema</h2>
+    <div id="loginErro" class="aviso err escondido"></div>
+    <div style="margin-bottom:14px;">
+      <label>E-mail</label>
+      <input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email">
+    </div>
+    <div style="margin-bottom:18px;">
+      <label>Senha</label>
+      <input id="loginPass" type="password" placeholder="******" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()">
+    </div>
+    <button class="btn btn-primary" id="btnLogin" onclick="entrar()" style="width:100%; justify-content:center;">
+      <i class="fas fa-sign-in-alt"></i> Entrar
+    </button>
+    <div class="rodape">Mesmo usuário do sistema e do importador (Console do Firebase &gt; Authentication).</div>
+  </div>
+
+  <!-- ========================= APLICATIVO ========================= -->
+  <div class="card escondido" id="caixaApp">
+    <div class="topo">
+      <h2 style="margin:0;"><i class="fas fa-images"></i> Fotos dos imóveis</h2>
+      <div style="text-align:right;">
+        <div class="email" id="emailLogado"></div>
+        <span class="link" onclick="sair()">Sair</span>
+      </div>
+    </div>
+
+    <div id="avisos"></div>
+
+    <div class="kpis">
+      <div class="kpi"><h4>Imóveis</h4><div class="v" id="kT">0</div></div>
+      <div class="kpi" style="border-left-color:var(--green);"><h4>Com foto</h4><div class="v" id="kC" style="color:var(--green);">0</div></div>
+      <div class="kpi" style="border-left-color:var(--yellow);"><h4>Sem foto</h4><div class="v" id="kS" style="color:var(--yellow);">0</div></div>
+      <div class="kpi" style="border-left-color:var(--blue);"><h4>Fotos enviadas</h4><div class="v" id="kF" style="color:var(--blue);">0</div></div>
+    </div>
+
+    <!-- ---------- ENVIO EM MASSA ---------- -->
+    <h3 class="mini">Envio em massa - escolha as fotos ou a pasta dos imóveis</h3>
+    <div class="aviso info">
+      <strong>Como funciona a associação automática:</strong> o gerenciador procura o código <strong>LD-0000</strong>
+      no nome do arquivo <em>ou no nome da pasta</em>. Exemplos: <code>LD-0011 fachada.jpg</code>,
+      <code>LD-0011/sala.jpg</code> ou <code>fotos/LD-0011/frente.jpg</code> - todos caem no imóvel LD-0011.
+      O que não casar automaticamente aparece marcado em vermelho e você escolhe o imóvel na lista.
+    </div>
+    <div class="barra-ferramentas">
+      <button class="btn btn-primary" onclick="document.getElementById('arqInput').click()"><i class="fas fa-images"></i> Escolher fotos</button>
+      <input id="arqInput" type="file" accept="image/*" multiple hidden onchange="analisarArquivos(this)">
+      <button class="btn btn-outline" onclick="document.getElementById('pastaInput').click()"><i class="fas fa-folder-open"></i> Escolher uma pasta</button>
+      <input id="pastaInput" type="file" webkitdirectory multiple hidden onchange="analisarArquivos(this)">
+      <button class="btn btn-outline" onclick="limparFila()"><i class="fas fa-broom"></i> Limpar lista</button>
+      <span id="resumoFila" class="email"></span>
+    </div>
+
+    <div class="rolagem escondido" id="caixaFila" style="max-height:320px; overflow-y:auto;">
+      <table>
+        <thead><tr><th>Arquivo</th><th>Imóvel</th><th>Situação</th><th style="width:46px;"></th></tr></thead>
+        <tbody id="tbFila"></tbody>
+      </table>
+    </div>
+
+    <div id="caixaEnviar" class="escondido" style="margin-top:14px;">
+      <button class="btn btn-verde" id="btnEnviar" onclick="enviarFila()" style="width:100%; justify-content:center;">
+        <i class="fas fa-cloud-upload-alt"></i> <span id="rotuloEnviar">Enviar fotos</span>
+      </button>
+      <div class="barra"><div id="barra"></div></div>
+      <div class="log" id="log">Pronto.</div>
+    </div>
+
+    <!-- ---------- LISTA DOS IMÓVEIS ---------- -->
+    <h3 class="mini">Todos os imóveis</h3>
+    <div class="barra-ferramentas">
+      <input type="search" id="busca" placeholder="Buscar por código, endereço ou bairro..." oninput="renderGrade()">
+      <select id="filtro" onchange="renderGrade()">
+        <option value="">Todos</option>
+        <option value="sem">Só os SEM foto</option>
+        <option value="com">Só os COM foto</option>
+      </select>
+      <button class="btn btn-outline" onclick="recarregar()"><i class="fas fa-sync-alt"></i> Atualizar</button>
+    </div>
+    <div class="grade" id="grade"></div>
+    <div class="rodape" id="rodapeGrade"></div>
+  </div>
+
+</div>
+
+<!-- ========================= MODAL: FOTOS DO IMÓVEL ========================= -->
+<div class="modal-overlay" id="modalFotos">
+  <div class="modal-card">
+    <div class="modal-h">
+      <h2><i class="fas fa-camera"></i> <span id="mTitulo">Fotos do imóvel</span></h2>
+      <button class="btn btn-outline" onclick="fecharFotos()">X</button>
+    </div>
+    <div class="modal-b">
+      <div id="mInfo" class="email" style="margin-bottom:12px;"></div>
+      <div class="miniaturas" id="mMiniaturas"></div>
+    </div>
+    <div class="modal-f">
+      <button class="btn btn-primary" onclick="document.getElementById('mInput').click()"><i class="fas fa-plus"></i> Adicionar fotos</button>
+      <input id="mInput" type="file" accept="image/*" multiple hidden onchange="adicionarNoModal(this)">
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline" id="mRemoverTodas" style="border-color:var(--red); color:var(--red);" onclick="removerTodasDoModal()"><i class="fas fa-trash"></i> Remover todas</button>
+        <button class="btn btn-outline" onclick="fecharFotos()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toastBox"></div>
+
+<script type="module">
+/* =====================================================================
+   LD IMÓVEIS - GERENCIADOR DE FOTOS
+   - mesma estrutura de nuvem do sistema: imoveis/{id}/fotos (uma foto por documento)
+   - mini capa (fotoCapaMini) e contador (numFotos) atualizados no cadastro do imóvel
+   - envio em massa com associação automática pelo código LD-0000 (arquivo ou pasta)
+   ===================================================================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",
+    authDomain: "ld-imoveis.firebaseapp.com",
+    projectId: "ld-imoveis",
+    storageBucket: "ld-imoveis.firebasestorage.app",
+    messagingSenderId: "871416060994",
+    appId: "1:871416060994:web:bf3b2ad3e07b18b80ca1db"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const FOTO_PADRAO = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">' +
+    '<rect width="400" height="300" fill="#141414"/>' +
+    '<text x="200" y="160" font-family="sans-serif" font-size="26" fill="#3a3a3a" text-anchor="middle">Sem Foto</text></svg>'
+);
+
+const LIMITE_FOTOS = 20;
+let IMOVEIS = [];
+let CACHE = {};        // id -> [{id, dados}]
+let FILA = [];         // {arquivo, nome, imovelId, codigo}
+let idAberto = '';
+
+function toast(msg, tipo) {
+    const t = document.createElement('div');
+    t.className = 'toast' + (tipo ? ' ' + tipo : '');
+    t.textContent = msg;
+    $('toastBox').appendChild(t);
+    setTimeout(() => t.remove(), 3600);
+}
+function logar(msg) {
+    const l = $('log');
+    l.textContent += '\n' + msg;
+    l.scrollTop = l.scrollHeight;
+}
+function aviso(texto, tipo) {
+    $('avisos').innerHTML = '<div class="aviso ' + (tipo || 'info') + '">' + texto + '</div>';
+}
+
+/* ---------------- autenticação ---------------- */
+async function entrar() {
+    const email = $('loginEmail').value.trim();
+    const senha = $('loginPass').value;
+    const erro = $('loginErro');
+    erro.classList.add('escondido');
+    if (!email || !senha) { erro.textContent = 'Digite o e-mail e a senha.'; erro.classList.remove('escondido'); return; }
+    $('btnLogin').disabled = true;
+    try {
+        await signInWithEmailAndPassword(auth, email, senha);
+    } catch (e) {
+        const cod = String((e && e.code) || '');
+        erro.textContent = (cod.includes('invalid-credential') || cod.includes('wrong-password') || cod.includes('user-not-found'))
+            ? 'E-mail ou senha incorretos. Se ainda não criou o usuário, veja o Passo 1 do guia.'
+            : 'Não foi possível entrar. Verifique sua internet e tente de novo.';
+        erro.classList.remove('escondido');
+    } finally {
+        $('btnLogin').disabled = false;
+    }
+};
+function sair() { return signOut(auth); }
+
+onAuthStateChanged(auth, (user) => {
+    $('caixaLogin').classList.toggle('escondido', !!user);
+    $('caixaApp').classList.toggle('escondido', !user);
+    $('emailLogado').textContent = user ? (user.email || '') : '';
+    if (user) recarregar();
+});
+
+/* ---------------- fotos na nuvem ---------------- */
+async function lerFotos(imovelId) {
+    const snap = await getDocs(query(collection(db, 'imoveis', imovelId, 'fotos'), orderBy('ordem')));
+    return snap.docs.map(d => ({ id: d.id, dados: d.data().dados }));
+}
+async function fotosDe(imovelId, forcar) {
+    if (CACHE[imovelId] && !forcar) return CACHE[imovelId];
+    let fotos = [];
+    try { fotos = await lerFotos(imovelId); } catch (e) { console.warn('fotos', e); }
+    const ix = IMOVEIS.find(i => i.id === imovelId);
+    if (!fotos.length && ix) {
+        const antigas = (Array.isArray(ix.fotos) ? ix.fotos : []).filter(f => f && f !== FOTO_PADRAO && !String(f).startsWith('data:image/svg'));
+        fotos = antigas.map((dados, i) => ({ id: null, dados, legado: true, ordem: i }));
+    }
+    CACHE[imovelId] = fotos;
+    return fotos;
+}
+function capaDe(ix) {
+    if (ix && ix.fotoCapaMini) return ix.fotoCapaMini;
+    const antigas = (ix && Array.isArray(ix.fotos)) ? ix.fotos.filter(f => f && f !== FOTO_PADRAO && !String(f).startsWith('data:image/svg')) : [];
+    return antigas.length ? antigas[0] : FOTO_PADRAO;
+}
+function contagemDe(ix) {
+    /* o que estiver em memória (recém-lido ou recém-enviado) manda */
+    if (ix && CACHE[ix.id] && Array.isArray(CACHE[ix.id])) return CACHE[ix.id].length;
+    if (ix && Number(ix.numFotos)) return Number(ix.numFotos);
+    return (Array.isArray(ix && ix.fotos) ? ix.fotos.filter(f => f && f !== FOTO_PADRAO && !String(f).startsWith('data:image/svg')) : []).length;
+}
+
+function comprimirArquivo(file, maxLado = 1280, qualidade = 0.75) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onerror = () => resolve(null);
+        reader.onload = (ev) => {
+            const img = new Image();
+            img.onerror = () => resolve(null);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                if (w > maxLado) { h = Math.round(h * maxLado / w); w = maxLado; }
+                if (h > maxLado) { w = Math.round(w * maxLado / h); h = maxLado; }
+                canvas.width = w;
+                canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', qualidade));
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+function miniaturizar(dataUrl, maxLado = 240, qualidade = 0.55) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onerror = () => resolve('');
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            if (w > maxLado) { h = Math.round(h * maxLado / w); w = maxLado; }
+            if (h > maxLado) { w = Math.round(w * maxLado / h); h = maxLado; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', qualidade));
+        };
+        img.src = dataUrl;
+    });
+}
+async function gravarMiniCapa(ix) {
+    const fotos = await lerFotos(ix.id);
+    const capa = fotos.length ? await miniaturizar(fotos[0].dados) : '';
+    await updateDoc(doc(db, 'imoveis', ix.id), { numFotos: fotos.length, fotoCapaMini: capa });
+    CACHE[ix.id] = fotos;
+    ix.numFotos = fotos.length;
+    ix.fotoCapaMini = capa;
+}
+
+/* ---------------- código do imóvel no caminho ---------------- */
+function codigoDoCaminho(caminho) {
+    const m = String(caminho).toUpperCase().match(/LD[\s_.-]*0*(\d{1,4})/);
+    return m ? 'LD-' + String(m[1]).padStart(4, '0') : '';
+}
+function acharImovel(codigo) {
+    const alvo = String(codigo || '').toUpperCase().replace(/\s+/g, '');
+    return IMOVEIS.find(i => String(i.codigo || '').toUpperCase().replace(/\s+/g, '') === alvo) || null;
+}
+
+/* ---------------- carga e telas ---------------- */
+async function recarregar() {
+    try {
+        const snap = await getDocs(collection(db, 'imoveis'));
+        IMOVEIS = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => String(a.codigo || '').localeCompare(String(b.codigo || ''), 'pt-BR', { numeric: true }));
+        CACHE = {};
+        renderStats();
+        renderGrade();
+        verificarFormatoAntigo();
+        aviso('Carregado: ' + IMOVEIS.length + ' imóveis.', 'ok');
+        if (!IMOVEIS.length) {
+            aviso('Nenhum imóvel no banco ainda. Rode primeiro o <strong>LD_Imoveis_Importador.html</strong> para levar os 241 da planilha, depois volte aqui para as fotos.', 'alerta');
+        }
+    } catch (e) {
+        const negado = String((e && e.code) || '').includes('permission');
+        aviso(negado
+            ? '<strong>O banco recusou a leitura.</strong> Publique as regras do Firestore (Passo 2 do guia) e clique em Atualizar.'
+            : '<strong>Não consegui falar com a nuvem.</strong> Verifique a internet e clique em Atualizar.', 'err');
+    }
+};
+
+function verificarFormatoAntigo() {
+    const antigos = IMOVEIS.filter(i => Array.isArray(i.fotos) && i.fotos.some(f => f && f !== FOTO_PADRAO && !String(f).startsWith('data:image/svg')));
+    if (!antigos.length) return;
+    aviso('Existem <strong>' + antigos.length + ' imóveis com fotos no formato antigo</strong> (guardadas dentro do cadastro). ' +
+          'Converta para o formato novo para liberar espaço e poder usar todas as funções: ' +
+          '<button class="btn btn-outline" style="margin-top:8px;" onclick="migrarAntigas()"><i class="fas fa-exchange-alt"></i> Converter ' + antigos.length + ' imóveis agora</button>', 'alerta');
+}
+
+async function migrarAntigas() {
+    const antigos = IMOVEIS.filter(i => Array.isArray(i.fotos) && i.fotos.some(f => f && f !== FOTO_PADRAO && !String(f).startsWith('data:image/svg')));
+    if (!antigos.length) return;
+    let ok = 0;
+    for (const ix of antigos) {
+        try {
+            const fotos = ix.fotos.filter(f => f && f !== FOTO_PADRAO && !String(f).startsWith('data:image/svg'));
+            for (let i = 0; i < fotos.length; i++) {
+                await addDoc(collection(db, 'imoveis', ix.id, 'fotos'), { dados: fotos[i], ordem: i, criadaEm: new Date().toISOString() });
+            }
+            await updateDoc(doc(db, 'imoveis', ix.id), { fotos: [] });
+            ix.fotos = [];
+            await gravarMiniCapa(ix);
+            ok++;
+        } catch (e) { console.error(e); }
+    }
+    toast(ok + ' imóvel(is) convertido(s) para o formato novo.');
+    await window.recarregar();
+};
+
+function renderStats() {
+    const com = IMOVEIS.filter(i => contagemDe(i) > 0).length;
+    const totalFotos = IMOVEIS.reduce((s, i) => s + contagemDe(i), 0);
+    $('kT').textContent = IMOVEIS.length;
+    $('kC').textContent = com;
+    $('kS').textContent = IMOVEIS.length - com;
+    $('kF').textContent = totalFotos;
+}
+
+function renderGrade() {
+    const busca = ($('busca').value || '').toLowerCase().trim();
+    const filtro = $('filtro').value;
+    let lista = IMOVEIS.filter(i => {
+        const n = contagemDe(i);
+        if (filtro === 'sem' && n > 0) return false;
+        if (filtro === 'com' && n === 0) return false;
+        if (!busca) return true;
+        return [i.codigo, i.endereco, i.bairro, i.tipo].some(v => String(v || '').toLowerCase().includes(busca));
+    });
+    $('grade').innerHTML = lista.map(i => {
+        const n = contagemDe(i);
+        return `
+        <div class="item">
+            <div class="foto">
+                <img src="${esc(capaDe(i))}" alt="Foto do imóvel ${esc(i.codigo)}" loading="lazy" onerror="this.onerror=null; this.src=window.FOTO_PADRAO;">
+                <div class="chip ${n ? 'on' : 'off'}"><i class="fas fa-camera"></i> ${n} foto(s)</div>
+            </div>
+            <div class="corpo">
+                <div class="cod">${esc(i.codigo || 'sem código')}</div>
+                <div class="end">${esc(i.tipo || '')} · ${esc(i.bairro || '')}<br>${esc(i.endereco || '')}</div>
+                <button class="btn btn-outline" onclick="abrirFotos('${i.id}')"><i class="fas fa-images"></i> Gerenciar fotos</button>
+            </div>
+        </div>`;
+    }).join('') || '<div class="aviso info" style="grid-column:1/-1;">Nenhum imóvel encontrado com esse filtro.</div>';
+    $('rodapeGrade').textContent = lista.length + ' de ' + IMOVEIS.length + ' imóveis exibidos.';
+};
+
+/* ---------------- envio em massa ---------------- */
+function analisarArquivos(input) {
+    const arquivos = [...input.files];
+    input.value = '';
+    if (!arquivos.length) return;
+    let casados = 0;
+    for (const arquivo of arquivos) {
+        const nome = arquivo.webkitRelativePath || arquivo.name;
+        if (!/\.(jpe?g|png|webp|gif|bmp|heic|heif|avif)$/i.test(nome)) continue;
+        const cod = codigoDoCaminho(nome);
+        const ix = cod ? acharImovel(cod) : null;
+        if (ix) casados++;
+        FILA.push({ arquivo, nome, imovelId: ix ? ix.id : '', codigo: ix ? (ix.codigo || '') : cod });
+    }
+    toast(arquivos.length + ' arquivo(s) analisado(s): ' + casados + ' com imóvel identificado.');
+    renderFila();
+};
+
+function opcoesImoveis(selecionado) {
+    return '<option value="">-- escolha o imóvel --</option>' + IMOVEIS.map(i =>
+        `<option value="${esc(i.id)}" ${i.id === selecionado ? 'selected' : ''}>${esc(i.codigo || i.id)} - ${esc((i.endereco || '').slice(0, 40))}</option>`).join('');
+}
+
+function renderFila() {
+    const caixa = $('caixaFila');
+    if (!FILA.length) {
+        caixa.classList.add('escondido');
+        $('caixaEnviar').classList.add('escondido');
+        $('resumoFila').textContent = '';
+        return;
+    }
+    caixa.classList.remove('escondido');
+    $('caixaEnviar').classList.remove('escondido');
+    const prontos = FILA.filter(f => f.imovelId).length;
+    $('resumoFila').textContent = prontos + ' de ' + FILA.length + ' prontas para envio.';
+    $('rotuloEnviar').textContent = 'Enviar ' + prontos + ' foto(s)';
+    $('btnEnviar').disabled = prontos === 0;
+    $('tbFila').innerHTML = FILA.map((f, i) => `
+        <tr>
+            <td style="max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${esc(f.nome)}">${esc(f.nome)}</td>
+            <td style="min-width:260px;"><select onchange="definirImovel(${i}, this.value)">${opcoesImoveis(f.imovelId)}</select></td>
+            <td>${f.imovelId
+                ? '<span class="tag t-ok"><i class="fas fa-check"></i> ' + esc(IMOVEIS.find(i2 => i2.id === f.imovelId)?.codigo || 'ok') + '</span>'
+                : '<span class="tag t-erro">escolha o imóvel</span>'}</td>
+            <td><span class="link" onclick="tirarDaFila(${i})"><i class="fas fa-times"></i></span></td>
+        </tr>`).join('');
+};
+
+function definirImovel(idx, imovelId) {
+    if (!FILA[idx]) return;
+    FILA[idx].imovelId = imovelId;
+    renderFila();
+};
+function tirarDaFila(idx) {
+    FILA.splice(idx, 1);
+    renderFila();
+};
+function limparFila() {
+    FILA = [];
+    renderFila();
+};
+
+async function enviarFila() {
+    const prontos = FILA.filter(f => f.imovelId);
+    if (!prontos.length) return;
+    const btn = $('btnEnviar');
+    btn.disabled = true;
+    $('log').textContent = 'Iniciando envio...';
+    $('barra').style.width = '2%';
+
+    /* agrupa por imóvel para manter a ordem das fotos */
+    const porImovel = new Map();
+    for (const f of prontos) {
+        if (!porImovel.has(f.imovelId)) porImovel.set(f.imovelId, []);
+        porImovel.get(f.imovelId).push(f);
+    }
+
+    let feitas = 0, falhas = 0;
+    const total = prontos.length;
+    try {
+        for (const [imovelId, itens] of porImovel) {
+            const ix = IMOVEIS.find(i => i.id === imovelId);
+            let ordem = (await lerFotos(imovelId)).length;
+            let enviadasAqui = 0;
+            for (const item of itens) {
+                if (ordem >= LIMITE_FOTOS) { logar('   ' + (ix?.codigo || imovelId) + ': limite de ' + LIMITE_FOTOS + ' fotos atingido, pulando o resto.'); break; }
+                try {
+                    const foto = await comprimirArquivo(item.arquivo);
+                    if (!foto) { falhas++; logar('   ! não consegui ler: ' + item.nome); continue; }
+                    await addDoc(collection(db, 'imoveis', imovelId, 'fotos'), { dados: foto, ordem, criadaEm: new Date().toISOString() });
+                    ordem++; enviadasAqui++;
+                } catch (e) {
+                    falhas++;
+                    console.error(e);
+                    logar('   ! falhou: ' + item.nome);
+                }
+                feitas++;
+                $('barra').style.width = Math.round(feitas / total * 96) + '%';
+            }
+            if (enviadasAqui) {
+                await gravarMiniCapa(ix);
+                CACHE[imovelId] = null;
+                logar('   ' + (ix?.codigo || imovelId) + ': +' + enviadasAqui + ' foto(s) ✔');
+            }
+        }
+        $('barra').style.width = '100%';
+        toast((total - falhas) + ' foto(s) enviada(s)' + (falhas ? ' · ' + falhas + ' falha(s)' : '') + '!');
+        logar('Fim. ' + (total - falhas) + ' enviadas, ' + falhas + ' falhas.');
+        FILA = [];
+        renderFila();
+        renderStats();
+        renderGrade();
+    } catch (e) {
+        const negado = String((e && e.code) || '').includes('permission');
+        toast(negado ? 'O banco recusou o envio: publique as regras (Passo 2 do guia).' : 'Falha no envio. Verifique a internet.', 'erro');
+        logar('ERRO: ' + (e && e.message ? e.message : e));
+    } finally {
+        btn.disabled = false;
+    }
+};
+
+/* ---------------- modal por imóvel ---------------- */
+async function abrirFotos(imovelId) {
+    const ix = IMOVEIS.find(i => i.id === imovelId);
+    if (!ix) return;
+    idAberto = imovelId;
+    $('mTitulo').textContent = (ix.codigo || 'Imóvel') + ' - ' + (ix.bairro || '');
+    $('modalFotos').classList.add('active');
+    await desenharModal();
+};
+
+async function desenharModal() {
+    const ix = IMOVEIS.find(i => i.id === idAberto);
+    if (!ix) return;
+    $('mInfo').textContent = 'Carregando fotos...';
+    const fotos = await fotosDe(idAberto, true);
+    $('mInfo').innerHTML = fotos.length
+        ? '<strong>' + fotos.length + '</strong> de ' + LIMITE_FOTOS + ' foto(s). ' +
+          (ix.fotoCapaMini ? 'A primeira foto é a capa do catálogo.' : 'A primeira foto vira a capa do catálogo.')
+        : 'Este imóvel ainda não tem fotos. Use <strong>Adicionar fotos</strong> (galeria, câmera ou computador).';
+    $('mRemoverTodas').style.display = fotos.length ? 'inline-flex' : 'none';
+    $('mMiniaturas').innerHTML = fotos.length
+        ? fotos.map((f, i) => `
+            <div class="m">
+                <img src="${esc(f.dados)}" alt="Foto ${i + 1}" onclick="window.open('${esc(f.dados)}', '_blank')">
+                <button class="x" title="Remover" onclick="removerFoto(${i})">&times;</button>
+                <div style="text-align:center; color:var(--muted); font-size:0.68rem; margin-top:4px;">${i === 0 ? 'capa' : 'foto ' + (i + 1)}</div>
+            </div>`).join('')
+        : '<div class="aviso info" style="width:100%;">Sem fotos por enquanto.</div>';
+};
+
+async function adicionarNoModal(input) {
+    const arquivos = [...input.files];
+    input.value = '';
+    const ix = IMOVEIS.find(i => i.id === idAberto);
+    if (!ix || !arquivos.length) return;
+    try {
+        let ordem = (await lerFotos(ix.id)).length;
+        let enviadas = 0;
+        $('mInfo').textContent = 'Enviando...';
+        for (const arquivo of arquivos) {
+            if (ordem >= LIMITE_FOTOS) { toast('Limite de ' + LIMITE_FOTOS + ' fotos por imóvel.', 'info'); break; }
+            const foto = await comprimirArquivo(arquivo);
+            if (!foto) { toast('Não foi possível ler: ' + arquivo.name, 'erro'); continue; }
+            await addDoc(collection(db, 'imoveis', ix.id, 'fotos'), { dados: foto, ordem, criadaEm: new Date().toISOString() });
+            ordem++; enviadas++;
+        }
+        if (enviadas) {
+            await gravarMiniCapa(ix);
+            CACHE[ix.id] = null;
+            toast(enviadas === 1 ? 'Foto adicionada!' : enviadas + ' fotos adicionadas!');
+            renderStats(); renderGrade();
+        }
+        await desenharModal();
+    } catch (e) {
+        console.error(e);
+        toast('Não foi possível salvar as fotos.', 'erro');
+        await desenharModal();
+    }
+};
+
+async function removerFoto(indice) {
+    const ix = IMOVEIS.find(i => i.id === idAberto);
+    if (!ix) return;
+    const fotos = await fotosDe(idAberto, true);
+    const foto = fotos[indice];
+    if (!foto) return;
+    if (!confirm('Remover esta foto do imóvel?')) return;
+    try {
+        if (foto.id) {
+            await deleteDoc(doc(db, 'imoveis', ix.id, 'fotos', foto.id));
+        } else {
+            const antigas = (Array.isArray(ix.fotos) ? ix.fotos : []).filter(f => f && f !== FOTO_PADRAO && !String(f).startsWith('data:image/svg'));
+            antigas.splice(indice, 1);
+            await updateDoc(doc(db, 'imoveis', ix.id), { fotos: antigas });
+            ix.fotos = antigas;
+        }
+        await gravarMiniCapa(ix);
+        CACHE[ix.id] = null;
+        toast('Foto removida.');
+        renderStats(); renderGrade();
+        await desenharModal();
+    } catch (e) {
+        console.error(e);
+        toast('Não foi possível remover a foto.', 'erro');
+    }
+};
+
+async function removerTodasDoModal() {
+    const ix = IMOVEIS.find(i => i.id === idAberto);
+    if (!ix) return;
+    if (!confirm('Remover TODAS as fotos deste imóvel?')) return;
+    try {
+        const fotos = await lerFotos(ix.id);
+        for (const f of fotos) await deleteDoc(doc(db, 'imoveis', ix.id, 'fotos', f.id));
+        const antigas = (Array.isArray(ix.fotos) ? ix.fotos : []).filter(f => f && f !== FOTO_PADRAO && !String(f).startsWith('data:image/svg'));
+        if (antigas.length) { await updateDoc(doc(db, 'imoveis', ix.id), { fotos: [] }); ix.fotos = []; }
+        await gravarMiniCapa(ix);
+        CACHE[ix.id] = null;
+        toast('Fotos removidas.');
+        renderStats(); renderGrade();
+        await desenharModal();
+    } catch (e) {
+        console.error(e);
+        toast('Não foi possível remover as fotos.', 'erro');
+    }
+};
+
+function fecharFotos() {
+    $('modalFotos').classList.remove('active');
+    idAberto = '';
+};
+
+/* expõe as funções usadas pelos botões do HTML (classes de módulo não são globais) */
+Object.assign(window, {
+    entrar, sair, recarregar, migrarAntigas, renderGrade, analisarArquivos, renderFila,
+    definirImovel, tirarDaFila, limparFila, enviarFila, abrirFotos, desenharModal,
+    adicionarNoModal, removerFoto, removerTodasDoModal, fecharFotos
+});
+window.FOTO_PADRAO = FOTO_PADRAO;
+
+/* fecha o modal com ESC / clique fora */
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && idAberto) fecharFotos(); });
+$('modalFotos').addEventListener('mousedown', (e) => { if (e.target === $('modalFotos')) fecharFotos(); });
+
+/* CONTROLE CENTRAL LD — perfil específico e bloqueio em tempo real */
+const __LD_ADMIN_PRINCIPAL='matheusslvdsz@gmail.com';
+const __LD_PERFIS_PERMITIDOS=['admin', 'manutencao'];
+let __ldBloqueando=false,__ldPerfilStop=null;
+async function __ldBloquear(__motivo){
+ if(__ldBloqueando)return;__ldBloqueando=true;
+ if(__ldPerfilStop){try{__ldPerfilStop()}catch(__e){}}
+ try{const __au=await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');await __au.signOut(auth)}catch(__e){}
+ document.body.innerHTML=`<main style="min-height:100vh;display:grid;place-items:center;background:#050505;color:#fff;font-family:Arial,sans-serif;padding:20px"><section style="max-width:540px;text-align:center;background:#141414;border:1px solid #3b3b3b;border-radius:18px;padding:32px;box-shadow:0 25px 80px #000"><div style="font-size:48px;color:#e50914">●</div><h1 style="font-size:25px">Acesso bloqueado</h1><p style="color:#aaa;line-height:1.65">${__motivo}</p><button onclick="location.reload()" style="padding:11px 16px;border:0;border-radius:9px;background:#d80b15;color:#fff;font-weight:800;cursor:pointer">Voltar ao login</button></section></main>`;
+}
+onAuthStateChanged(auth,async(__u)=>{
+ if(!__u||__ldBloqueando)return;
+ const __email=String(__u.email||'').trim().toLowerCase();
+ if(__email===__LD_ADMIN_PRINCIPAL)return;
+ try{
+  const __fs=await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+  const __ref=__fs.doc(db,'usuariosSistema',__email);
+  const __validar=(__snap)=>{
+   const __d=__snap.exists()?__snap.data():null;
+   if(!__d||__d.ativo!==true)return __ldBloquear('Este usuário não possui autorização ativa. Os dados e a conexão foram encerrados.');
+   const __perfil=String(__d.perfil||'').trim().toLowerCase();
+   if(!__LD_PERFIS_PERMITIDOS.includes(__perfil))return __ldBloquear('Este módulo está disponível para Administração e Manutenção.');
+  };
+  let __snap;try{__snap=await __fs.getDocFromServer(__ref)}catch(__e){__snap=await __fs.getDoc(__ref)}
+  await __validar(__snap);if(__ldBloqueando)return;
+  __ldPerfilStop=__fs.onSnapshot(__ref,__validar,()=>__ldBloquear('Não foi possível confirmar sua permissão. Entre novamente.'));
+ }catch(__e){console.error('[LD Permissões]',__e);await __ldBloquear('Não foi possível confirmar sua permissão. Verifique a conexão e entre novamente.')}
+});
+
+</script>
+<div class="ld-versao">LD Sistemas · versão 2026</div></body>
+</html>

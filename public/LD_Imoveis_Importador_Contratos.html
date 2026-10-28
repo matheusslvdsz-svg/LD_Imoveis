@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LD Imóveis - Importador de Contratos</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    :root {
+        --bg-dark:#050505; --bg-panel:#0f0f0f; --bg-card:#1a1a1a; --bg-input:#101010;
+        --border:#2a2a2a; --text-main:#fff; --text-muted:#999; --red-main:#ff0000; --red-dark:#cc0000;
+        --green:#00cc66; --yellow:#ffcc00; --blue:#3399ff; --orange:#ff8c00;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg-dark); color:var(--text-main); font-family:'Inter',sans-serif; min-height:100vh; }
+    h1,h2,h3,.marca { font-family:'Montserrat',sans-serif; }
+    .wrap { max-width:1180px; margin:0 auto; padding:22px 18px 60px; }
+    .topo { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:20px; }
+    .marca { font-size:1.25rem; font-weight:900; letter-spacing:.3px; }
+    .marca span { color:var(--red-main); }
+    .marca small { display:block; font-family:'Inter',sans-serif; font-size:.72rem; font-weight:500; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+    .email { font-size:.8rem; color:var(--text-muted); }
+    .link { color:var(--red-main); cursor:pointer; text-decoration:underline; font-size:.8rem; }
+    .card { background:var(--bg-panel); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:18px; }
+    .card h2 { font-size:1.02rem; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:9px; }
+    .card h2 i { color:var(--red-main); }
+    .card p.sub { color:var(--text-muted); font-size:.83rem; margin-bottom:14px; }
+    .btn { border:none; border-radius:9px; padding:11px 18px; font-family:'Montserrat',sans-serif; font-weight:800; font-size:.83rem; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:.15s; }
+    .btn-primary { background:var(--red-main); color:#fff; }
+    .btn-primary:hover { background:var(--red-dark); }
+    .btn-outline { background:transparent; color:#fff; border:1px solid var(--border); }
+    .btn-outline:hover { border-color:var(--red-main); color:var(--red-main); }
+    .btn:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-grande { padding:15px 26px; font-size:.95rem; }
+    .opcoes { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+    .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin:14px 0 4px; }
+    .kpi { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+    .kpi b { display:block; font-size:1.35rem; font-family:'Montserrat',sans-serif; }
+    .kpi small { color:var(--text-muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.6px; }
+    .rolagem { max-height:420px; overflow:auto; border:1px solid var(--border); border-radius:10px; margin-top:12px; }
+    table { width:100%; border-collapse:collapse; font-size:.8rem; }
+    th { position:sticky; top:0; background:#141414; text-align:left; padding:10px; font-size:.72rem; letter-spacing:.5px; text-transform:uppercase; color:#bbb; border-bottom:1px solid var(--border); white-space:nowrap; }
+    td { padding:9px 10px; border-bottom:1px solid #1e1e1e; }
+    tr:hover td { background:#141414; }
+    .tag { display:inline-block; padding:3px 9px; border-radius:99px; font-size:.7rem; font-weight:800; white-space:nowrap; }
+    .t-ok { background:rgba(0,204,102,.15); color:var(--green); }
+    .t-novo { background:rgba(51,153,255,.15); color:var(--blue); }
+    .t-atualiza { background:rgba(255,204,0,.15); color:var(--yellow); }
+    .t-aviso { background:rgba(255,140,0,.18); color:var(--orange); }
+    .t-erro { background:rgba(255,0,0,.16); color:#ff6666; }
+    .aviso { border-radius:10px; padding:13px 16px; font-size:.84rem; margin-bottom:14px; }
+    .aviso-info { background:rgba(51,153,255,.10); border:1px solid var(--blue); color:#9ecbff; }
+    .aviso-erro { background:rgba(255,0,0,.10); border:1px solid var(--red-main); color:#ffb3b3; }
+    .aviso-ok { background:rgba(0,204,102,.10); border:1px solid var(--green); color:#9ff0c6; }
+    .barra { height:10px; background:#1c1c1c; border-radius:99px; overflow:hidden; margin-top:12px; }
+    .barra div { height:100%; width:0%; background:linear-gradient(90deg,var(--red-dark),var(--red-main)); transition:.2s; }
+    .log { background:#0a0a0a; border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-family:Consolas,monospace; font-size:.76rem; color:#bdbdbd; white-space:pre-wrap; max-height:220px; overflow:auto; margin-top:12px; }
+    .campo { margin-bottom:12px; }
+    .campo label { display:block; font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:5px; }
+    input, select, textarea { width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:9px; padding:11px 12px; color:#fff; font-family:'Inter',sans-serif; font-size:.88rem; }
+    input:focus, select:focus, textarea:focus { outline:none; border-color:var(--red-main); }
+    textarea { min-height:120px; font-family:Consolas,monospace; font-size:.8rem; }
+    .grade2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .mapa { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
+    .mapa .campo { margin-bottom:0; }
+    .drop { border:2px dashed var(--border); border-radius:12px; padding:26px; text-align:center; color:var(--text-muted); cursor:pointer; transition:.15s; }
+    .drop:hover, .drop.on { border-color:var(--red-main); color:#fff; background:rgba(255,0,0,.04); }
+    .drop i { font-size:1.6rem; color:var(--red-main); display:block; margin-bottom:8px; }
+    .check { display:flex; align-items:flex-start; gap:10px; font-size:.85rem; margin-bottom:10px; cursor:pointer; }
+    .check input { width:auto; margin-top:2px; accent-color:var(--red-main); }
+    .escondido { display:none !important; }
+    .passo { display:flex; align-items:center; gap:10px; font-family:'Montserrat',sans-serif; font-weight:800; font-size:.8rem; color:var(--text-muted); margin-bottom:12px; }
+    .passo b { background:var(--bg-card); border:1px solid var(--border); width:26px; height:26px; border-radius:99px; display:flex; align-items:center; justify-content:center; font-size:.8rem; color:#fff; }
+    .rodape { text-align:center; color:#555; font-size:.75rem; margin-top:26px; line-height:1.7; }
+    @media (max-width:720px) {
+        .grade2 { grid-template-columns:1fr; }
+        .wrap { padding:16px 12px 50px; }
+        .rolagem { max-height:340px; }
+        /* no celular a tabela de conferência fica mais estreita e rola de lado */
+        .rolagem table { font-size:.72rem; }
+        .rolagem th, .rolagem td { padding:6px 6px; }
+        .rolagem th:nth-child(1), .rolagem td:nth-child(1) { display:none; }
+        .rolagem input[type="date"] { width:118px; }
+        .rolagem input[type="number"] { width:92px; }
+        .rolagem .cel-sit { min-width:132px; }
+    }
+
+/* ===== PADRÃO VISUAL LD 2026 — atualização geral ===== */
+html{scroll-behavior:smooth}body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,.btn,input,select,textarea,a{transition:border-color .18s ease,background-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)}
+button:focus-visible,.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--red-main,var(--red,#e50914));outline-offset:2px}
+.card,.kpi-card,.table-container,.modal-card,.login-box{box-shadow:0 12px 34px rgba(0,0,0,.16)}
+table{width:100%}th{letter-spacing:.35px}td,th{vertical-align:middle}
+img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:#0a0a0a}::-webkit-scrollbar-thumb{background:#3a3a3a;border:2px solid #0a0a0a;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:var(--red-main,var(--red,#d90b16))}
+.ld-versao{position:fixed;right:8px;bottom:6px;z-index:2;font-size:8px;letter-spacing:.7px;color:#666;pointer-events:none;text-transform:uppercase}
+@media(max-width:760px){.content{padding-left:12px!important;padding-right:12px!important}.header{gap:12px}.header h1{font-size:clamp(1.55rem,7vw,2.1rem)}.form-grid{grid-template-columns:1fr!important}.form-full{grid-column:auto!important}.modal-card{width:96vw!important;max-height:94vh!important}.table-container{overflow-x:auto}.topbar{padding-left:12px!important;padding-right:12px!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media print{.ld-versao{display:none!important}button,.btn{box-shadow:none!important}}
+
+</style>
+</head>
+<body>
+
+<div id="telaLogin" class="wrap" style="max-width:430px; margin-top:8vh;">
+    <div class="card" style="padding:26px;">
+        <div class="marca" style="text-align:center; margin-bottom:6px;">LD <span>IMÓVEIS</span><small>Importador de Contratos</small></div>
+        <p class="sub" style="text-align:center;">Entre com o mesmo usuário do sistema</p>
+        <div class="campo"><label>E-mail</label><input id="email" type="email" placeholder="seu@email.com" autocomplete="username"></div>
+        <div class="campo"><label>Senha</label><input id="senha" type="password" placeholder="******" autocomplete="current-password"></div>
+        <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="window.entrar()"><i class="fas fa-right-to-bracket"></i> Entrar</button>
+        <div id="msgLogin" class="aviso aviso-erro escondido" style="margin-top:14px;"></div>
+        <p style="text-align:center; margin-top:12px;"><span class="link" onclick="window.esqueciSenha()">Esqueci minha senha</span></p>
+    </div>
+</div>
+
+<div id="telaApp" class="wrap escondido">
+    <div class="topo">
+        <div class="marca">LD <span>IMÓVEIS</span><small>Importador de Contratos</small></div>
+        <div style="text-align:right;">
+            <div class="email" id="emailLogado"></div>
+            <span class="link" onclick="window.sair()">Sair do sistema</span>
+        </div>
+    </div>
+
+    <div id="statusNuvem" class="aviso aviso-info"><i class="fas fa-cloud"></i> Lendo o banco de dados...</div>
+
+    <!-- ================= PASSO 1 ================= -->
+    <div class="card" id="card1">
+        <div class="passo"><b>1</b> De onde vêm os contratos?</div>
+        <h2><i class="fas fa-file-signature"></i> Escolha a origem</h2>
+        <p class="sub">Pode misturar: o que já estiver na tela de conferência entra junto. O sistema não deixa importar em dobro.</p>
+        <div class="opcoes">
+            <button class="btn btn-primary" onclick="window.gerarDosAlugados()"><i class="fas fa-building"></i> Gerar dos imóveis alugados</button>
+            <button class="btn btn-outline" type="button" onclick="document.getElementById('arquivo').click()"><i class="fas fa-file-csv"></i> Enviar arquivo (CSV do Excel)</button>
+            <button class="btn btn-outline" onclick="window.abaColar()"><i class="fas fa-paste"></i> Colar do Excel</button>
+            <button class="btn btn-outline" onclick="window.baixarModelo()"><i class="fas fa-download"></i> Baixar modelo</button>
+        </div>
+        <input type="file" id="arquivo" accept=".csv,.txt,.tsv" class="escondido">
+
+        <div id="boxColar" class="escondido" style="margin-top:16px;">
+            <div class="campo">
+                <label>Cole aqui (pode ser com cabeçalho, direto do Excel)</label>
+                <textarea id="textoColar" placeholder="Código do imóvel &nbsp; Inquilino &nbsp; Início &nbsp; Fim &nbsp; Valor&#10;LD-0003 &nbsp; MARIA APARECIDA SOUZA &nbsp; 01/11/2025 &nbsp; 31/10/2026 &nbsp; 900,00"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="window.usarTextoColado()"><i class="fas fa-check"></i> Usar o que colei</button>
+        </div>
+
+        <div id="boxArquivo" class="escondido" style="margin-top:16px;">
+            <p class="sub" id="nomeArquivo"></p>
+        </div>
+    </div>
+
+    <!-- ================= PASSO 2 (mapa de colunas) ================= -->
+    <div class="card escondido" id="cardMapa">
+        <div class="passo"><b>2</b> Confira as colunas</div>
+        <h2><i class="fas fa-table-columns"></i> Quem é quem na sua planilha</h2>
+        <p class="sub">O sistema já tentou adivinhar pelos nomes do cabeçalho. Se alguma coluna ficou errada, troque aqui. Os campos com <b style="color:var(--red-main)">*</b> são obrigatórios.</p>
+        <div class="mapa" id="mapaColunas"></div>
+        <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="window.conferirPlanilha()"><i class="fas fa-magnifying-glass"></i> Conferir</button>
+            <button class="btn btn-outline" onclick="window.limparTudo()"><i class="fas fa-rotate-left"></i> Começar de novo</button>
+        </div>
+    </div>
+
+    <!-- ================= PASSO 3 (conferência) ================= -->
+    <div class="card escondido" id="cardPrevia">
+        <div class="passo"><b>3</b> Conferência</div>
+        <h2><i class="fas fa-list-check"></i> O que vai entrar no sistema</h2>
+        <p class="sub" id="resumoPrevia">—</p>
+        <div class="kpis" id="kpisPrevia"></div>
+
+        <div style="margin-top:16px;">
+            <label class="check"><input type="checkbox" id="optCriarInquilinos" checked>
+                <span><b>Criar os inquilinos que ainda não existem</b> — quem não estiver na aba Inquilinos entra com o nome (depois você completa CPF/telefone).</span></label>
+            <label class="check"><input type="checkbox" id="optAtualizar" checked>
+                <span><b>Atualizar o contrato do imóvel que já tiver um</b> — em vez de criar dois contratos para o mesmo imóvel. Desmarcado, esses ficam de fora.</span></label>
+            <label class="check"><input type="checkbox" id="optMarcarAlugado" checked>
+                <span><b>Marcar o imóvel como ALUGADO</b> quando o contrato entrar. Se o contrato já tiver vencido, a situação do imóvel fica como está (o sistema não desmarca sozinho).</span></label>
+        </div>
+
+        <div class="rolagem">
+            <table>
+                <thead><tr>
+                    <th>#</th><th>Imóvel</th><th>Inquilino</th><th>Início</th><th>Fim</th><th>Valor (R$)</th><th>Situação</th>
+                </tr></thead>
+                <tbody id="linhasPrevia"></tbody>
+            </table>
+        </div>
+        <p class="sub" style="margin-top:8px;"><i class="fas fa-pen-to-square" style="color:var(--red-main)"></i>
+            Pode corrigir aqui mesmo: clique no <b>código do imóvel</b>, no inquilino, nas datas ou no valor e digite
+            (no código, a lista mostra os imóveis que você tem cadastrados). O que ficar aqui é o que vai para o sistema.</p>
+        <datalist id="listaCodigosImoveis"></datalist>
+        <div style="margin-top:6px; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+            <div class="campo" style="max-width:230px; margin-bottom:0;">
+                <label>Preencher os que estão sem data com:</label>
+                <input type="date" id="dataVazia">
+            </div>
+            <button class="btn btn-outline" onclick="window.aplicarDataVazios()"><i class="fas fa-wand-magic-sparkles"></i> Aplicar aos sem data</button>
+        </div>
+
+        <div class="aviso aviso-erro escondido" id="alertaImport" style="margin-top:14px;"></div>
+        <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            <button class="btn btn-primary btn-grande" id="btnImportar" onclick="window.importar()"><i class="fas fa-cloud-arrow-up"></i> Importar para o sistema</button>
+            <button class="btn btn-outline" onclick="window.limparTudo()"><i class="fas fa-rotate-left"></i> Começar de novo</button>
+        </div>
+        <div class="barra escondido" id="barraWrap"><div id="barra"></div></div>
+        <div class="log escondido" id="log"></div>
+    </div>
+
+    <div class="card escondido" id="cardFim">
+        <div class="passo"><b>4</b> Pronto</div>
+        <h2><i class="fas fa-circle-check" style="color:var(--green)"></i> Contratos importados</h2>
+        <p class="sub" id="resumoFim">—</p>
+        <div class="kpis" id="kpisFim"></div>
+        <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+            <a class="btn btn-primary" href="LD_Imoveis_Sistema_Gerencial.html#contratos"><i class="fas fa-arrow-up-right-from-square"></i> Abrir o sistema na aba Contratos</a>
+            <button class="btn btn-outline" onclick="window.limparTudo()"><i class="fas fa-plus"></i> Importar mais</button>
+        </div>
+        <p class="sub" style="margin-top:14px;">Dentro do sistema, a aba <b>Contratos</b> lista tudo. O contrato alimenta a receita do painel, o preenchimento automático do Fechamento e o próprio contrato do locatário.</p>
+    </div>
+
+    <div class="rodape">
+        LD IMÓVEIS - Negócios Imobiliários · Av. Tupinambá, Qd. 41, Lote 14B - Parque dos Carajás - Parauapebas/PA · (94) 99174-4612<br>
+        Importador de Contratos · os dados vão direto para o seu banco na nuvem (Firebase)
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, addDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",
+    authDomain: "ld-imoveis.firebaseapp.com",
+    projectId: "ld-imoveis",
+    storageBucket: "ld-imoveis.firebasestorage.app",
+    messagingSenderId: "871416060994",
+    appId: "1:871416060994:web:bf3b2ad3e07b18b80ca1db"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const moeda = (n) => 'R$ ' + (Number(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const dataBR = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[3] + '/' + m[2] + '/' + m[1] : (iso || '—'); };
+const norm = (t) => String(t == null ? '' : t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
+function logar(msg) { const l = $('log'); l.textContent += msg + '\n'; l.scrollTop = l.scrollHeight; }
+
+/* ============================================================ login */
+window.entrar = async () => {
+    const email = $('email').value.trim(), senha = $('senha').value;
+    const msg = $('msgLogin');
+    if (!email || !senha) { msg.textContent = 'Preencha o e-mail e a senha.'; msg.classList.remove('escondido'); return; }
+    try {
+        msg.classList.add('escondido');
+        await signInWithEmailAndPassword(auth, email, senha);
+    } catch (e) {
+        msg.textContent = (e && e.code === 'auth/invalid-credential') ? 'E-mail ou senha incorretos.'
+            : (e && e.code === 'auth/unauthorized-domain') ? 'Este endereço não está liberado no Firebase (Authentication > Settings > Authorized domains).'
+            : 'Não consegui entrar: ' + (e && e.message ? e.message : e);
+        msg.classList.remove('escondido');
+    }
+};
+window.esqueciSenha = async () => {
+    const email = $('email').value.trim();
+    const msg = $('msgLogin');
+    if (!email) { msg.textContent = 'Digite seu e-mail primeiro.'; msg.classList.remove('escondido'); return; }
+    try { await sendPasswordResetEmail(auth, email); msg.className = 'aviso aviso-ok'; msg.textContent = 'Enviei um link de troca de senha para ' + email; }
+    catch (e) { msg.className = 'aviso aviso-erro'; msg.textContent = 'Não consegui enviar: ' + (e && e.message ? e.message : e); }
+    msg.classList.remove('escondido');
+};
+window.sair = () => signOut(auth);
+
+let DADOS = { imoveis: [], contratos: [], inquilinos: [] };
+let PLANILHA = null;          // { cabecalhos: [], linhas: [[...]] }
+let PREVIA = [];              // linhas validadas
+let CONTRATOS_POR_IMOVEL = new Map();
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { $('telaLogin').style.display = ''; $('telaApp').classList.add('escondido'); return; }
+    $('emailLogado').textContent = user.email || '';
+    $('telaLogin').style.display = 'none';
+    $('telaApp').classList.remove('escondido');
+    await carregarBase();
+});
+
+async function carregarBase() {
+    const st = $('statusNuvem');
+    try {
+        const [imv, ct, inq] = await Promise.all([
+            getDocs(collection(db, 'imoveis')),
+            getDocs(collection(db, 'contratos')),
+            getDocs(collection(db, 'inquilinos'))
+        ]);
+        DADOS.imoveis = imv.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        DADOS.contratos = ct.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        DADOS.inquilinos = inq.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        CONTRATOS_POR_IMOVEL = new Map();
+        DADOS.contratos.forEach(c => {
+            const k = norm(c.imovelCodigo);
+            if (!k) return;
+            const atual = CONTRATOS_POR_IMOVEL.get(k);
+            if (!atual || String(c.fim || '') > String(atual.fim || '')) CONTRATOS_POR_IMOVEL.set(k, c);
+        });
+        INDICE_IMOVEIS = null;
+        $('listaCodigosImoveis').innerHTML = DADOS.imoveis
+            .map(i => '<option value="' + esc(i.codigo || '') + '">' + esc(i.bairro || i.endereco || '') + '</option>').join('');
+        st.className = 'aviso aviso-info';
+        st.innerHTML = '<i class="fas fa-cloud"></i> Banco conectado: <b>' + DADOS.imoveis.length + '</b> imóveis · <b>'
+            + DADOS.inquilinos.length + '</b> inquilinos · <b>' + DADOS.contratos.length + '</b> contratos já cadastrados';
+    } catch (e) {
+        st.className = 'aviso aviso-erro';
+        st.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Não consegui ler o banco: ' + esc(e && e.message ? e.message : e)
+            + ' — confira as regras do Firestore e a internet.';
+    }
+}
+
+/* ============================================================ 1. origens */
+window.abaColar = () => { $('boxColar').classList.remove('escondido'); $('textoColar').focus(); };
+
+window.gerarDosAlugados = () => {
+    const alugados = DADOS.imoveis.filter(i => String(i.status || '').toLowerCase() === 'alugado');
+    if (!alugados.length) { alert('Não encontrei imóveis com a situação ALUGADO no cadastro. Se você ainda não importou os imóveis, use o Importador de Imóveis primeiro.'); return; }
+    const linhas = alugados.map(i => {
+        const ct = CONTRATOS_POR_IMOVEL.get(norm(i.codigo));
+        const inq = (ct && ct.inquilino) ? ct.inquilino : '';
+        return [i.codigo || '', inq, ct ? (ct.inicio || '') : '', ct ? (ct.fim || '') : '', String((i.valor || i.aluguel || 0))];
+    });
+    /* já vem com a maior parte preenchida: o que o cadastro não tem (inquilino da
+       maioria e as datas), o corretor completa depois na tela de conferência */
+    const semInq = linhas.filter(l => !l[1]).length;
+    PLANILHA = { cabecalhos: ['Código do imóvel', 'Inquilino', 'Início do contrato', 'Fim do contrato', 'Valor mensal'], linhas: linhas };
+    $('nomeArquivo').textContent = 'Origem: ' + linhas.length + ' imóveis ALUGADOS do seu cadastro'
+        + (semInq ? ' (' + semInq + ' ainda sem o nome do inquilino - aparece como aviso, mas pode importar assim e completar depois)' : '');
+    $('boxArquivo').classList.remove('escondido');
+    montarMapa({ codigo: 0, inquilino: 1, inicio: 2, fim: 3, valor: 4 });
+    window.conferirPlanilha();
+};
+
+window.baixarModelo = () => {
+    const linhas = [
+        ['Codigo do imovel', 'Inquilino', 'Inicio', 'Fim', 'Valor', 'Dia do vencimento', 'Garantia', 'Condominio', 'IPTU', 'Taxa de administracao (%)', 'Observacoes'],
+        ['LD-0003', 'MARIA APARECIDA SOUZA', '01/11/2025', '31/10/2026', '900,00', '5', 'Caucao 3 alugueis', '0,00', '0,00', '10', 'Contrato de 12 meses, renovacao automatica'],
+        ['LD-0011', 'JOAO DA SILVA', '15/01/2026', '14/01/2027', '2168,89', '10', 'Fiador', '150,00', '45,00', '10', '']
+    ];
+    const csv = '\ufeff' + linhas.map(l => l.join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'Modelo_Contratos_LD_Imoveis.csv';
+    a.click();
+};
+
+/* ---- leitura de arquivo ---- */
+$('arquivo').addEventListener('change', (ev) => {
+    const f = ev.target.files && ev.target.files[0];
+    if (!f) return;
+    const leitor = new FileReader();
+    leitor.onload = () => {
+        try {
+            const bytes = leitor.result;
+            let texto;
+            try { texto = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
+            catch (e2) { texto = new TextDecoder('windows-1252').decode(bytes); }   /* CSV salvo pelo Excel em ANSI */
+            PLANILHA = lerCSV(texto);
+            $('nomeArquivo').textContent = 'Arquivo: ' + f.name + ' (' + PLANILHA.linhas.length + ' linha(s))';
+            $('boxArquivo').classList.remove('escondido');
+            montarMapa(adivinharMapa(PLANILHA.cabecalhos));
+            window.conferirPlanilha();
+        } catch (e) { alert('Não consegui ler o arquivo: ' + e.message); }
+    };
+    leitor.readAsArrayBuffer(f);
+    ev.target.value = '';
+});
+
+window.usarTextoColado = () => {
+    const t = $('textoColar').value.trim();
+    if (!t) { alert('Cole primeiro os dados.'); return; }
+    try {
+        PLANILHA = lerCSV(t);
+        $('nomeArquivo').textContent = 'Origem: dados colados do Excel (' + PLANILHA.linhas.length + ' linha(s))'
+            + (PLANILHA.semCabecalho ? ' - sem cabeçalho: o sistema adivinhou as colunas pelo conteúdo (confira no passo 2).' : '');
+        $('boxArquivo').classList.remove('escondido');
+        montarMapa(adivinharMapa(PLANILHA.cabecalhos));
+        window.conferirPlanilha();
+    } catch (e) { alert('Não consegui entender o que foi colado: ' + e.message); }
+};
+
+/* ---- CSV ---- */
+function detectarSeparador(primeira) {
+    const cands = [';', '\t', ',', '|'];
+    let melhor = ';', maior = -1;
+    cands.forEach(c => { const n = primeira.split(c).length; if (n > maior) { maior = n; melhor = c; } });
+    return melhor;
+}
+function dividirLinha(linha, sep) {
+    const fora = []; let atual = '', aspas = false;
+    for (let i = 0; i < linha.length; i++) {
+        const ch = linha[i];
+        if (ch === '"') { if (aspas && linha[i + 1] === '"') { atual += '"'; i++; } else aspas = !aspas; }
+        else if (ch === sep && !aspas) { fora.push(atual); atual = ''; }
+        else atual += ch;
+    }
+    fora.push(atual);
+    return fora.map(c => c.trim());
+}
+function lerCSV(texto) {
+    const linhas = texto.replace(/\r\n?/g, '\n').split('\n').filter(l => l.trim() !== '');
+    if (!linhas.length) throw new Error('o texto está vazio');
+    const sep = detectarSeparador(linhas[0]);
+    const tabela = linhas.map(l => dividirLinha(l, sep));
+    const larg = tabela.reduce((m, l) => Math.max(m, l.length), 0);
+    tabela.forEach(l => { while (l.length < larg) l.push(''); });
+    /* colunas vazias em todas as linhas saem fora (acontece muito ao copiar do Excel) */
+    const manter = [];
+    for (let c = 0; c < larg; c++) if (tabela.some(l => String(l[c] == null ? '' : l[c]).trim() !== '')) manter.push(c);
+    const t2 = tabela.map(l => manter.map(c => l[c]));
+    let cabecalhos = t2[0];
+    let linhasDados = t2.slice(1);
+    /* se a primeira linha nao parece cabecalho, ela e dado - e nao se perde nada */
+    if (!Object.keys(adivinharMapa(cabecalhos)).length && linhasDados.length) {
+        linhasDados = t2.slice();
+        cabecalhos = cabecalhos.map((_, i) => 'Coluna ' + (i + 1));
+    }
+    return { cabecalhos: cabecalhos, linhas: linhasDados, sep: sep, semCabecalho: cabecalhos[0] === 'Coluna 1' };
+}
+const CAMPOS = [
+    { id: 'codigo', rotulo: 'Imóvel (LD-0000 ou o número + endereço)', obrig: true, chaves: ['codigo', 'cod', 'imovel', 'imóvel', 'ref', 'referencia', 'referência'] },
+    { id: 'inquilino', rotulo: 'Inquilino / locatário', obrig: false, chaves: ['inquilino', 'locatario', 'locatário', 'cliente', 'nome', 'tenant'] },
+    { id: 'inicio', rotulo: 'Início do contrato', obrig: true, chaves: ['inicio', 'início', 'inicio do contrato', 'entrada', 'data inicio', 'vigencia'] },
+    { id: 'fim', rotulo: 'Fim do contrato', obrig: false, chaves: ['fim', 'termino', 'término', 'fim do contrato', 'vencimento contrato', 'saida', 'saída'] },
+    { id: 'valor', rotulo: 'Valor mensal (R$)', obrig: true, chaves: ['valor', 'aluguel', 'valor mensal', 'preco', 'preço', 'mensalidade'] },
+    { id: 'diaVencimento', rotulo: 'Dia do vencimento', obrig: false, chaves: ['dia', 'vencimento', 'dia venc', 'dia do vencimento'] },
+    { id: 'garantia', rotulo: 'Garantia', obrig: false, chaves: ['garantia', 'caucao', 'caução', 'fiador', 'seguro'] },
+    { id: 'condominio', rotulo: 'Condomínio (R$)', obrig: false, chaves: ['condominio', 'condomínio'] },
+    { id: 'iptu', rotulo: 'IPTU (R$)', obrig: false, chaves: ['iptu'] },
+    { id: 'taxaAdm', rotulo: 'Taxa de administração (%)', obrig: false, chaves: ['taxa', 'taxa adm', 'administracao', 'administração'] },
+    { id: 'observacoes', rotulo: 'Observações', obrig: false, chaves: ['obs', 'observacao', 'observação', 'observacoes', 'observações', 'nota'] }
+];
+/* olha o conteudo das colunas: serve para colagem do Excel sem cabecalho */
+/* quanto essa célula "parece" um código de imóvel? (número solto vale pouco) */
+function forcaCodigo(v) {
+    if (!acharImovel(v)) return 0;
+    const so = String(v).trim();
+    if (/^\d{1,3}$/.test(so)) return 0.25;      /* "7", "31": pode ser dia, número da casa... */
+    return 1;
+}
+/* qual coluna traz mesmo os códigos de imóvel? (compara com o cadastro) */
+function melhorColunaCodigo(linhas, atual) {
+    const larg = linhas.reduce((m, l) => Math.max(m, l.length), 0);
+    const pontos = [];
+    for (let c = 0; c < larg; c++) {
+        let acertos = 0;
+        linhas.forEach(l => { const v = String(l[c] == null ? '' : l[c]).trim(); if (v) acertos += forcaCodigo(v); });
+        pontos.push({ c: c, acertos: acertos });
+    }
+    const melhor = pontos.reduce((a, b) => (b.acertos > a.acertos ? b : a), { c: -1, acertos: 0 });
+    const atualP = pontos.find(x => x.c === atual) || { acertos: 0 };
+    if (melhor.acertos > atualP.acertos + 0.01 && melhor.acertos >= Math.max(0.5, linhas.length * 0.5)) return melhor.c;
+    return null;
+}
+function mapaPorConteudo(linhas) {
+    const larg = linhas.reduce((m, l) => Math.max(m, l.length), 0);
+    const col = [];
+    for (let c = 0; c < larg; c++) {
+        const vals = linhas.map(l => String(l[c] == null ? '' : l[c]).trim()).filter(v => v !== '');
+        const datas = vals.filter(v => paraISO(v)).length;
+        const nums = vals.filter(v => paraValor(v) > 0).length;
+        const codigos = vals.reduce((s, v) => s + forcaCodigo(v), 0);
+        const textos = vals.filter(v => /[A-Za-zÀ-ÿ]{3,}/.test(v) && !paraISO(v)).length;
+        const soma = vals.reduce((s, v) => s + paraValor(v), 0);
+        col.push({ c: c, datas: datas, nums: nums, codigos: codigos, textos: textos, n: vals.length, media: nums ? soma / nums : 0 });
+    }
+    const mapa = {}; const usados = new Set();
+    const metade = (x, campo) => x[campo] >= Math.max(1, Math.round(linhas.length * 0.5));
+    const melhorCod = col.slice().sort((a, b) => b.codigos - a.codigos)[0];
+    if (melhorCod && melhorCod.codigos >= Math.max(0.5, linhas.length * 0.5)) { mapa.codigo = melhorCod.c; usados.add(melhorCod.c); }
+    const colsData = col.filter(x => metade(x, 'datas') && !usados.has(x.c)).sort((a, b) => a.c - b.c);
+    if (colsData[0]) { mapa.inicio = colsData[0].c; usados.add(colsData[0].c); }
+    if (colsData[1]) { mapa.fim = colsData[1].c; usados.add(colsData[1].c); }
+    const colsNum = col.filter(x => metade(x, 'nums') && !usados.has(x.c)).sort((a, b) => b.media - a.media);
+    if (colsNum[0]) { mapa.valor = colsNum[0].c; usados.add(colsNum[0].c); }
+    const colsTxt = col.filter(x => metade(x, 'textos') && !usados.has(x.c)).sort((a, b) => b.textos - a.textos);
+    if (colsTxt[0]) mapa.inquilino = colsTxt[0].c;
+    return mapa;
+}
+function adivinharMapa(cabecalhos) {
+    const mapa = {};
+    const usados = new Set();
+    CAMPOS.forEach(c => {
+        let idx = -1;
+        cabecalhos.forEach((h, i) => {
+            if (idx >= 0 || usados.has(i)) return;
+            const n = norm(h);
+            if (c.chaves.some(k => n === norm(k) || n.indexOf(norm(k)) >= 0)) idx = i;
+        });
+        if (idx >= 0) { mapa[c.id] = idx; usados.add(idx); }
+    });
+    return mapa;
+}
+function montarMapa(escolhidos) {
+    const html = CAMPOS.map(c => {
+        const opts = ['<option value="">— não usar —</option>'].concat(
+            PLANILHA.cabecalhos.map((h, i) => '<option value="' + i + '"' + (escolhidos[c.id] === i ? ' selected' : '') + '>'
+                + esc(h || ('Coluna ' + (i + 1))) + '</option>')).join('');
+        return '<div class="campo"><label>' + c.rotulo + (c.obrig ? ' <b style="color:var(--red-main)">*</b>' : '') + '</label>'
+            + '<select data-campo="' + c.id + '">' + opts + '</select></div>';
+    }).join('');
+    $('mapaColunas').innerHTML = html;
+    $('cardMapa').classList.remove('escondido');
+}
+function mapaAtual() {
+    const m = {};
+    document.querySelectorAll('#mapaColunas select').forEach(s => { if (s.value !== '') m[s.dataset.campo] = Number(s.value); });
+    return m;
+}
+
+/* ---- conversores ---- */
+function paraValor(t) {
+    if (t == null) return 0;
+    let s = String(t).replace(/[^\d.,-]/g, '');     /* "R$ 2.800,00", "10,00(%)", "(R$) 462,95" */
+    if (!s) return 0;
+    if (s.indexOf(',') >= 0) s = s.replace(/\./g, '').replace(',', '.');
+    else if (/\.\d{3}(\D|$)/.test(s)) s = s.replace(/\./g, '');   // 1.850 = 1850, nao 1,85
+    const n = Number(s);
+    return isNaN(n) ? 0 : n;
+}
+function paraISO(t) {
+    const s = String(t == null ? '' : t).trim();
+    if (!s) return '';
+    let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return m[1] + '-' + m[2] + '-' + m[3];
+    m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+    if (m) {
+        let ano = m[3]; if (ano.length === 2) ano = '20' + ano;
+        return ano + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[1]).padStart(2, '0');
+    }
+    m = s.match(/^(\d{1,2})[\/\-\.](\d{4})$/);            // 11/2025
+    if (m) return m[2] + '-' + String(m[1]).padStart(2, '0') + '-01';
+    if (/^\d{5}$/.test(s)) {                              // data do Excel (número de série)
+        const d = new Date(Date.UTC(1899, 11, 30) + Number(s) * 86400000);
+        return d.toISOString().slice(0, 10);
+    }
+    return '';
+}
+
+/* ============================================================ 3. conferência */
+window.conferirPlanilha = () => {
+    if (!PLANILHA || !PLANILHA.linhas.length) { alert('Primeiro escolha de onde vêm os contratos (passo 1).'); return; }
+    let mapa = mapaAtual();
+    if (!PLANILHA.jaAdivinhado) {                 /* primeira vez: cabeçalho + conteúdo */
+        mapa = Object.assign(mapaPorConteudo(PLANILHA.linhas), mapa);
+        document.querySelectorAll('#mapaColunas select').forEach(s => {
+            if (mapa[s.dataset.campo] !== undefined) s.value = String(mapa[s.dataset.campo]);
+        });
+        PLANILHA.jaAdivinhado = true;
+    }
+    /* o código pode estar em outra coluna: se o conteúdo mostrar isso, troco sozinho */
+    const colCod = melhorColunaCodigo(PLANILHA.linhas, mapa.codigo);
+    if (colCod !== null) {
+        mapa.codigo = colCod;
+        const sel = document.querySelector('#mapaColunas select[data-campo="codigo"]');
+        if (sel) sel.value = String(colCod);
+        logar('   Pelo conteúdo, a coluna do código do imóvel é a ' + (colCod + 1) + ' (' + (PLANILHA.cabecalhos[colCod] || 'sem nome') + ').');
+    }
+    const faltando = CAMPOS.filter(c => c.obrig && mapa[c.id] === undefined).map(c => c.rotulo);
+    if (faltando.length) { alert('Falta escolher a coluna de: ' + faltando.join(', ')); return; }
+
+    const codigosValidos = new Set(DADOS.imoveis.map(i => norm(i.codigo)));
+    const inquilinosExistentes = new Map(DADOS.inquilinos.map(i => [norm(i.nome), i]));
+    PREVIA = PLANILHA.linhas.map((linha, n) => {
+        const pega = (campo) => (mapa[campo] === undefined ? '' : (linha[mapa[campo]] || ''));
+        const codigo = String(pega('codigo')).replace(/[^\w\-\.\/ ]/g, '').trim().toUpperCase();
+        const inquilino = String(pega('inquilino')).trim().replace(/\s+/g, ' ');
+        const inicio = paraISO(pega('inicio'));
+        const fim = paraISO(pega('fim'));
+        const valor = paraValor(pega('valor'));
+        const dia = String(pega('diaVencimento')).replace(/\D/g, '').slice(0, 2);
+        /* "10,00(%)" fica 10 ; "(R$) 462,95" vira a porcentagem sobre o aluguel */
+        const taxaBruta = String(pega('taxaAdm')).trim();
+        let taxa = paraValor(taxaBruta);
+        if (taxaBruta && /R\$/.test(taxaBruta) && valor > 0) taxa = Math.round((taxa / valor) * 10000) / 100;
+        const contratoAtual = CONTRATOS_POR_IMOVEL.get(norm(codigo));
+
+        const dados = {
+            imovelCodigo: codigo, inquilino: inquilino, inicio: inicio, fim: fim, valor: valor,
+            diaVencimento: dia ? Number(dia) : undefined,
+            garantia: String(pega('garantia')).trim() || undefined,
+            condominio: paraValor(pega('condominio')) || undefined,
+            iptu: paraValor(pega('iptu')) || undefined,
+            taxaAdm: taxa || undefined,
+            observacoes: String(pega('observacoes')).trim() || undefined
+        };
+        Object.keys(dados).forEach(k => { if (dados[k] === undefined) delete dados[k]; });
+
+        const p = { n: n + 1, ...dados, contratoAtual: contratoAtual ? contratoAtual.id : null, erros: [], avisos: [] };
+        reavaliar(p);
+        return p;
+    });
+
+    /* mesmo imóvel repetido na planilha? vale a linha com o fim mais novo */
+    const porCodigo = new Map();
+    PREVIA.forEach(p => {
+        if (p.erros.length || !p.imovelCodigo) return;
+        const k = norm(p.imovelCodigo);
+        const atual = porCodigo.get(k);
+        if (!atual) { porCodigo.set(k, p); return; }
+        const fica = (!p.fim && atual.fim) || (p.fim && (!atual.fim || p.fim > atual.fim)) ? p : atual;
+        (fica === p ? atual : p).repetido = true;
+        porCodigo.set(k, fica);
+    });
+
+    atualizarKpisPrevia();
+
+    const MAX = 400;
+    const est = 'background:#101010; border:1px solid #2a2a2a; border-radius:6px; padding:6px 7px; color:#fff; font-size:.78rem; width:100%;';
+    $('linhasPrevia').innerHTML = PREVIA.slice(0, MAX).map(p => {
+        return '<tr data-linha="' + p.n + '"><td>' + p.n + '</td>'
+            + '<td><input list="listaCodigosImoveis" class="inp-imv" style="' + est + '; min-width:98px;" value="' + esc(p.imovelCodigo || '') + '" placeholder="LD-0000" title="código do imóvel (a lista mostra os que existem)" onchange="window.mudarPrevia(' + p.n + ',\'imovelCodigo\',this.value)"></td>'
+            + '<td><input style="' + est + '" value="' + esc(p.inquilino || '') + '" placeholder="nome do inquilino" oninput="window.mudarPrevia(' + p.n + ',\'inquilino\',this.value)"></td>'
+            + '<td><input type="date" style="' + est + '" value="' + (p.inicio || '') + '" oninput="window.mudarPrevia(' + p.n + ',\'inicio\',this.value)"></td>'
+            + '<td><input type="date" style="' + est + '" value="' + (p.fim || '') + '" oninput="window.mudarPrevia(' + p.n + ',\'fim\',this.value)"></td>'
+            + '<td><input type="number" step="0.01" style="' + est + '" value="' + (p.valor || '') + '" oninput="window.mudarPrevia(' + p.n + ',\'valor\',this.value)"></td>'
+            + '<td class="cel-sit" data-idx="' + p.n + '">' + celulaSituacao(p) + '</td></tr>';
+    }).join('') + (PREVIA.length > MAX ? '<tr><td colspan="7" style="text-align:center; color:#888;">... e mais ' + (PREVIA.length - MAX) + ' linha(s) — todas entram na importação.</td></tr>' : '');
+
+    $('cardPrevia').classList.remove('escondido');
+    $('cardFim').classList.add('escondido');
+    $('cardPrevia').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+function kpi(valor, rotulo, cor) {
+    return '<div class="kpi"><b style="color:' + (cor || '#fff') + '">' + valor + '</b><small>' + rotulo + '</small></div>';
+}
+
+function celulaSituacao(p) {
+    const tag = p.situacao === 'erro' ? '<span class="tag t-erro">ERRO</span>'
+        : p.situacao === 'atualiza' ? '<span class="tag t-atualiza">ATUALIZA</span>'
+        : p.situacao === 'aviso' ? '<span class="tag t-aviso">AVISO</span>' : '<span class="tag t-ok">OK</span>';
+    const obs = p.erros.concat(p.avisos);
+    return tag + (obs.length ? '<div style="color:#888; font-size:.72rem; margin-top:4px;">' + esc(obs.join(' · ')) + '</div>' : '');
+}
+let INDICE_IMOVEIS = null;
+function indiceImoveis() {
+    if (INDICE_IMOVEIS) return INDICE_IMOVEIS;
+    const m = new Map();
+    DADOS.imoveis.forEach(i => {
+        const t = String(i.codigo || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!t) return;
+        if (!m.has(t)) m.set(t, i.codigo);
+        const d = t.replace(/^[A-Z]+/, '').replace(/^0+/, '');
+        if (d && !m.has('#' + d)) m.set('#' + d, i.codigo);
+    });
+    INDICE_IMOVEIS = m;
+    return m;
+}
+/* palavras que não ajudam a identificar o imóvel */
+const PALAVRAS_VAZIAS = new Set(['RUA', 'AV', 'AVENIDA', 'QD', 'QUADRA', 'LT', 'LOTE', 'APT', 'APTO', 'APARTAMENTO',
+    'CASA', 'SOBRADO', 'SALA', 'LOJA', 'CONJ', 'CONJUNTO', 'BLOCO', 'BL', 'TERREO', 'FUNDOS', 'PARAUAPEBAS', 'PA',
+    'CEP', 'PARQUE', 'CIDADE', 'JARDIM', 'DOS', 'DAS', 'DE', 'DO', 'DA', 'E', 'EM', 'NO', 'NA', 'NUMERO', 'COMPLEMENTO']);
+function tokensEndereco(txt) {
+    return norm(txt).replace(/[^A-Z0-9\s]/g, ' ').split(/\s+/)
+        .filter(p => p && p.length > 1 && !PALAVRAS_VAZIAS.has(p) && !/^\d{1,2}$/.test(p));
+}
+let TOKENS_IMOVEIS = null;
+function acharImovelPorTexto(txt) {
+    const alvo = new Set(tokensEndereco(txt));
+    if (alvo.size < 3) return null;
+    if (!TOKENS_IMOVEIS) {
+        TOKENS_IMOVEIS = DADOS.imoveis.map(i => ({
+            codigo: i.codigo,
+            tokens: tokensEndereco((i.titulo || '') + ' ' + (i.endereco || '') + ' ' + (i.bairro || ''))
+        }));
+    }
+    let melhor = null, melhorPts = 0, empate = false;
+    TOKENS_IMOVEIS.forEach(x => {
+        if (!x.tokens.length) return;
+        const comuns = x.tokens.filter(p => alvo.has(p)).length;
+        const taxa = comuns / x.tokens.length;
+        if (comuns >= 3 && taxa >= 0.5) {
+            const pts = comuns + taxa;
+            if (pts > melhorPts + 0.0001) { melhor = x.codigo; melhorPts = pts; empate = false; }
+            else if (Math.abs(pts - melhorPts) <= 0.0001) { empate = true; }
+        }
+    });
+    return empate ? null : melhor;                    /* na dúvida, não chuta */
+}
+/* aceita LD-0003, ld 3, 0003, LD3 e também "118 - Sobrado no PARQUE DOS CARAJAS..." */
+function acharImovel(codigo) {
+    const bruto = String(codigo == null ? '' : codigo).trim();
+    const t = bruto.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!t) return null;
+    const idx = indiceImoveis();
+    if (idx.has(t)) return idx.get(t);
+    /* data não é código de imóvel ("31/12/2026" NÃO é o imóvel 31) */
+    if (/^\d{1,4}[\/\-.]\d{1,2}([\/\-.]\d{2,4})?$/.test(bruto)) return null;
+    const d = t.replace(/^[A-Z]+/, '').replace(/^0+/, '');
+    if (d && idx.has('#' + d)) return idx.get('#' + d);
+    const m = bruto.match(/^\s*(\d{1,4})\b/);        /* "118 - Sobrado..." = imóvel 118 */
+    if (m) {
+        const n = String(Number(m[1]));
+        if (idx.has('#' + n)) return idx.get('#' + n);
+    }
+    return acharImovelPorTexto(bruto);
+}
+function reavaliar(p) {
+    const canon = acharImovel(p.imovelCodigo);
+    if (canon && canon !== p.imovelCodigo) { p.codigoCorrigido = p.imovelCodigo; p.imovelCodigo = canon; }
+    else p.codigoCorrigido = '';
+    /* o contrato que já existe é sempre procurado com o código já "arrumado" */
+    const contratoAgora = canon ? CONTRATOS_POR_IMOVEL.get(norm(canon)) : null;
+    p.contratoAtual = contratoAgora ? contratoAgora.id : null;
+    const nomeInq = norm(p.inquilino);
+    const inqExiste = !nomeInq || DADOS.inquilinos.some(i => norm(i.nome) === nomeInq);
+    p.temImovel = !!canon;
+    p.inqNovo = !!p.inquilino && !inqExiste;
+    p.erros = []; p.avisos = [];
+    if (!p.imovelCodigo) p.erros.push('sem o código do imóvel (veja o mapa das colunas no passo 2)');
+    else if (!p.temImovel) p.erros.push('imóvel "' + p.imovelCodigo + '" não está no cadastro - clique aqui no código e escolha da lista');
+    else if (p.codigoCorrigido) p.avisos.push('código ' + p.codigoCorrigido + ' entendido como ' + p.imovelCodigo);
+    if (!p.inicio) p.avisos.push('sem a data de início (dá para preencher aqui na tabela)');
+    if (p.inicio && p.fim && p.fim < p.inicio) p.erros.push('o fim é antes do início');
+    if (!p.valor) p.avisos.push('valor zerado');
+    if (!p.inquilino) p.avisos.push('sem o nome do inquilino (dá para digitar aqui)');
+    if (p.inqNovo) p.avisos.push('inquilino novo: ' + p.inquilino);
+    if (p.contratoAtual) p.avisos.push('este imóvel já tem contrato (vai atualizar)');
+    if (p.repetido) p.avisos.push('este imóvel aparece 2x na planilha: vale a linha com o fim mais novo (esta fica fora)');
+    p.situacao = p.erros.length ? 'erro' : (p.contratoAtual ? 'atualiza' : (p.avisos.length ? 'aviso' : 'ok'));
+}
+function atualizarKpisPrevia() {
+    const k = {
+        lidas: PREVIA.length,
+        ok: PREVIA.filter(p => !p.erros.length && !p.contratoAtual && !p.repetido).length,
+        atualiza: PREVIA.filter(p => !p.erros.length && p.contratoAtual && !p.repetido).length,
+        aviso: PREVIA.filter(p => p.situacao === 'aviso').length,
+        erro: PREVIA.filter(p => p.erros.length).length,
+        inq: PREVIA.filter(p => !p.erros.length && p.inqNovo).length,
+        soma: PREVIA.filter(p => !p.erros.length).reduce((s, p) => s + (Number(p.valor) || 0), 0)
+    };
+    $('kpisPrevia').innerHTML =
+        kpi(k.lidas, 'linhas lidas') + kpi(k.ok, 'vão ENTRAR', 'var(--green)') +
+        kpi(k.atualiza, 'vão atualizar', 'var(--yellow)') + kpi(k.aviso, 'com aviso (entram)', 'var(--orange)') +
+        kpi(k.erro, 'com erro (fora)', 'var(--red-main)') + kpi(k.inq, 'inquilinos novos', 'var(--blue)') +
+        kpi(moeda(k.soma), 'soma dos aluguéis');
+    $('resumoPrevia').innerHTML = k.erro
+        ? 'As linhas marcadas em ERRO ficam de fora (o resto entra normalmente). Dá para corrigir direto na tabela abaixo ou ajustar o mapa das colunas e clicar em Conferir de novo.'
+        : (k.aviso ? 'Nada bloqueando: as linhas com AVISO entram assim mesmo e dá para completar o que falta direto na tabela.'
+                   : 'Tudo certo! Confira abaixo e clique em Importar.');
+}
+function explicarNadaAImportar(atualizar) {
+    const comErro = PREVIA.filter(p => p.erros.length);
+    const travadas = PREVIA.filter(p => !p.erros.length && p.contratoAtual && !atualizar);
+    const motivos = {};
+    comErro.forEach(p => p.erros.forEach(e => {
+        const k = e.replace(/imóvel [^ ]+ /, 'imóvel (código) ').split(' - ')[0];
+        motivos[k] = (motivos[k] || 0) + 1;
+    }));
+    const partes = [];
+    partes.push('<b>Nada foi para o sistema ainda.</b> O botão só grava as linhas que estão OK ou ATUALIZA.');
+    if (comErro.length) {
+        partes.push('<br>Linhas travadas por ERRO: <b>' + comErro.length + '</b> de ' + PREVIA.length + '. Motivo(s):<br>'
+            + Object.keys(motivos).sort((a, b) => motivos[b] - motivos[a]).slice(0, 4)
+                .map(m => '• ' + esc(m) + ' (' + motivos[m] + ' linha(s))').join('<br>'));
+        const soCodigo = Object.keys(motivos).some(m => /c[oó]digo/i.test(m));
+        if (soCodigo) partes.push('<br>A culpa quase sempre é da coluna do código do imóvel. Volte ao <b>passo 2 (Confira as colunas)</b> '
+            + 'e escolha a coluna certa em "Código do imóvel" — ou clique no código aqui na tabela e escolha da lista.');
+    }
+    if (travadas.length) {
+        partes.push('<br><br>Você tem <b>' + travadas.length + '</b> contrato(s) de imóveis que JÁ têm contrato e a caixinha '
+            + '"Atualizar o contrato do imóvel que já tiver um" está desmarcada — é só marcar para eles entrarem.');
+    }
+    const el = $('alertaImport');
+    el.innerHTML = '<i class="fas fa-circle-exclamation"></i> ' + partes.join('');
+    el.classList.remove('escondido');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    logar('Importação não iniciada: ' + comErro.length + ' linha(s) com erro, ' + travadas.length + ' esperando a opção de atualizar.');
+}
+
+window.mudarPrevia = (n, campo, valor) => {
+    const p = PREVIA.find(x => x.n === n);
+    if (!p) return;
+    p[campo] = campo === 'valor' ? paraValor(valor) : valor;
+    reavaliar(p);
+    const cel = document.querySelector('.cel-sit[data-idx="' + n + '"]');
+    if (cel) cel.innerHTML = celulaSituacao(p);
+    if (campo === 'imovelCodigo') {
+        const lin = document.querySelector('tr[data-linha="' + n + '"]');
+        const inp = lin && lin.querySelector('.inp-imv');
+        if (inp && p.imovelCodigo && inp.value !== p.imovelCodigo) inp.value = p.imovelCodigo;
+    }
+    atualizarKpisPrevia();
+};
+window.aplicarDataVazios = () => {
+    const iso = $('dataVazia').value;
+    if (!iso) { alert('Escolha primeiro a data no campo ao lado.'); return; }
+    let n = 0;
+    PREVIA.forEach(p => { if (!p.inicio) { p.inicio = iso; reavaliar(p); n++; } });
+    window.conferirPlanilha();
+    logar('   ' + n + ' linha(s) receberam a data ' + dataBR(iso) + '.');
+};
+
+window.limparTudo = () => {
+    PLANILHA = null; PREVIA = [];
+    ['cardMapa', 'cardPrevia', 'cardFim', 'boxColar', 'boxArquivo', 'barraWrap', 'log', 'alertaImport'].forEach(id => $(id).classList.add('escondido'));
+    $('textoColar').value = ''; $('log').textContent = ''; $('barra').style.width = '0%';
+    $('arquivo').value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+/* ============================================================ 4. importação */
+window.importar = async () => {
+    const criarInq = $('optCriarInquilinos').checked;
+    const atualizar = $('optAtualizar').checked;
+    const marcar = $('optMarcarAlugado').checked;
+    const lista = PREVIA.filter(p => !p.erros.length && !p.repetido && (!p.contratoAtual || atualizar));
+    if (!PREVIA.length) { alert('Primeiro monte a lista de contratos (passo 1) e clique em Conferir.'); return; }
+    if (!lista.length) { explicarNadaAImportar(atualizar); return; }
+    $('alertaImport').classList.add('escondido');
+
+    const btn = $('btnImportar');
+    btn.disabled = true;
+    $('barraWrap').classList.remove('escondido');
+    $('log').classList.remove('escondido');
+    $('log').textContent = '';
+    logar('Iniciando a importação de ' + lista.length + ' contrato(s)...');
+
+    const hoje = new Date().toISOString().slice(0, 10);
+    let criados = 0, atualizados = 0, inqCriados = 0, imoveisMarcados = 0, erros = 0;
+    const nomesNovos = new Map();
+    lista.forEach(p => { if (criarInq && p.inqNovo && p.inquilino) nomesNovos.set(norm(p.inquilino), p.inquilino); });
+
+    try {
+        /* 1) inquilinos novos */
+        if (nomesNovos.size) {
+            logar('Criando ' + nomesNovos.size + ' inquilino(s) novo(s)...');
+            const loteI = [];
+            nomesNovos.forEach((nome) => loteI.push(nome));
+            for (let i = 0; i < loteI.length; i += 400) {
+                const b = writeBatch(db);
+                loteI.slice(i, i + 400).forEach(nome => b.set(doc(collection(db, 'inquilinos')), { nome: nome, cpf: '', telefone: '', email: '', endereco: '' }));
+                await b.commit();
+                inqCriados += loteI.slice(i, i + 400).length;
+            }
+            logar('   inquilinos criados: ' + inqCriados);
+        }
+
+        /* 2) contratos */
+        const TAM = 400;
+        for (let i = 0; i < lista.length; i += TAM) {
+            const b = writeBatch(db);
+            lista.slice(i, i + TAM).forEach(p => {
+                const dados = {
+                    imovelCodigo: p.imovelCodigo, inquilino: p.inquilino, inicio: p.inicio, fim: p.fim, valor: p.valor
+                };
+                ['diaVencimento', 'garantia', 'condominio', 'iptu', 'taxaAdm', 'observacoes'].forEach(k => { if (p[k] !== undefined) dados[k] = p[k]; });
+                if (p.contratoAtual) { b.set(doc(db, 'contratos', p.contratoAtual), Object.assign(dados, { atualizadoEm: hoje }), { merge: true }); }
+                else { b.set(doc(collection(db, 'contratos')), Object.assign(dados, { criadoEm: hoje })); }
+            });
+            await b.commit();
+            lista.slice(i, i + TAM).forEach(p => { if (p.contratoAtual) atualizados++; else criados++; });
+            const feitos = Math.min(i + TAM, lista.length);
+            $('barra').style.width = Math.round((feitos / lista.length) * (marcar ? 80 : 100)) + '%';
+            logar('   contratos: ' + feitos + ' de ' + lista.length + ' enviados...');
+        }
+
+        /* 3) situação dos imóveis */
+        if (marcar) {
+            const porStatus = new Map();
+            let vencidos = 0;
+            lista.forEach(p => {
+                if (!p.temImovel) return;
+                if (p.fim && p.fim < hoje) { vencidos++; return; }   /* contrato vencido: não mexe na situação */
+                porStatus.set(p.imovelCodigo, 'alugado');
+            });
+            if (vencidos) logar('   ' + vencidos + ' contrato(s) já venceram: a situação desses imóveis ficou como estava');
+            const pares = [...porStatus.entries()];
+            for (let i = 0; i < pares.length; i += 400) {
+                const b = writeBatch(db);
+                pares.slice(i, i + 400).forEach(([codigo, status]) => {
+                    const im = DADOS.imoveis.find(x => norm(x.codigo) === norm(codigo));
+                    if (im && im.status !== status) { b.update(doc(db, 'imoveis', im.id), { status: status, situacao: status === 'alugado' ? 'Alugado' : 'Disponível' }); imoveisMarcados++; }
+                });
+                await b.commit();
+            }
+            $('barra').style.width = '100%';
+            logar('   imóveis marcados como ALUGADOS: ' + imoveisMarcados);
+        }
+        logar('\nCONCLUÍDO: ' + criados + ' contrato(s) novo(s), ' + atualizados + ' atualizado(s), '
+            + inqCriados + ' inquilino(s) novo(s), ' + imoveisMarcados + ' imóvel(is) ajustado(s).');
+        $('barra').style.width = '100%';
+
+        $('kpisFim').innerHTML = kpi(criados, 'contratos novos', 'var(--green)') + kpi(atualizados, 'atualizados', 'var(--yellow)')
+            + kpi(inqCriados, 'inquilinos novos', 'var(--blue)') + kpi(imoveisMarcados, 'imóveis ajustados')
+            + kpi(DADOS.contratos.length + criados, 'contratos no total');
+        $('resumoFim').textContent = 'Os contratos já estão no banco. Abra o sistema na aba Contratos para ver a lista.';
+        $('cardFim').classList.remove('escondido');
+        $('cardFim').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        await carregarBase();
+    } catch (e) {
+        erros++;
+        logar('\nERRO: ' + (e && e.message ? e.message : e));
+        alert('A importação parou: ' + (e && e.message ? e.message : e) + '\nNada do que já foi enviado se perde - você pode rodar de novo que o sistema não duplica.');
+    } finally {
+        btn.disabled = false;
+    }
+};
+
+window.abrirJanelaArquivo = () => $('arquivo').click();
+
+/* CONTROLE CENTRAL LD — perfil específico e bloqueio em tempo real */
+const __LD_ADMIN_PRINCIPAL='matheusslvdsz@gmail.com';
+const __LD_PERFIS_PERMITIDOS=['admin'];
+let __ldBloqueando=false,__ldPerfilStop=null;
+async function __ldBloquear(__motivo){
+ if(__ldBloqueando)return;__ldBloqueando=true;
+ if(__ldPerfilStop){try{__ldPerfilStop()}catch(__e){}}
+ try{const __au=await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');await __au.signOut(auth)}catch(__e){}
+ document.body.innerHTML=`<main style="min-height:100vh;display:grid;place-items:center;background:#050505;color:#fff;font-family:Arial,sans-serif;padding:20px"><section style="max-width:540px;text-align:center;background:#141414;border:1px solid #3b3b3b;border-radius:18px;padding:32px;box-shadow:0 25px 80px #000"><div style="font-size:48px;color:#e50914">●</div><h1 style="font-size:25px">Acesso bloqueado</h1><p style="color:#aaa;line-height:1.65">${__motivo}</p><button onclick="location.reload()" style="padding:11px 16px;border:0;border-radius:9px;background:#d80b15;color:#fff;font-weight:800;cursor:pointer">Voltar ao login</button></section></main>`;
+}
+onAuthStateChanged(auth,async(__u)=>{
+ if(!__u||__ldBloqueando)return;
+ const __email=String(__u.email||'').trim().toLowerCase();
+ if(__email===__LD_ADMIN_PRINCIPAL)return;
+ try{
+  const __fs=await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+  const __ref=__fs.doc(db,'usuariosSistema',__email);
+  const __validar=(__snap)=>{
+   const __d=__snap.exists()?__snap.data():null;
+   if(!__d||__d.ativo!==true)return __ldBloquear('Este usuário não possui autorização ativa. Os dados e a conexão foram encerrados.');
+   const __perfil=String(__d.perfil||'').trim().toLowerCase();
+   if(!__LD_PERFIS_PERMITIDOS.includes(__perfil))return __ldBloquear('Somente administradores podem executar importações de contratos.');
+  };
+  let __snap;try{__snap=await __fs.getDocFromServer(__ref)}catch(__e){__snap=await __fs.getDoc(__ref)}
+  await __validar(__snap);if(__ldBloqueando)return;
+  __ldPerfilStop=__fs.onSnapshot(__ref,__validar,()=>__ldBloquear('Não foi possível confirmar sua permissão. Entre novamente.'));
+ }catch(__e){console.error('[LD Permissões]',__e);await __ldBloquear('Não foi possível confirmar sua permissão. Verifique a conexão e entre novamente.')}
+});
+
+</script>
+<div class="ld-versao">LD Sistemas · versão 2026</div></body>
+</html>

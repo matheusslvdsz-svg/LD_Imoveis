@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LD Imóveis - Importador de Inquilinos</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    :root {
+        --bg-dark:#050505; --bg-panel:#0f0f0f; --bg-card:#1a1a1a; --bg-input:#101010;
+        --border:#2a2a2a; --text-main:#fff; --text-muted:#999; --red-main:#ff0000; --red-dark:#cc0000;
+        --green:#00cc66; --yellow:#ffcc00; --blue:#3399ff; --orange:#ff8c00;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg-dark); color:var(--text-main); font-family:'Inter',sans-serif; min-height:100vh; }
+    h1,h2,h3,.marca { font-family:'Montserrat',sans-serif; }
+    .wrap { max-width:1180px; margin:0 auto; padding:22px 18px 60px; }
+    .topo { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:20px; }
+    .marca { font-size:1.25rem; font-weight:900; letter-spacing:.3px; }
+    .marca span { color:var(--red-main); }
+    .marca small { display:block; font-family:'Inter',sans-serif; font-size:.72rem; font-weight:500; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+    .email { font-size:.8rem; color:var(--text-muted); }
+    .link { color:var(--red-main); cursor:pointer; text-decoration:underline; font-size:.8rem; }
+    .card { background:var(--bg-panel); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:18px; }
+    .card h2 { font-size:1.02rem; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:9px; }
+    .card h2 i { color:var(--red-main); }
+    .card p.sub { color:var(--text-muted); font-size:.83rem; margin-bottom:14px; }
+    .btn { border:none; border-radius:9px; padding:11px 18px; font-family:'Montserrat',sans-serif; font-weight:800; font-size:.83rem; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:.15s; }
+    .btn-primary { background:var(--red-main); color:#fff; }
+    .btn-primary:hover { background:var(--red-dark); }
+    .btn-outline { background:transparent; color:#fff; border:1px solid var(--border); }
+    .btn-outline:hover { border-color:var(--red-main); color:var(--red-main); }
+    .btn:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-grande { padding:15px 26px; font-size:.95rem; }
+    .opcoes { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+    .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin:14px 0 4px; }
+    .kpi { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+    .kpi b { display:block; font-size:1.35rem; font-family:'Montserrat',sans-serif; }
+    .kpi small { color:var(--text-muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.6px; }
+    .rolagem { max-height:420px; overflow:auto; border:1px solid var(--border); border-radius:10px; margin-top:12px; }
+    table { width:100%; border-collapse:collapse; font-size:.8rem; }
+    th { position:sticky; top:0; background:#141414; text-align:left; padding:10px; font-size:.72rem; letter-spacing:.5px; text-transform:uppercase; color:#bbb; border-bottom:1px solid var(--border); white-space:nowrap; }
+    td { padding:9px 10px; border-bottom:1px solid #1e1e1e; }
+    tr:hover td { background:#141414; }
+    .tag { display:inline-block; padding:3px 9px; border-radius:99px; font-size:.7rem; font-weight:800; white-space:nowrap; }
+    .t-ok { background:rgba(0,204,102,.15); color:var(--green); }
+    .t-novo { background:rgba(51,153,255,.15); color:var(--blue); }
+    .t-atualiza { background:rgba(255,204,0,.15); color:var(--yellow); }
+    .t-aviso { background:rgba(255,140,0,.18); color:var(--orange); }
+    .t-erro { background:rgba(255,0,0,.16); color:#ff6666; }
+    .aviso { border-radius:10px; padding:13px 16px; font-size:.84rem; margin-bottom:14px; }
+    .aviso-info { background:rgba(51,153,255,.10); border:1px solid var(--blue); color:#9ecbff; }
+    .aviso-erro { background:rgba(255,0,0,.10); border:1px solid var(--red-main); color:#ffb3b3; }
+    .aviso-ok { background:rgba(0,204,102,.10); border:1px solid var(--green); color:#9ff0c6; }
+    .barra { height:10px; background:#1c1c1c; border-radius:99px; overflow:hidden; margin-top:12px; }
+    .barra div { height:100%; width:0%; background:linear-gradient(90deg,var(--red-dark),var(--red-main)); transition:.2s; }
+    .log { background:#0a0a0a; border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-family:Consolas,monospace; font-size:.76rem; color:#bdbdbd; white-space:pre-wrap; max-height:220px; overflow:auto; margin-top:12px; }
+    .campo { margin-bottom:12px; }
+    .campo label { display:block; font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:5px; }
+    input, select, textarea { width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:9px; padding:11px 12px; color:#fff; font-family:'Inter',sans-serif; font-size:.88rem; }
+    input:focus, select:focus, textarea:focus { outline:none; border-color:var(--red-main); }
+    textarea { min-height:120px; font-family:Consolas,monospace; font-size:.8rem; }
+    .grade2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .mapa { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
+    .mapa .campo { margin-bottom:0; }
+    .drop { border:2px dashed var(--border); border-radius:12px; padding:26px; text-align:center; color:var(--text-muted); cursor:pointer; transition:.15s; }
+    .drop:hover, .drop.on { border-color:var(--red-main); color:#fff; background:rgba(255,0,0,.04); }
+    .drop i { font-size:1.6rem; color:var(--red-main); display:block; margin-bottom:8px; }
+    .check { display:flex; align-items:flex-start; gap:10px; font-size:.85rem; margin-bottom:10px; cursor:pointer; }
+    .check input { width:auto; margin-top:2px; accent-color:var(--red-main); }
+    .escondido { display:none !important; }
+    .passo { display:flex; align-items:center; gap:10px; font-family:'Montserrat',sans-serif; font-weight:800; font-size:.8rem; color:var(--text-muted); margin-bottom:12px; }
+    .passo b { background:var(--bg-card); border:1px solid var(--border); width:26px; height:26px; border-radius:99px; display:flex; align-items:center; justify-content:center; font-size:.8rem; color:#fff; }
+    .rodape { text-align:center; color:#555; font-size:.75rem; margin-top:26px; line-height:1.7; }
+    @media (max-width:720px) {
+        .grade2 { grid-template-columns:1fr; }
+        .wrap { padding:16px 12px 50px; }
+        .rolagem { max-height:340px; }
+        /* no celular a tabela de conferência fica mais estreita e rola de lado */
+        .rolagem table { font-size:.72rem; }
+        .rolagem th, .rolagem td { padding:6px 6px; }
+        .rolagem th:nth-child(1), .rolagem td:nth-child(1) { display:none; }
+        .rolagem input[type="date"] { width:118px; }
+        .rolagem input[type="number"] { width:92px; }
+        .rolagem .cel-sit { min-width:132px; }
+    }
+
+/* ===== PADRÃO VISUAL LD 2026 — atualização geral ===== */
+html{scroll-behavior:smooth}body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,.btn,input,select,textarea,a{transition:border-color .18s ease,background-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)}
+button:focus-visible,.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--red-main,var(--red,#e50914));outline-offset:2px}
+.card,.kpi-card,.table-container,.modal-card,.login-box{box-shadow:0 12px 34px rgba(0,0,0,.16)}
+table{width:100%}th{letter-spacing:.35px}td,th{vertical-align:middle}
+img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:#0a0a0a}::-webkit-scrollbar-thumb{background:#3a3a3a;border:2px solid #0a0a0a;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:var(--red-main,var(--red,#d90b16))}
+.ld-versao{position:fixed;right:8px;bottom:6px;z-index:2;font-size:8px;letter-spacing:.7px;color:#666;pointer-events:none;text-transform:uppercase}
+@media(max-width:760px){.content{padding-left:12px!important;padding-right:12px!important}.header{gap:12px}.header h1{font-size:clamp(1.55rem,7vw,2.1rem)}.form-grid{grid-template-columns:1fr!important}.form-full{grid-column:auto!important}.modal-card{width:96vw!important;max-height:94vh!important}.table-container{overflow-x:auto}.topbar{padding-left:12px!important;padding-right:12px!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media print{.ld-versao{display:none!important}button,.btn{box-shadow:none!important}}
+
+</style>
+</head>
+<body>
+
+<div id="telaLogin" class="wrap" style="max-width:430px; margin-top:8vh;">
+    <div class="card" style="padding:26px;">
+        <div class="marca" style="text-align:center; margin-bottom:6px;">LD <span>IMÓVEIS</span><small>Importador de Inquilinos</small></div>
+        <p class="sub" style="text-align:center;">Entre com o mesmo usuário do sistema</p>
+        <div class="campo"><label>E-mail</label><input id="email" type="email" placeholder="seu@email.com" autocomplete="username"></div>
+        <div class="campo"><label>Senha</label><input id="senha" type="password" placeholder="******" autocomplete="current-password"></div>
+        <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="window.entrar()"><i class="fas fa-right-to-bracket"></i> Entrar</button>
+        <div id="msgLogin" class="aviso aviso-erro escondido" style="margin-top:14px;"></div>
+        <p style="text-align:center; margin-top:12px;"><span class="link" onclick="window.esqueciSenha()">Esqueci minha senha</span></p>
+    </div>
+</div>
+
+
+<div id="telaApp" class="wrap escondido">
+    <div class="topo">
+        <div class="marca">LD <span>IMÓVEIS</span><small>Importador de Inquilinos</small></div>
+        <div style="text-align:right;">
+            <div class="email" id="emailLogado"></div>
+            <span class="link" onclick="window.sair()">Sair do sistema</span>
+        </div>
+    </div>
+
+    <div id="statusNuvem" class="aviso aviso-info"><i class="fas fa-cloud"></i> Lendo o banco de dados...</div>
+
+    <!-- ================= PASSO 1 ================= -->
+    <div class="card" id="card1">
+        <div class="passo"><b>1</b> De onde vêm os inquilinos?</div>
+        <h2><i class="fas fa-users"></i> Escolha a origem</h2>
+        <p class="sub">Pode misturar as opções: o que já estiver na tela de conferência entra junto.
+            Quem já estiver no cadastro <b>não é duplicado</b> — o sistema reconhece pelo CPF ou pelo nome e só completa o que estiver faltando.</p>
+        <div class="opcoes">
+            <button class="btn btn-outline" onclick="window.gerarDosContratos()"><i class="fas fa-file-signature"></i> Pegar os nomes dos contratos</button>
+            <button class="btn btn-outline" onclick="window.gerarDoCadastro()"><i class="fas fa-user-pen"></i> Revisar quem está sem CPF ou telefone</button>
+            <button class="btn btn-primary" type="button" onclick="document.getElementById('arquivo').click()"><i class="fas fa-file-csv"></i> Enviar arquivo (CSV do Excel)</button>
+            <button class="btn btn-outline" onclick="window.abaColar()"><i class="fas fa-paste"></i> Colar do Excel</button>
+            <button class="btn btn-outline" onclick="window.baixarModelo()"><i class="fas fa-download"></i> Baixar modelo</button>
+        </div>
+        <input type="file" id="arquivo" accept=".csv,.txt,.tsv" class="escondido">
+
+        <div id="boxColar" class="escondido" style="margin-top:16px;">
+            <div class="campo">
+                <label>Cole aqui (pode ser com cabeçalho, direto do Excel)</label>
+                <textarea id="textoColar" placeholder="Nome &nbsp; CPF &nbsp; Telefone &nbsp; Email &nbsp; Endereco&#10;MARIA APARECIDA SOUZA &nbsp; 954.225.522-53 &nbsp; (94) 99174-4612 &nbsp; maria@email.com &nbsp; Rua 20, Qd. 125"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="window.usarTextoColado()"><i class="fas fa-check"></i> Usar o que colei</button>
+        </div>
+
+        <div id="boxArquivo" class="escondido" style="margin-top:16px;">
+            <p class="sub" id="nomeArquivo"></p>
+        </div>
+    </div>
+
+    <!-- ================= PASSO 2 (mapa de colunas) ================= -->
+    <div class="card escondido" id="cardMapa">
+        <div class="passo"><b>2</b> Confira as colunas</div>
+        <h2><i class="fas fa-table-columns"></i> Quem é quem na sua planilha</h2>
+        <p class="sub">O sistema já tentou adivinhar pelos nomes do cabeçalho e pelo conteúdo. Se alguma coluna ficou errada, troque aqui.
+            Os campos com <b style="color:var(--red-main)">*</b> são obrigatórios.</p>
+        <div class="mapa" id="mapaColunas"></div>
+        <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="window.conferirPlanilha()"><i class="fas fa-magnifying-glass"></i> Conferir</button>
+            <button class="btn btn-outline" onclick="window.limparTudo()"><i class="fas fa-rotate-left"></i> Começar de novo</button>
+        </div>
+    </div>
+
+    <!-- ================= PASSO 3 (conferência) ================= -->
+    <div class="card escondido" id="cardPrevia">
+        <div class="passo"><b>3</b> Conferência</div>
+        <h2><i class="fas fa-list-check"></i> O que vai entrar no cadastro</h2>
+        <p class="sub" id="resumoPrevia">—</p>
+        <div class="kpis" id="kpisPrevia"></div>
+
+        <div style="margin-top:16px;">
+            <label class="check"><input type="checkbox" id="optCompletar" checked>
+                <span><b>Completar os dados que faltam</b> nos inquilinos que já estão no cadastro — só preenche o que estiver vazio (nunca apaga o que já está lá).</span></label>
+            <label class="check"><input type="checkbox" id="optCasarNome" checked onchange="window.conferirPlanilha()">
+                <span><b>Reconhecer quem já está cadastrado pelo nome</b> (quando a linha não tiver CPF para comparar). Desmarcado, ele compara só pelo CPF.</span></label>
+        </div>
+
+        <div class="rolagem">
+            <table>
+                <thead><tr>
+                    <th>#</th><th>Nome do inquilino</th><th>CPF / CNPJ</th><th>Telefone / WhatsApp</th><th>E-mail</th><th>Endereço</th><th>Situação</th>
+                </tr></thead>
+                <tbody id="linhasPrevia"></tbody>
+            </table>
+        </div>
+        <p class="sub" style="margin-top:8px;"><i class="fas fa-pen-to-square" style="color:var(--red-main)"></i>
+            Pode corrigir aqui mesmo: clique em qualquer campo e digite (o CPF e o telefone se arrumam sozinhos quando você sai da célula).
+            O que ficar aqui é o que vai para o sistema.</p>
+
+        <div class="aviso aviso-erro escondido" id="alertaImport" style="margin-top:14px;"></div>
+        <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            <button class="btn btn-primary btn-grande" id="btnImportar" onclick="window.importar()"><i class="fas fa-cloud-arrow-up"></i> Importar para o sistema</button>
+            <button class="btn btn-outline" onclick="window.limparTudo()"><i class="fas fa-rotate-left"></i> Começar de novo</button>
+        </div>
+        <div class="barra escondido" id="barraWrap"><div id="barra"></div></div>
+        <div class="log escondido" id="log"></div>
+    </div>
+
+    <div class="card escondido" id="cardFim">
+        <div class="passo"><b>4</b> Pronto</div>
+        <h2><i class="fas fa-circle-check" style="color:var(--green)"></i> Inquilinos importados</h2>
+        <p class="sub" id="resumoFim">—</p>
+        <div class="kpis" id="kpisFim"></div>
+        <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+            <a class="btn btn-primary" href="LD_Imoveis_Sistema_Gerencial.html#inquilinos"><i class="fas fa-arrow-up-right-from-square"></i> Abrir o sistema na aba Inquilinos</a>
+            <button class="btn btn-outline" onclick="window.limparTudo()"><i class="fas fa-plus"></i> Importar mais</button>
+        </div>
+        <p class="sub" style="margin-top:14px;">Dentro do sistema, a aba <b>Inquilinos</b> guarda nome, CPF, telefone, e-mail e endereço de cada locatário.
+            O telefone é o que vira o botão de WhatsApp e o nome é o que aparece nos contratos e nos recibos.</p>
+    </div>
+
+    <div class="rodape">
+        LD IMÓVEIS - Negócios Imobiliários · Av. Tupinambá, Qd. 41, Lote 14B - Parque dos Carajás - Parauapebas/PA · (94) 99174-4612<br>
+        Importador de Inquilinos · os dados vão direto para o seu banco na nuvem (Firebase)
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, addDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",
+    authDomain: "ld-imoveis.firebaseapp.com",
+    projectId: "ld-imoveis",
+    storageBucket: "ld-imoveis.firebasestorage.app",
+    messagingSenderId: "871416060994",
+    appId: "1:871416060994:web:bf3b2ad3e07b18b80ca1db"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const moeda = (n) => 'R$ ' + (Number(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const dataBR = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[3] + '/' + m[2] + '/' + m[1] : (iso || '—'); };
+const norm = (t) => String(t == null ? '' : t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
+function logar(msg) { const l = $('log'); l.textContent += msg + '\n'; l.scrollTop = l.scrollHeight; }
+
+/* ============================================================ login */
+window.entrar = async () => {
+    const email = $('email').value.trim(), senha = $('senha').value;
+    const msg = $('msgLogin');
+    if (!email || !senha) { msg.textContent = 'Preencha o e-mail e a senha.'; msg.classList.remove('escondido'); return; }
+    try {
+        msg.classList.add('escondido');
+        await signInWithEmailAndPassword(auth, email, senha);
+    } catch (e) {
+        msg.textContent = (e && e.code === 'auth/invalid-credential') ? 'E-mail ou senha incorretos.'
+            : (e && e.code === 'auth/unauthorized-domain') ? 'Este endereço não está liberado no Firebase (Authentication > Settings > Authorized domains).'
+            : 'Não consegui entrar: ' + (e && e.message ? e.message : e);
+        msg.classList.remove('escondido');
+    }
+};
+window.esqueciSenha = async () => {
+    const email = $('email').value.trim();
+    const msg = $('msgLogin');
+    if (!email) { msg.textContent = 'Digite seu e-mail primeiro.'; msg.classList.remove('escondido'); return; }
+    try { await sendPasswordResetEmail(auth, email); msg.className = 'aviso aviso-ok'; msg.textContent = 'Enviei um link de troca de senha para ' + email; }
+    catch (e) { msg.className = 'aviso aviso-erro'; msg.textContent = 'Não consegui enviar: ' + (e && e.message ? e.message : e); }
+    msg.classList.remove('escondido');
+};
+window.sair = () => signOut(auth);
+
+let DADOS = { imoveis: [], contratos: [], inquilinos: [] };
+let PLANILHA = null;          // { cabecalhos: [], linhas: [[...]] }
+let PREVIA = [];              // linhas validadas
+
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { $('telaLogin').style.display = ''; $('telaApp').classList.add('escondido'); return; }
+    $('emailLogado').textContent = user.email || '';
+    $('telaLogin').style.display = 'none';
+    $('telaApp').classList.remove('escondido');
+    await carregarBase();
+});
+
+async function carregarBase() {
+    const st = $('statusNuvem');
+    try {
+        const [imv, ct, inq] = await Promise.all([
+            getDocs(collection(db, 'imoveis')),
+            getDocs(collection(db, 'contratos')),
+            getDocs(collection(db, 'inquilinos'))
+        ]);
+        DADOS.imoveis = imv.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        DADOS.contratos = ct.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        DADOS.inquilinos = inq.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        INDICE_INQ = null;
+        st.className = 'aviso aviso-info';
+        st.innerHTML = '<i class="fas fa-cloud"></i> Banco conectado: <b>' + DADOS.imoveis.length + '</b> imóveis · <b>'
+            + DADOS.contratos.length + '</b> contratos · <b>' + DADOS.inquilinos.length + '</b> inquilinos já cadastrados';
+    } catch (e) {
+        st.className = 'aviso aviso-erro';
+        st.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Não consegui ler o banco: ' + esc(e && e.message ? e.message : e)
+            + ' — confira as regras do Firestore e a internet.';
+    }
+}
+
+function detectarSeparador(primeira) {
+    const cands = [';', '\t', ',', '|'];
+    let melhor = ';', maior = -1;
+    cands.forEach(c => { const n = primeira.split(c).length; if (n > maior) { maior = n; melhor = c; } });
+    return melhor;
+}
+function dividirLinha(linha, sep) {
+    const fora = []; let atual = '', aspas = false;
+    for (let i = 0; i < linha.length; i++) {
+        const ch = linha[i];
+        if (ch === '"') { if (aspas && linha[i + 1] === '"') { atual += '"'; i++; } else aspas = !aspas; }
+        else if (ch === sep && !aspas) { fora.push(atual); atual = ''; }
+        else atual += ch;
+    }
+    fora.push(atual);
+    return fora.map(c => c.trim());
+}
+function lerCSV(texto) {
+    const linhas = texto.replace(/\r\n?/g, '\n').split('\n').filter(l => l.trim() !== '');
+    if (!linhas.length) throw new Error('o texto está vazio');
+    const sep = detectarSeparador(linhas[0]);
+    const tabela = linhas.map(l => dividirLinha(l, sep));
+    const larg = tabela.reduce((m, l) => Math.max(m, l.length), 0);
+    tabela.forEach(l => { while (l.length < larg) l.push(''); });
+    /* colunas vazias em todas as linhas saem fora (acontece muito ao copiar do Excel) */
+    const manter = [];
+    for (let c = 0; c < larg; c++) if (tabela.some(l => String(l[c] == null ? '' : l[c]).trim() !== '')) manter.push(c);
+    const t2 = tabela.map(l => manter.map(c => l[c]));
+    let cabecalhos = t2[0];
+    let linhasDados = t2.slice(1);
+    /* se a primeira linha nao parece cabecalho, ela e dado - e nao se perde nada */
+    const pareceDado = (v) => /@/.test(v) || /[()]/.test(v) || /^\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}$/.test(String(v).trim())
+        || /\d{3}\.\d{3}\.\d{3}-\d{2}/.test(v) || String(v).replace(/\D/g, '').length >= 10;
+    const dadosNa1a = t2[0].filter(pareceDado).length;
+    const semCab = !Object.keys(adivinharMapa(cabecalhos)).length || dadosNa1a >= Math.max(1, Math.ceil(t2[0].length / 2));
+    if (semCab && linhasDados.length) {
+        linhasDados = t2.slice();
+        cabecalhos = cabecalhos.map((_, i) => 'Coluna ' + (i + 1));
+    }
+    return { cabecalhos: cabecalhos, linhas: linhasDados, sep: sep, semCabecalho: cabecalhos[0] === 'Coluna 1' };
+}
+function adivinharMapa(cabecalhos) {
+    const mapa = {};
+    const usados = new Set();
+    CAMPOS.forEach(c => {
+        let idx = -1;
+        cabecalhos.forEach((h, i) => {
+            if (idx >= 0 || usados.has(i)) return;
+            const n = norm(h);
+            if ((c.evitar || []).some(k => n.indexOf(norm(k)) >= 0)) return;
+            if (c.chaves.some(k => n === norm(k) || n.indexOf(norm(k)) >= 0)) idx = i;
+        });
+        if (idx >= 0) { mapa[c.id] = idx; usados.add(idx); }
+    });
+    return mapa;
+}
+function montarMapa(escolhidos) {
+    const html = CAMPOS.map(c => {
+        const opts = ['<option value="">— não usar —</option>'].concat(
+            PLANILHA.cabecalhos.map((h, i) => '<option value="' + i + '"' + (escolhidos[c.id] === i ? ' selected' : '') + '>'
+                + esc(h || ('Coluna ' + (i + 1))) + '</option>')).join('');
+        return '<div class="campo"><label>' + c.rotulo + (c.obrig ? ' <b style="color:var(--red-main)">*</b>' : '') + '</label>'
+            + '<select data-campo="' + c.id + '">' + opts + '</select></div>';
+    }).join('');
+    $('mapaColunas').innerHTML = html;
+    $('cardMapa').classList.remove('escondido');
+}
+function mapaAtual() {
+    const m = {};
+    document.querySelectorAll('#mapaColunas select').forEach(s => { if (s.value !== '') m[s.dataset.campo] = Number(s.value); });
+    return m;
+}
+
+function kpi(valor, rotulo, cor) {
+    return '<div class="kpi"><b style="color:' + (cor || '#fff') + '">' + valor + '</b><small>' + rotulo + '</small></div>';
+}
+
+/* olha o conteudo das colunas: serve para colagem do Excel sem cabecalho */
+function mapaPorConteudo(linhas) {
+    const larg = linhas.reduce((m, l) => Math.max(m, l.length), 0);
+    const col = [];
+    for (let c = 0; c < larg; c++) {
+        const vals = linhas.map(l => String(l[c] == null ? '' : l[c]).trim()).filter(v => v !== '');
+        const n = Math.max(1, linhas.length);
+        const dig = vals.map(v => digitos(v));
+        const comPonto = vals.filter(v => /\.\d{3}\.\d{3}/.test(v) || /-\d{2}$/.test(v)).length;   /* 954.225.522-53 */
+        const comBarra = vals.filter(v => /\d{2}\.\d{3}\.\d{3}\/\d{4}/.test(v)).length;         /* CNPJ */
+        const comParenteses = vals.filter(v => /[()]/.test(v) || /^\+?55/.test(dig[0] || '')).length;
+        const dh = dig.filter(d => d.length === 14).length;
+        const cp = dig.filter(d => d.length === 11 && (comPonto || comBarra)).length + dh;
+        const fone = dig.filter(d => (d.length === 10 || d.length === 11) && !(d.length === 11 && comPonto)).length;
+        const emails = vals.filter(v => /@/.test(v)).length;
+        const textos = vals.filter(v => /[A-Za-zÀ-ÿ]{3,}/.test(v) && !/@/.test(v)).length;
+        const longos = vals.filter(v => v.length > 22 && /\d/.test(v) && /[A-Za-zÀ-ÿ]/.test(v)).length;
+        const semDigito = vals.filter(v => !/\d/.test(v)).length;
+        const curto = vals.filter(v => v.length <= 26).length;
+        col.push({ c: c, doc: cp / n, fone: fone / n, email: emails / n, texto: textos / n,
+                   longo: longos / n, semDigito: semDigito / n, curto: curto / n });
+    }
+    const mapa = {}; const usados = new Set();
+    const escolhe = (campo, fn) => {
+        const melhor = col.filter(x => !usados.has(x.c)).sort((a, b) => fn(b) - fn(a))[0];
+        if (melhor && fn(melhor) > 0.5) { mapa[campo] = melhor.c; usados.add(melhor.c); return true; }
+        return false;
+    };
+    escolhe('email', x => x.email);
+    escolhe('cpf', x => x.doc + (x.longo > 0.5 ? -1 : 0));
+    escolhe('telefone', x => x.fone);
+    /* nome = texto curto, sem número; endereço = texto comprido com número */
+    escolhe('nome', x => x.texto + x.semDigito * 0.6 + x.curto * 0.3 - x.longo * 1.5);
+    escolhe('endereco', x => x.longo + (1 - x.semDigito) * 0.7 + (x.texto > 0.5 ? 0.2 : 0));
+    return mapa;
+}
+
+
+/* ============================================================ 1. origens */
+window.abaColar = () => { $('boxColar').classList.remove('escondido'); $('textoColar').focus(); };
+
+window.gerarDosContratos = () => {
+    const nomes = new Map();
+    DADOS.contratos.forEach(c => {
+        const n = String(c.inquilino || '').replace(/\s+/g, ' ').trim();
+        if (n) nomes.set(norm(n), n);
+    });
+    if (!nomes.size) {
+        alert('Não encontrei nomes de inquilinos nos contratos. Importe os contratos primeiro (ou use o arquivo / colar do Excel).');
+        return;
+    }
+    const linhas = [...nomes.values()].map(n => [n, '', '', '', '']);
+    PLANILHA = { cabecalhos: ['Nome do inquilino', 'CPF', 'Telefone', 'E-mail', 'Endereço'], linhas: linhas };
+    $('nomeArquivo').textContent = 'Origem: ' + linhas.length + ' nome(s) diferentes vindos dos contratos já cadastrados. '
+        + 'O nome já vem pronto - o CPF e o telefone você completa aqui na tabela (ou usa uma planilha com eles).';
+    $('boxArquivo').classList.remove('escondido');
+    montarMapa({ nome: 0, cpf: 1, telefone: 2, email: 3, endereco: 4 });
+    window.conferirPlanilha();
+};
+
+window.gerarDoCadastro = () => {
+    const faltando = DADOS.inquilinos.filter(i => !String(i.cpf || '').trim() || !String(i.telefone || '').trim());
+    if (!faltando.length) {
+        alert('Boa notícia: todos os ' + DADOS.inquilinos.length + ' inquilinos do cadastro já têm CPF e telefone preenchidos. Nada para revisar.');
+        return;
+    }
+    const linhas = faltando.map(i => [i.nome || '', i.cpf || '', i.telefone || '', i.email || '', i.endereco || '']);
+    PLANILHA = { cabecalhos: ['Nome do inquilino', 'CPF', 'Telefone', 'E-mail', 'Endereço'], linhas: linhas };
+    $('nomeArquivo').textContent = 'Origem: ' + linhas.length + ' inquilino(s) do seu cadastro que estão sem CPF ou sem telefone. '
+        + 'Clique na célula, digite o que falta e importe para salvar no sistema.';
+    $('boxArquivo').classList.remove('escondido');
+    montarMapa({ nome: 0, cpf: 1, telefone: 2, email: 3, endereco: 4 });
+    window.conferirPlanilha();
+};
+
+window.baixarModelo = () => {
+    const linhas = [
+        ['Nome', 'CPF', 'Telefone', 'Email', 'Endereco'],
+        ['MARIA APARECIDA SOUZA', '954.225.522-53', '(94) 99174-4612', 'maria@email.com', 'Rua 20, Qd. 125 Lt. 10 - Nova Carajás'],
+        ['JOSE CARLOS DA SILVA', '050.305.246-90', '(94) 98123-4567', 'jose@email.com', 'Av. Tupinambá, Qd. 41 - Parque dos Carajás']
+    ];
+    const csv = '\ufeff' + linhas.map(l => l.join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'Modelo_Inquilinos_LD_Imoveis.csv';
+    a.click();
+};
+
+/* ---- leitura de arquivo ---- */
+$('arquivo').addEventListener('change', (ev) => {
+    const f = ev.target.files && ev.target.files[0];
+    if (!f) return;
+    const leitor = new FileReader();
+    leitor.onload = () => {
+        try {
+            const bytes = leitor.result;
+            let texto;
+            try { texto = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
+            catch (e2) { texto = new TextDecoder('windows-1252').decode(bytes); }
+            PLANILHA = lerCSV(texto);
+            $('nomeArquivo').textContent = 'Arquivo: ' + f.name + ' (' + PLANILHA.linhas.length + ' linha(s))'
+                + (PLANILHA.semCabecalho ? ' - sem cabeçalho: o sistema adivinhou as colunas pelo conteúdo (confira no passo 2).' : '');
+            $('boxArquivo').classList.remove('escondido');
+            montarMapa(adivinharMapa(PLANILHA.cabecalhos));
+            window.conferirPlanilha();
+        } catch (e) { alert('Não consegui ler o arquivo: ' + e.message); }
+    };
+    leitor.readAsArrayBuffer(f);
+    ev.target.value = '';
+});
+
+window.usarTextoColado = () => {
+    const t = $('textoColar').value.trim();
+    if (!t) { alert('Cole primeiro os dados.'); return; }
+    try {
+        PLANILHA = lerCSV(t);
+        $('nomeArquivo').textContent = 'Origem: dados colados do Excel (' + PLANILHA.linhas.length + ' linha(s))'
+            + (PLANILHA.semCabecalho ? ' - sem cabeçalho: o sistema adivinhou as colunas pelo conteúdo (confira no passo 2).' : '');
+        $('boxArquivo').classList.remove('escondido');
+        montarMapa(adivinharMapa(PLANILHA.cabecalhos));
+        window.conferirPlanilha();
+    } catch (e) { alert('Não consegui entender o que foi colado: ' + e.message); }
+};
+
+/* ---- o que cada coluna da planilha deve alimentar ---- */
+const CAMPOS = [
+    { id: 'nome', rotulo: 'Nome do inquilino', obrig: true,
+      chaves: ['nome', 'inquilino', 'locatario', 'locatário', 'cliente', 'tenant'],
+      evitar: ['imovel', 'imóvel', 'locador', 'proprietario', 'proprietário'] },
+    { id: 'cpf', rotulo: 'CPF ou CNPJ', obrig: false,
+      chaves: ['cpf', 'cnpj', 'documento', 'cpf cnpj'],
+      evitar: ['locador', 'proprietario', 'proprietário'] },
+    { id: 'telefone', rotulo: 'Telefone / WhatsApp', obrig: false,
+      chaves: ['telefone', 'celular', 'whatsapp', 'fone', 'tel', 'contato'] },
+    { id: 'email', rotulo: 'E-mail', obrig: false,
+      chaves: ['email', 'e-mail', 'mail', 'correio'] },
+    { id: 'endereco', rotulo: 'Endereço', obrig: false,
+      chaves: ['endereco', 'endereço', 'residencia', 'residência', 'moradia', 'rua'] }
+];
+
+/* ---- números, documentos e telefones ---- */
+function digitos(t) { return String(t == null ? '' : t).replace(/\D/g, ''); }
+function formataDoc(t) {
+    const d = digitos(t);
+    if (d.length === 11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    if (d.length === 14) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    return String(t == null ? '' : t).trim();
+}
+function formataFone(t) {
+    let d = digitos(t);
+    if (d.length > 11 && d.indexOf('55') === 0) d = d.slice(2);
+    if (d.length === 11) return '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7);
+    if (d.length === 10) return '(' + d.slice(0, 2) + ') ' + d.slice(2, 6) + '-' + d.slice(6);
+    if (d.length === 9) return d.slice(0, 5) + '-' + d.slice(5);
+    return String(t == null ? '' : t).trim();
+}
+const emailOk = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(e || '').trim());
+
+/* ---- quem já está no cadastro ---- */
+let INDICE_INQ = null;
+function indiceInq() {
+    if (INDICE_INQ) return INDICE_INQ;
+    const porCpf = new Map(), porNome = new Map();
+    DADOS.inquilinos.forEach(i => {
+        const d = digitos(i.cpf);
+        if (d.length >= 11 && !porCpf.has(d)) porCpf.set(d, i);
+        const n = norm(i.nome);
+        if (n && !porNome.has(n)) porNome.set(n, i);
+    });
+    INDICE_INQ = { porCpf: porCpf, porNome: porNome };
+    return INDICE_INQ;
+}
+function acharInquilino(p, casarNome) {
+    const idx = indiceInq();
+    const d = digitos(p.cpf);
+    if (d.length >= 11 && idx.porCpf.has(d)) return idx.porCpf.get(d);
+    if (casarNome) { const n = norm(p.nome); if (n && idx.porNome.has(n)) return idx.porNome.get(n); }
+    return null;
+}
+
+/* ============================================================ 2. conferência */
+function existePendente(existente, p) {
+    return ['cpf', 'telefone', 'email', 'endereco'].some(c => !String(existente[c] || '').trim() && String(p[c] || '').trim());
+}
+function reavaliarInq(p) {
+    p.nome = String(p.nome || '').replace(/\s+/g, ' ').trim();
+    p.cpf = formataDoc(p.cpf);
+    p.telefone = formataFone(p.telefone);
+    p.email = String(p.email || '').trim();
+    p.endereco = String(p.endereco || '').replace(/\s+/g, ' ').trim();
+    const casarNome = $('optCasarNome') ? $('optCasarNome').checked : true;
+    const existente = acharInquilino(p, casarNome);
+    p.existenteId = existente ? existente.id : null;
+    p.existente = existente || null;
+    p.erros = []; p.avisos = []; p.pendentes = {};
+    if (!p.nome) p.erros.push('sem o nome do inquilino (confira o mapa das colunas no passo 2)');
+    const d = digitos(p.cpf);
+    const jaCompleto = !!existente && !existePendente(existente, p);
+    if (!jaCompleto) {
+        if (!p.cpf) p.avisos.push('sem CPF');
+        else if (d.length !== 11 && d.length !== 14) p.avisos.push('CPF/CNPJ com ' + d.length + ' dígito(s) - o normal é 11 (CPF) ou 14 (CNPJ)');
+        if (!p.telefone) p.avisos.push('sem telefone');
+        else { const t = digitos(p.telefone); if (t.length < 10 || t.length > 13) p.avisos.push('telefone fora do normal: ' + p.telefone); }
+        if (p.email && !emailOk(p.email)) p.avisos.push('e-mail parece inválido: ' + p.email);
+    }
+
+    if (existente) {
+        const rotulos = { cpf: 'CPF/CNPJ', telefone: 'telefone', email: 'e-mail', endereco: 'endereço' };
+        ['cpf', 'telefone', 'email', 'endereco'].forEach(c => {
+            const noCadastro = String(existente[c] || '').trim();
+            if (!noCadastro && p[c]) p.pendentes[c] = p[c];
+            else if (noCadastro && p[c] && norm(noCadastro) !== norm(p[c])) p.avisos.push('no cadastro o ' + rotulos[c] + ' é diferente - fica o que já está lá');
+        });
+        p.qtdPend = Object.keys(p.pendentes).length;
+    } else p.qtdPend = 0;
+
+    if (p.repetido) p.avisos.push('mesma pessoa da linha ' + p.entraPelaLinha + ' - ela tem mais de um imóvel, então o cadastro é um só (esta linha não conta de novo)');
+    if (!p.repetido && p.linhasMesma > 1) p.avisos.push('este locatário aparece em ' + p.linhasMesma + ' linhas do arquivo (mais de um imóvel alugado): entra uma vez só, com os dados de todas elas juntados');
+    p.situacao = p.erros.length ? 'erro'
+        : p.repetido ? 'repetido'
+        : existente ? (p.qtdPend ? 'completar' : 'jatem')
+        : 'novo';
+    p.semDados = !p.erros.length && !p.repetido && !existente && (!p.cpf || !p.telefone);
+}
+function celulaSit(p) {
+    const tag = p.situacao === 'erro' ? '<span class="tag t-erro">ERRO</span>'
+        : p.situacao === 'repetido' ? '<span class="tag t-novo">MESMA PESSOA</span>'
+        : p.situacao === 'jatem' ? '<span class="tag t-novo">JÁ TEM</span>'
+        : p.situacao === 'completar' ? '<span class="tag t-atualiza">COMPLETAR</span>'
+        : '<span class="tag t-ok">NOVO</span>';
+    const obs = p.erros.concat(p.avisos);
+    return tag + (obs.length ? '<div style="color:#888; font-size:.72rem; margin-top:4px;">' + esc(obs.join(' · ')) + '</div>' : '');
+}
+function atualizarKpisInq() {
+    const entra = PREVIA.filter(p => !p.erros.length && !p.repetido && !p.existenteId);
+    const completa = PREVIA.filter(p => !p.erros.length && !p.repetido && p.existenteId && p.qtdPend);
+    const mesma = PREVIA.filter(p => p.repetido).length;
+    const jatem = PREVIA.filter(p => !p.erros.length && !p.repetido && p.existenteId && !p.qtdPend).length;
+    const semDados = entra.filter(p => p.semDados).length + completa.filter(p => p.semDados).length;
+    const comErro = PREVIA.filter(p => p.erros.length).length;
+    $('kpisPrevia').innerHTML =
+        kpi(PREVIA.length, 'linhas lidas') + kpi(entra.length, 'vão ENTRAR', 'var(--green)') +
+        kpi(completa.length, 'vão COMPLETAR', 'var(--yellow)') + kpi(mesma, 'mesma pessoa (1 cadastro)', 'var(--blue)') +
+        kpi(jatem, 'já cadastrados (fora)') + kpi(semDados, 'sem CPF ou telefone', 'var(--orange)') +
+        kpi(comErro, 'com erro (fora)', 'var(--red-main)');
+    $('resumoPrevia').innerHTML = comErro
+        ? 'As linhas marcadas em ERRO ficam de fora (o resto entra). Na maioria das vezes é só o mapa das colunas que precisa ser ajustado no passo 2 — ou o nome que está vazio na planilha.'
+        : (complexo() ? 'Confira abaixo e clique em Importar. Os "JÁ TEM" não são mexidos e ninguém é duplicado.'
+            : (mesma_qtd() ? 'As linhas marcadas como MESMA PESSOA são o mesmo locatário com mais de um imóvel alugado: no cadastro ele entra uma vez só, com os dados de todas elas juntados.'
+                           : 'Confira abaixo e clique em Importar.'));
+}
+const complexo = () => PREVIA.some(p => p.existenteId && p.qtdPend);
+const mesma_qtd = () => PREVIA.some(p => p.repetido);
+window.mudarPrevia = (n, campo, valor) => {
+    const p = PREVIA.find(x => x.n === n);
+    if (!p) return;
+    p[campo] = valor;
+    reavaliarInq(p);
+    const cel = document.querySelector('.cel-sit[data-idx="' + n + '"]');
+    if (cel) cel.innerHTML = celulaSit(p);
+    if (campo === 'cpf' || campo === 'telefone') {
+        const lin = document.querySelector('tr[data-linha="' + n + '"]');
+        const inp = lin && lin.querySelector('.inp-' + campo);
+        if (inp && inp.value !== p[campo]) inp.value = p[campo];
+    }
+    atualizarKpisInq();
+};
+window.conferirPlanilha = () => {
+    if (!PLANILHA || !PLANILHA.linhas.length) { alert('Primeiro escolha de onde vêm os inquilinos (passo 1).'); return; }
+    let mapa = mapaAtual();
+    if (!PLANILHA.jaAdivinhado) {
+        /* adivinha pelo conteudo so quando a planilha nao tem cabecalho (ou a coluna esta
+           sem nome) - com cabecalho quem manda e o nome da coluna */
+        const porConteudo = mapaPorConteudo(PLANILHA.linhas);
+        CAMPOS.forEach(c => {
+            if (mapa[c.id] !== undefined) return;
+            const cand = porConteudo[c.id];
+            if (cand === undefined) return;
+            const nomeCol = String(PLANILHA.cabecalhos[cand] || '').trim();
+            if (!PLANILHA.semCabecalho && nomeCol) return;
+            mapa[c.id] = cand;
+        });
+        document.querySelectorAll('#mapaColunas select').forEach(s => {
+            if (mapa[s.dataset.campo] !== undefined) s.value = String(mapa[s.dataset.campo]);
+        });
+        PLANILHA.jaAdivinhado = true;
+    }
+    const faltando = CAMPOS.filter(c => c.obrig && mapa[c.id] === undefined).map(c => c.rotulo);
+    if (faltando.length) { alert('Falta escolher a coluna de: ' + faltando.join(', ')); return; }
+
+    PREVIA = PLANILHA.linhas.map((linha, n) => {
+        const pega = (campo) => (mapa[campo] === undefined ? '' : (linha[mapa[campo]] || ''));
+        return { n: n + 1, nome: String(pega('nome')), cpf: String(pega('cpf')), telefone: String(pega('telefone')),
+                 email: String(pega('email')), endereco: String(pega('endereco')), erros: [], avisos: [], pendentes: {} };
+    });
+    /* o MESMO locatário costuma aparecer em várias linhas (ele aluga mais de um
+       imóvel). No cadastro ele é uma pessoa só: junto os dados de todas as
+       linhas numa linha que fica, e as outras viram "mesma pessoa". */
+    const pontosP = (p) => ['cpf', 'telefone', 'email', 'endereco'].filter(c => String(p[c] || '').trim()).length;
+    const grupos = [], idxCpf = new Map(), idxNome = new Map();
+    PREVIA.forEach(p => {
+        const d = digitos(p.cpf), nome = norm(p.nome);
+        let g = null;
+        if (d.length >= 11) {
+            g = idxCpf.get(d) || null;
+            if (!g && nome && idxNome.get(nome) && !idxNome.get(nome).temCpf) g = idxNome.get(nome);
+        } else if (nome) g = idxNome.get(nome) || null;
+        if (!g) { g = { linhas: [], temCpf: false }; grupos.push(g); }
+        g.linhas.push(p);
+        if (d.length >= 11) { idxCpf.set(d, g); g.temCpf = true; }
+        if (nome) idxNome.set(nome, g);
+    });
+    grupos.forEach(g => {
+        g.linhas.forEach(p => { p.linhasMesma = g.linhas.length; });
+        if (g.linhas.length === 1) return;
+        const fica = g.linhas.slice().sort((a, b) => pontosP(b) - pontosP(a))[0];
+        /* o nome que fica é o mais "apresentável" (o que tem mais letras maiúsculas) */
+        const melhorNome = g.linhas.slice().sort((a, b) => {
+            const maius = (x) => (String(x.nome).match(/[A-ZÀ-Þ]/g) || []).length;
+            return maius(b) - maius(a);
+        })[0].nome;
+        if (melhorNome) fica.nome = melhorNome;
+        g.linhas.forEach(p => {
+            if (p === fica) return;
+            ['cpf', 'telefone', 'email', 'endereco'].forEach(c => {          /* junta o que faltava */
+                if (!String(fica[c] || '').trim() && String(p[c] || '').trim()) fica[c] = p[c];
+            });
+            p.repetido = true;
+            p.nome = melhorNome || p.nome;
+            p.entraPelaLinha = fica.n;
+        });
+    });
+    PREVIA.forEach(reavaliarInq);
+    atualizarKpisInq();
+
+    const MAX = 400;
+    const est = 'background:#101010; border:1px solid #2a2a2a; border-radius:6px; padding:6px 7px; color:#fff; font-size:.78rem; width:100%;';
+    $('linhasPrevia').innerHTML = PREVIA.slice(0, MAX).map(p => {
+        return '<tr data-linha="' + p.n + '"><td>' + p.n + '</td>'
+            + '<td><input style="' + est + '; min-width:150px;" value="' + esc(p.nome || '') + '" placeholder="nome completo" oninput="window.mudarPrevia(' + p.n + ',\'nome\',this.value)"></td>'
+            + '<td><input class="inp-cpf" style="' + est + '; min-width:124px;" value="' + esc(p.cpf || '') + '" placeholder="000.000.000-00" onchange="window.mudarPrevia(' + p.n + ',\'cpf\',this.value)"></td>'
+            + '<td><input class="inp-telefone" style="' + est + '; min-width:120px;" value="' + esc(p.telefone || '') + '" placeholder="(94) 90000-0000" onchange="window.mudarPrevia(' + p.n + ',\'telefone\',this.value)"></td>'
+            + '<td><input style="' + est + '; min-width:150px;" value="' + esc(p.email || '') + '" placeholder="email@exemplo.com" oninput="window.mudarPrevia(' + p.n + ',\'email\',this.value)"></td>'
+            + '<td><input style="' + est + '; min-width:170px;" value="' + esc(p.endereco || '') + '" placeholder="rua, número, bairro" oninput="window.mudarPrevia(' + p.n + ',\'endereco\',this.value)"></td>'
+            + '<td class="cel-sit" data-idx="' + p.n + '">' + celulaSit(p) + '</td></tr>';
+    }).join('') + (PREVIA.length > MAX ? '<tr><td colspan="7" style="text-align:center; color:#888;">... e mais ' + (PREVIA.length - MAX) + ' linha(s) — todas entram na importação.</td></tr>' : '');
+    $('cardPrevia').classList.remove('escondido');
+    $('cardMapa').classList.remove('escondido');
+};
+
+window.limparTudo = () => {
+    PLANILHA = null; PREVIA = [];
+    ['cardMapa', 'cardPrevia', 'cardFim', 'boxColar', 'boxArquivo', 'barraWrap', 'log', 'alertaImport']
+        .forEach(id => $(id).classList.add('escondido'));
+    $('textoColar').value = ''; $('log').textContent = ''; $('barra').style.width = '0%';
+    $('linhasPrevia').innerHTML = ''; $('kpisPrevia').innerHTML = ''; $('kpisFim').innerHTML = '';
+    $('resumoPrevia').textContent = '\u2014';
+    $('arquivo').value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+/* ============================================================ 3. importação */
+function explicarNadaAImportar(completar) {
+    const comErro = PREVIA.filter(p => p.erros.length);
+    const jatem = PREVIA.filter(p => !p.erros.length && !p.repetido && p.existenteId && !p.qtdPend).length;
+    const mesmas = PREVIA.filter(p => p.repetido).length;
+    const esperando = PREVIA.filter(p => !p.erros.length && !p.repetido && p.existenteId && p.qtdPend).length;
+    const partes = ['<b>Nada foi para o sistema ainda.</b>'];
+    if (comErro.length) {
+        partes.push('<br><b>' + comErro.length + '</b> de ' + PREVIA.length + ' linha(s) estão sem o nome do inquilino. '
+            + 'Volte ao <b>passo 2 (Confira as colunas)</b> e escolha a coluna certa em "Nome do inquilino" — ou digite o nome aqui na tabela.');
+    }
+    if (esperando && !completar) {
+        partes.push('<br><br>Você tem <b>' + esperando + '</b> inquilino(s) que já estão no cadastro e este arquivo traz dados novos para eles: '
+            + 'é só marcar a caixinha <b>"Completar os dados que faltam"</b>.');
+    }
+    if (!comErro.length && !esperando) {
+        partes.push('<br><br>Todos os ' + (jatem + mesmas) + ' já estavam certos no cadastro'
+            + (mesmas ? ' (' + mesmas + ' linha(s) são do mesmo locatário com mais de um imóvel - no cadastro ele é uma pessoa só)' : '')
+            + ' — não há nada novo para gravar. Se quiser corrigir algum dado, é na aba <b>Inquilinos</b> do sistema.');
+    }
+    const el = $('alertaImport');
+    el.innerHTML = '<i class="fas fa-circle-exclamation"></i> ' + partes.join('');
+    el.classList.remove('escondido');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    logar('Importação não iniciada: ' + comErro.length + ' linha(s) com erro, ' + esperando + ' esperando a opção de completar.');
+}
+
+function listaParaImportar(completar) {
+    return PREVIA.filter(p => {
+        if (p.erros.length || p.repetido) return false;
+        if (p.existenteId) return completar && p.qtdPend > 0;
+        return true;
+    });
+}
+window.importar = async () => {
+    const completar = $('optCompletar').checked;
+    let lista = listaParaImportar(completar);
+    if (!PREVIA.length) { alert('Primeiro monte a lista de inquilinos (passo 1) e clique em Conferir.'); return; }
+    if (!lista.length) { explicarNadaAImportar(completar); return; }
+    /* confere de novo contra o cadastro atual: se o seu colega cadastrou alguem nesse
+       meio tempo - ou se voce clicou duas vezes - ninguem e duplicado */
+    INDICE_INQ = null;
+    PREVIA.forEach(reavaliarInq);
+    atualizarKpisInq();
+    lista = listaParaImportar(completar);
+    $('alertaImport').classList.add('escondido');
+
+    const btn = $('btnImportar');
+    btn.disabled = true;
+    $('barraWrap').classList.remove('escondido');
+    $('log').classList.remove('escondido');
+    $('log').textContent = '';
+    logar('Iniciando a importação de ' + lista.length + ' inquilino(s)...');
+
+    const novos = lista.filter(p => !p.existenteId);
+    const completarLista = lista.filter(p => p.existenteId);
+    let criados = 0, completados = 0;
+    const TAM = 400;
+    try {
+        if (novos.length) {
+            logar('   criando ' + novos.length + ' novo(s)...');
+            for (let i = 0; i < novos.length; i += TAM) {
+                const b = writeBatch(db);
+                novos.slice(i, i + TAM).forEach(p => {
+                    b.set(doc(collection(db, 'inquilinos')), {
+                        nome: p.nome, cpf: p.cpf || '', telefone: p.telefone || '', email: p.email || '', endereco: p.endereco || ''
+                    });
+                });
+                await b.commit();
+                criados += novos.slice(i, i + TAM).length;
+                $('barra').style.width = Math.round(((i + TAM) / lista.length) * (completarLista.length ? 60 : 100)) + '%';
+                logar('   novos: ' + criados + ' de ' + novos.length + '...');
+            }
+        }
+        if (completarLista.length) {
+            logar('   completando os dados de ' + completarLista.length + ' que já estavam no cadastro...');
+            for (let i = 0; i < completarLista.length; i += TAM) {
+                const b = writeBatch(db);
+                completarLista.slice(i, i + TAM).forEach(p => b.update(doc(db, 'inquilinos', p.existenteId), p.pendentes));
+                await b.commit();
+                completados += completarLista.slice(i, i + TAM).length;
+                logar('   completados: ' + completados + ' de ' + completarLista.length + '...');
+            }
+        }
+        $('barra').style.width = '100%';
+        const jatem = PREVIA.filter(p => p.situacao === 'jatem').length;
+        const mesma = PREVIA.filter(p => p.situacao === 'repetido').length;
+        logar('\nCONCLUÍDO: ' + criados + ' inquilino(s) novo(s), ' + completados + ' completado(s), '
+            + jatem + ' já tinham tudo (não mexi)'
+            + (mesma ? ', ' + mesma + ' linha(s) eram do mesmo locatário (já contado)' : '') + '.');
+        $('kpisFim').innerHTML = kpi(criados, 'inquilinos novos', 'var(--green)')
+            + kpi(completados, 'completados', 'var(--yellow)')
+            + kpi(jatem, 'já estavam certos')
+            + kpi(DADOS.inquilinos.length + criados, 'inquilinos no total')
+            + (mesma ? kpi(mesma, 'linhas do mesmo locatário', 'var(--blue)') : '');
+        $('resumoFim').textContent = criados || completados
+            ? 'Tudo salvo na nuvem. Abra o sistema na aba Inquilinos para ver a lista.'
+            : 'Nada precisou ser gravado.';
+        $('cardFim').classList.remove('escondido');
+        $('cardFim').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        await carregarBase();
+        INDICE_INQ = null;
+        PREVIA.forEach(reavaliarInq);
+        document.querySelectorAll('#linhasPrevia tr').forEach(tr => {
+            const p = PREVIA.find(x => x.n === Number(tr.dataset.linha));
+            const cel = tr.querySelector('.cel-sit');
+            if (cel && p) cel.innerHTML = celulaSit(p);
+        });
+        atualizarKpisInq();
+    } catch (e) {
+        logar('\nERRO: ' + (e && e.message ? e.message : e));
+        alert('A importação parou: ' + (e && e.message ? e.message : e)
+            + '\nNada do que já foi enviado se perde - você pode rodar de novo que o sistema não duplica.');
+    } finally {
+        btn.disabled = false;
+    }
+};
+
+
+/* CONTROLE CENTRAL LD — perfil específico e bloqueio em tempo real */
+const __LD_ADMIN_PRINCIPAL='matheusslvdsz@gmail.com';
+const __LD_PERFIS_PERMITIDOS=['admin'];
+let __ldBloqueando=false,__ldPerfilStop=null;
+async function __ldBloquear(__motivo){
+ if(__ldBloqueando)return;__ldBloqueando=true;
+ if(__ldPerfilStop){try{__ldPerfilStop()}catch(__e){}}
+ try{const __au=await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');await __au.signOut(auth)}catch(__e){}
+ document.body.innerHTML=`<main style="min-height:100vh;display:grid;place-items:center;background:#050505;color:#fff;font-family:Arial,sans-serif;padding:20px"><section style="max-width:540px;text-align:center;background:#141414;border:1px solid #3b3b3b;border-radius:18px;padding:32px;box-shadow:0 25px 80px #000"><div style="font-size:48px;color:#e50914">●</div><h1 style="font-size:25px">Acesso bloqueado</h1><p style="color:#aaa;line-height:1.65">${__motivo}</p><button onclick="location.reload()" style="padding:11px 16px;border:0;border-radius:9px;background:#d80b15;color:#fff;font-weight:800;cursor:pointer">Voltar ao login</button></section></main>`;
+}
+onAuthStateChanged(auth,async(__u)=>{
+ if(!__u||__ldBloqueando)return;
+ const __email=String(__u.email||'').trim().toLowerCase();
+ if(__email===__LD_ADMIN_PRINCIPAL)return;
+ try{
+  const __fs=await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+  const __ref=__fs.doc(db,'usuariosSistema',__email);
+  const __validar=(__snap)=>{
+   const __d=__snap.exists()?__snap.data():null;
+   if(!__d||__d.ativo!==true)return __ldBloquear('Este usuário não possui autorização ativa. Os dados e a conexão foram encerrados.');
+   const __perfil=String(__d.perfil||'').trim().toLowerCase();
+   if(!__LD_PERFIS_PERMITIDOS.includes(__perfil))return __ldBloquear('Somente administradores podem executar importações de inquilinos.');
+  };
+  let __snap;try{__snap=await __fs.getDocFromServer(__ref)}catch(__e){__snap=await __fs.getDoc(__ref)}
+  await __validar(__snap);if(__ldBloqueando)return;
+  __ldPerfilStop=__fs.onSnapshot(__ref,__validar,()=>__ldBloquear('Não foi possível confirmar sua permissão. Entre novamente.'));
+ }catch(__e){console.error('[LD Permissões]',__e);await __ldBloquear('Não foi possível confirmar sua permissão. Verifique a conexão e entre novamente.')}
+});
+
+</script>
+<div class="ld-versao">LD Sistemas · versão 2026</div></body>
+</html>

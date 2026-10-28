@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=e92f480e-5691-4467-ad1c-100f53a64e80
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LD Imóveis - Boletins de Medição | Proprietários Especiais</title>
+
+    <!-- Fontes & Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* ================= VARIÁVEIS DE COR (identidade LD Imóveis) ================= */
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: #0f0f0f;
+            --bg-card: #1a1a1a;
+            --bg-hover: #252525;
+            --bg-input: #101010;
+            --border: #2a2a2a;
+            --text-main: #ffffff;
+            --text-muted: #999999;
+            --red-main: #ff0000;
+            --red-dark: #cc0000;
+            --red-glow: rgba(255, 0, 0, 0.35);
+            --green: #00cc66;
+            --yellow: #ffcc00;
+            --blue: #3399ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--red-main); }
+
+        :focus-visible { outline: 2px solid var(--red-main); outline-offset: 2px; }
+        .btn:disabled { opacity: 0.6; cursor: wait; }
+
+        /* ================= LOGIN ================= */
+        #loginScreen {
+            position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at 50% 30%, rgba(255,0,0,0.18) 0%, transparent 70%), var(--bg-dark);
+            padding: 20px;
+        }
+        .login-box {
+            background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px;
+            padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.9); text-align: center;
+        }
+        .brand-login { font-family: 'Montserrat', sans-serif; font-size: 1.9rem; font-weight: 900; letter-spacing: 1px; }
+        .brand-login span { color: var(--red-main); }
+        .login-sub { color: var(--text-muted); font-size: 0.85rem; margin: 8px 0 25px; }
+        .login-erro {
+            display: none; margin-bottom: 12px; padding: 10px 12px; border-radius: 8px;
+            background: rgba(255,0,0,0.12); border: 1px solid var(--red-main); color: #ff8080;
+            font-size: 0.82rem; text-align: left;
+        }
+        .login-erro:not(:empty) { display: block; }
+
+        /* ================= FORMULÁRIOS ================= */
+        label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.85rem; }
+        input, select {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: #fff;
+            border-radius: 8px; padding: 12px; outline: none; font-size: 0.95rem;
+        }
+        input:focus, select:focus { border-color: var(--red-main); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-full { grid-column: 1 / -1; }
+
+        /* ================= BOTÕES ================= */
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 8px;
+            border: none; cursor: pointer; font-size: 0.88rem; font-weight: 700; color: #fff; transition: 0.2s;
+            text-decoration: none;
+        }
+        .btn-primary { background: var(--red-main); }
+        .btn-primary:hover { background: var(--red-dark); box-shadow: 0 4px 15px var(--red-glow); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { border-color: var(--red-main); color: var(--red-main); }
+        .btn-success { background: var(--green); color: #000; }
+        .btn-success:hover { filter: brightness(0.9); }
+        .btn-sm { padding: 7px 12px; font-size: 0.78rem; }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            width: 260px; background: var(--bg-panel); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; height: 100vh; flex-shrink: 0;
+        }
+        .brand { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .brand-icon {
+            width: 42px; height: 42px; background: var(--red-main); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.15rem; color: #fff;
+        }
+        .brand-icon .d { color: #000; }
+        .brand-text .main { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: 1px; }
+        .brand-text .sub { color: var(--text-muted); font-size: 0.66rem; letter-spacing: 1px; }
+        .nav { flex: 1; padding: 12px; overflow-y: auto; }
+        .nav-title { color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; padding: 15px 12px 6px; font-weight: 600; }
+        .nav-link {
+            display: flex; align-items: center; gap: 10px; padding: 12px; color: var(--text-muted);
+            border-radius: 8px; cursor: pointer; margin-bottom: 4px; transition: 0.2s;
+            font-size: 0.9rem; font-weight: 500; user-select: none;
+        }
+        .nav-link i { width: 20px; text-align: center; }
+        .nav-link:hover { background: var(--bg-hover); color: var(--text-main); }
+        .nav-link.active { background: var(--red-main); color: #fff; box-shadow: 0 4px 15px var(--red-glow); }
+        .sidebar-footer { border-top: 1px solid var(--border); padding: 15px; display: flex; align-items: center; gap: 10px; }
+        .avatar {
+            width: 38px; height: 38px; border-radius: 50%; background: var(--red-main); color: #fff;
+            display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;
+        }
+
+        /* ================= MAIN ================= */
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar {
+            height: 62px; border-bottom: 1px solid var(--border); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 25px; background: var(--bg-panel);
+        }
+        .live-badge {
+            display: flex; align-items: center; gap: 8px; background: rgba(0,204,102,0.1);
+            color: var(--green); padding: 7px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+        }
+        .live-badge .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+        .content { flex: 1; overflow-y: auto; padding: 25px; }
+        .tab { display: none; }
+        .tab.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin-bottom: 22px; }
+        .header h1 { font-family: 'Montserrat', sans-serif; font-size: 1.7rem; font-weight: 800; }
+        .header h1 span { color: var(--red-main); }
+        .header .sub { color: var(--text-muted); font-size: 0.85rem; margin-top: 5px; }
+
+        /* ================= KPIs ================= */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 22px; }
+        .kpi-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--red-main);
+            border-radius: 10px; padding: 20px;
+        }
+        .kpi-card h3 { color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; margin-bottom: 10px; }
+        .kpi-card .val { font-family: 'Montserrat', sans-serif; font-size: 1.55rem; font-weight: 800; }
+
+        /* ================= TABELAS ================= */
+        .table-container {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left; padding: 14px 16px; color: var(--text-muted); font-size: 0.72rem;
+            text-transform: uppercase; border-bottom: 1px solid var(--border); background: var(--bg-panel);
+        }
+        td { padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg-hover); }
+        .empty-state { padding: 28px 10px; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+        .badge {
+            display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+        }
+        .badge-ok { background: rgba(0,204,102,0.15); color: var(--green); }
+        .badge-pend { background: rgba(255,204,0,0.12); color: var(--yellow); }
+
+        /* ================= MODAL ================= */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000;
+            display: none; align-items: flex-start; justify-content: center; padding: 30px 15px; overflow-y: auto;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            width: 100%; max-width: 900px; background: var(--bg-panel); border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        .modal-h { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-h h2 { font-size: 1.15rem; display: flex; align-items: center; gap: 10px; }
+        .modal-h h2 i { color: var(--red-main); }
+        .modal-b { padding: 24px; }
+        .modal-f { padding: 18px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+        .subtitulo {
+            color: var(--red-main); font-weight: 700; font-size: 0.85rem; text-transform: uppercase;
+            border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 18px 0 12px;
+        }
+        .linha-desconto {
+            display: grid; grid-template-columns: 1fr 1fr 1.5fr 1.5fr 1fr 40px; gap: 10px; margin-bottom: 10px; align-items: center;
+        }
+        .btn-lixo {
+            width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--border); background: transparent;
+            color: var(--red-main); cursor: pointer;
+        }
+        .btn-lixo:hover { background: var(--red-main); color: #fff; }
+
+        .totais-box {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+            padding: 18px; margin: 18px 0; display: flex; flex-direction: column; gap: 8px;
+        }
+        .totais-box .linha-total { display: flex; justify-content: space-between; font-size: 0.95rem; }
+        .totais-box .linha-total.liquido {
+            border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px;
+            font-family: 'Montserrat', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--green);
+        }
+
+        /* ================= PAPEL (BOLETIM / PDF) ================= */
+        .paper {
+            background: #ffffff; color: #111111; padding: 40px; border-radius: 8px; border: 1px solid #dddddd;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5); margin-top: 18px; font-family: 'Inter', sans-serif;
+            width: 100%; max-width: 100%; box-sizing: border-box; overflow: visible;
+        }
+        /* Durante a geração, desativa o flex/altura fixa da tela. Sem isso, o navegador
+           comprime a folha A4 e o PDF pode sair como uma tira estreita. */
+        body.pdf-gerando { display: block !important; height: auto !important; min-height: 100vh !important; overflow: visible !important; }
+
+        /* Proteção contra cortes no PDF e na impressão */
+        .paper *, .paper *::before, .paper *::after { box-sizing: border-box; }
+        .paper-header, .paper-resumo, .paper-assinaturas { break-inside: avoid; page-break-inside: avoid; }
+        .paper-table { table-layout: fixed; }
+        .paper-table th, .paper-table td { overflow-wrap: anywhere; word-break: break-word; }
+        .paper-table tr { break-inside: avoid; page-break-inside: avoid; }
+        @media print {
+            @page { size: A4 portrait; margin: 12mm; }
+            .paper { width: 100%; padding: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+        }
+        .paper.folha { page-break-after: always; margin-top: 0; border: none; box-shadow: none; border-radius: 0; }
+        .paper.folha:last-child { page-break-after: auto; }
+        .paper-header { display: flex; justify-content: space-between; border-bottom: 3px solid #cc0000; padding-bottom: 12px; margin-bottom: 14px; }
+        .paper-logo { font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 900; }
+        .paper-logo span { color: #cc0000; }
+        .paper-sub { font-size: 10px; color: #666; letter-spacing: 1px; }
+        .paper-doc-title { font-size: 12px; font-weight: 800; color: #cc0000; margin-top: 6px; }
+        .paper-meta { text-align: right; font-size: 11px; color: #333; line-height: 1.7; }
+        .paper-block { border: 1px solid #eee; border-radius: 6px; padding: 12px; margin-bottom: 10px; background: #fafafa; }
+        .paper-block-title { font-size: 10px; color: #cc0000; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .paper-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .paper-table th {
+            background: #f0f0f0; color: #333; text-transform: uppercase; font-size: 9px;
+            padding: 7px 8px; border: 1px solid #ddd; text-align: left;
+        }
+        .paper-table td { padding: 7px 8px; border: 1px solid #ddd; color: #222; font-size: 11px; }
+        .paper-table tr:hover td { background: transparent; }
+        .td-right { text-align: right; }
+        .paper-subtotal { text-align: right; font-size: 11px; margin-top: 8px; color: #333; }
+        .paper-resumo {
+            background: #f5f5f5; border: 1px solid #ddd; border-left: 5px solid #cc0000;
+            padding: 12px 16px; border-radius: 6px; font-size: 12px; display: flex; flex-direction: column; gap: 5px;
+        }
+        .paper-resumo .liquido {
+            border-top: 1px solid #ccc; padding-top: 8px; margin-top: 3px;
+            font-size: 15px; font-weight: 900; color: #cc0000;
+        }
+        .paper-assinaturas { display: flex; justify-content: space-around; margin-top: 36px; text-align: center; }
+        .paper-assinaturas .assin { border-top: 1px solid #000; width: 220px; padding-top: 5px; font-size: 11px; font-weight: 700; }
+        .paper-assinaturas .assin-sub { font-size: 9px; color: #666; }
+
+        /* ================= TOAST ================= */
+        #toastContainer { position: fixed; right: 20px; bottom: 20px; z-index: 4000; }
+        .toast-msg {
+            background: var(--green); color: #000; font-weight: 700; padding: 15px 20px;
+            border-radius: 8px; margin-top: 10px; animation: slideIn 0.3s ease;
+        }
+        .toast-msg.erro { background: var(--red-main); color: #fff; }
+        .toast-msg.info { background: var(--blue); color: #fff; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .perc-input { width: 85px; padding: 6px 8px; text-align: right; display: inline-block; margin: 0 4px; }
+        .status-pendente { color:#f5c542; } .status-pago { color:#32d583; }
+        .status-parcial { color:#4da3ff; } .status-atrasado { color:#ff4545; }
+        .fechado-aviso { background:#331010; border:1px solid #cc0000; color:#fff; padding:12px; border-radius:8px; margin-bottom:12px; }
+        .acoes-flex { display:flex; gap:6px; flex-wrap:wrap; }
+        .filtros-historico { padding:15px; margin-bottom:15px; }
+        .paper-pagina-info { text-align:right; font-size:9px; color:#777; margin-top:8px; }
+        .recibo-titulo { font-size:20px; font-weight:900; color:#cc0000; text-align:center; margin:18px 0; }
+        @media (max-width:700px) { .acoes-flex { min-width:210px; } }
+
+        /* ================= RESPONSIVO ================= */
+        @media (max-width: 980px) {
+            .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 1500; transform: translateX(-100%); transition: 0.25s; }
+            .sidebar.open { transform: translateX(0); }
+            .linha-desconto { grid-template-columns: 1fr 1fr; }
+        }
+    
+/* ===== PADRÃO VISUAL LD 2026 — atualização geral ===== */
+html{scroll-behavior:smooth}body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,.btn,input,select,textarea,a{transition:border-color .18s ease,background-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:not(:disabled):hover,.btn:not(:disabled):hover{transform:translateY(-1px)}
+button:focus-visible,.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--red-main,var(--red,#e50914));outline-offset:2px}
+.card,.kpi-card,.table-container,.modal-card,.login-box{box-shadow:0 12px 34px rgba(0,0,0,.16)}
+table{width:100%}th{letter-spacing:.35px}td,th{vertical-align:middle}
+img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:#0a0a0a}::-webkit-scrollbar-thumb{background:#3a3a3a;border:2px solid #0a0a0a;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:var(--red-main,var(--red,#d90b16))}
+.ld-versao{position:fixed;right:8px;bottom:6px;z-index:2;font-size:8px;letter-spacing:.7px;color:#666;pointer-events:none;text-transform:uppercase}
+@media(max-width:760px){.content{padding-left:12px!important;padding-right:12px!important}.header{gap:12px}.header h1{font-size:clamp(1.55rem,7vw,2.1rem)}.form-grid{grid-template-columns:1fr!important}.form-full{grid-column:auto!important}.modal-card{width:96vw!important;max-height:94vh!important}.table-container{overflow-x:auto}.topbar{padding-left:12px!important;padding-right:12px!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media print{.ld-versao{display:none!important}button,.btn{box-shadow:none!important}}
+
+
+</style>
+<style>
+/* PADRÃO VISUAL ORIGINAL DO PAINEL GERENCIAL — BOLETINS */
+.sidebar{background:#101010!important;border-right:1px solid #333!important;box-shadow:none!important}.nav-link{border-radius:7px!important}.nav-link.active{background:#e50914!important;box-shadow:0 4px 15px rgba(229,9,20,.25)!important}.main{background:#050505!important}.header{padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;margin-bottom:22px!important}.kpi-card{min-height:105px!important;padding:17px 18px!important;background:#1a1a1a!important;border:1px solid #333!important;border-left:4px solid var(--red-main)!important;border-radius:10px!important;box-shadow:none!important}.kpi-card:after{display:none!important}.table-container,.card{background:#1a1a1a!important;border:1px solid #333!important;border-radius:10px!important;box-shadow:none!important}.modal-card{background:#0f0f0f!important;border:1px solid #444!important;border-radius:12px!important}.btn{border-radius:8px!important}
+</style></head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <div class="brand-login">L<span>D</span> IMÓVEIS</div>
+            <div class="login-sub">Boletins de Medição — Proprietários Especiais</div>
+            <form onsubmit="realizarLogin(event)">
+                <div style="margin-bottom:15px; text-align:left;">
+                    <label>E-mail Corporativo</label>
+                    <input id="loginEmail" type="email" required placeholder="seu@email.com" autocomplete="email">
+                </div>
+                <div style="margin-bottom:20px; text-align:left;">
+                    <label>Senha de Acesso</label>
+                    <input id="loginPass" type="password" required placeholder="******" autocomplete="current-password">
+                </div>
+                <div class="login-erro" id="loginErro" role="alert"></div>
+                <button class="btn btn-primary" id="btnLogin" style="width:100%; justify-content:center;" type="submit">
+                    Entrar no Sistema
+                </button>
+            </form>
+            <div style="margin-top:20px; font-size:0.75rem; color:var(--text-muted);">
+                Use o mesmo e-mail e senha do Painel Gerencial.
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-icon"><span class="l">L</span><span class="d">D</span></div>
+            <div class="brand-text">
+                <div class="main">BOLETINS</div>
+                <div class="sub">MEDIÇÃO · ESPECIAIS</div>
+            </div>
+        </div>
+        <div class="nav">
+            <div class="nav-title">Módulo</div>
+            <a class="nav-link active" onclick="navegar('boletins', this)"><i class="fas fa-file-invoice-dollar"></i> Boletins do Mês</a>
+            <a class="nav-link" onclick="navegar('proprietarios', this)"><i class="fas fa-user-tie"></i> Proprietários Especiais</a>
+            <a class="nav-link" onclick="navegar('imoveis', this)"><i class="fas fa-building"></i> Imóveis da Carteira</a>
+            <a class="nav-link" onclick="navegar('historico', this)"><i class="fas fa-box-archive"></i> Histórico de Boletins</a>
+            <a class="nav-link" onclick="navegar('anual', this)"><i class="fas fa-chart-column"></i> Resumo Anual</a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="avatar" id="userAvatarText">LD</div>
+            <div style="flex:1; overflow:hidden;">
+                <div id="userNameDisplay" style="font-weight:700; font-size:0.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Usuário</div>
+                <div style="color:var(--red-main); font-size:0.75rem; cursor:pointer; font-weight:700;" onclick="fazerLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Sair do Sistema
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <div class="topbar">
+            <div style="display:flex; gap:15px; align-items:center;">
+                <button class="btn btn-outline btn-sm" style="border:none; font-size:1.2rem; padding:0;" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="live-badge"><div class="dot"></div> Nuvem Firebase Sincronizada</div>
+            </div>
+            <div id="userEmailDisplay" style="color:var(--text-muted); font-size:0.85rem;"></div>
+        </div>
+
+        <div class="content">
+
+            <!-- TAB: BOLETINS DO MÊS -->
+            <section class="tab active" id="tab-boletins">
+                <div class="header">
+                    <div>
+                        <h1>Boletins de <span>Medição</span></h1>
+                        <div class="sub">Proprietários especiais — receita, descontos com origem e valor líquido</div>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+                        <div>
+                            <label>Competência</label>
+                            <input type="month" id="selCompetencia" onchange="renderizarTudo()" style="width:190px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="gerarLote()"><i class="fas fa-layer-group"></i> Gerar Boletins do Lote</button>
+                        <button class="btn btn-success" onclick="baixarPDFLote()"><i class="fas fa-file-pdf"></i> PDF do Lote</button>
+                    </div>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card"><h3>Proprietários Especiais</h3><div class="val" id="kpiProps">0</div></div>
+                    <div class="kpi-card" style="border-left-color:var(--green);"><h3>Receita Bruta da Carteira</h3><div class="val" id="kpiBruta" style="color:var(--green)">R$ 0,00</div></div>
+                    <div class="kpi-card" style="border-left-color:var(--yellow);"><h3>Total de Descontos</h3><div class="val" id="kpiDescontos" style="color:var(--yellow)">R$ 0,00</div></div>
+                    <div class="kpi-card" style="border-left-color:var(--blue);"><h3>Comissão LD Imóveis</h3><div class="val" id="kpiComissao" style="color:var(--blue)">R$ 0,00</div></div>
+                    <div class="kpi-card" style="border-left-color:var(--green);"><h3>Líquido a Repassar</h3><div class="val" id="kpiLiquido" style="color:var(--green)">R$ 0,00</div></div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Proprietário</th><th>Imóveis</th><th>Receita Bruta</th>
+                                <th>Descontos</th><th>Comissão</th><th>Líquido</th><th>Boletim</th><th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbBoletins"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB: PROPRIETÁRIOS -->
+            <section class="tab" id="tab-proprietarios">
+                <div class="header">
+                    <div>
+                        <h1>Proprietários <span>Especiais</span></h1>
+                        <div class="sub">Cada proprietário pode ter vários imóveis na carteira</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="abrirModal('modalProp')"><i class="fas fa-user-plus"></i> Novo Proprietário</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Nome / Razão Social</th><th>CPF / CNPJ</th><th>Telefone</th><th>PIX / Banco</th><th>Comissão</th><th>Imóveis</th><th>Ações</th></tr>
+                        </thead>
+                        <tbody id="tbProprietarios"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB: IMÓVEIS -->
+            <section class="tab" id="tab-imoveis">
+                <div class="header">
+                    <div>
+                        <h1>Imóveis da <span>Carteira</span></h1>
+                        <div class="sub">Vincule cada imóvel ao seu proprietário especial</div>
+                    </div>
+                    <div class="acoes-flex"><button class="btn btn-outline" onclick="abrirImportadorFirebase()"><i class="fas fa-cloud-arrow-down"></i> Puxar do Firebase</button><button class="btn btn-primary" onclick="abrirModalImovel()"><i class="fas fa-plus"></i> Novo Imóvel</button></div>
+                </div>
+
+                <div class="table-container" style="margin-bottom:15px; padding:15px;">
+                    <div class="form-grid" style="align-items:end;">
+                        <div>
+                            <label>Filtrar por proprietário</label>
+                            <select id="filtroPropImoveis" onchange="renderizarImoveis()">
+                                <option value="">— Todos os proprietários —</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Busca (código ou endereço)</label>
+                            <input id="buscaImovel" placeholder="Ex: LD-101 ou nome da rua" oninput="renderizarImoveis()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Código</th><th>Endereço</th><th>Proprietário</th><th>Valor Mensal</th><th>Ações</th></tr>
+                        </thead>
+                        <tbody id="tbImoveis"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB: HISTÓRICO -->
+            <section class="tab" id="tab-historico">
+                <div class="header">
+                    <div>
+                        <h1>Histórico de <span>Boletins</span></h1>
+                        <div class="sub">Todos os boletins salvos na nuvem</div>
+                    </div>
+                </div>
+                <div class="table-container filtros-historico"><div class="form-grid"><div><label>Proprietário</label><select id="histProp" onchange="renderizarHistorico()"><option value="">Todos</option></select></div><div><label>Competência</label><input type="month" id="histComp" oninput="renderizarHistorico()"></div><div><label>Situação</label><select id="histStatus" onchange="renderizarHistorico()"><option value="">Todas</option><option value="pendente">Pendente</option><option value="pago">Pago</option><option value="parcial">Pago parcialmente</option><option value="atrasado">Atrasado</option></select></div><div><label>Buscar número</label><input id="histBusca" oninput="renderizarHistorico()" placeholder="BOL-..."></div></div></div>
+                <div class="table-container"><table><thead><tr><th>Nº</th><th>Competência</th><th>Proprietário</th><th>Líquido</th><th>Pagamento</th><th>Atualizado</th><th>Ações</th></tr></thead><tbody id="tbHistorico"></tbody></table></div>
+            </section>
+
+            <section class="tab" id="tab-anual"><div class="header"><div><h1>Resumo <span>Anual</span></h1><div class="sub">Totais por proprietário e situação dos repasses</div></div><div><label>Ano</label><input id="anoResumo" type="number" min="2020" max="2100" onchange="renderizarAnual()" style="width:120px"></div></div><div class="kpi-grid"><div class="kpi-card"><h3>Bruto</h3><div class="val" id="anBruta">R$ 0,00</div></div><div class="kpi-card"><h3>Descontos</h3><div class="val" id="anDesc">R$ 0,00</div></div><div class="kpi-card"><h3>Comissão</h3><div class="val" id="anCom">R$ 0,00</div></div><div class="kpi-card"><h3>Repassado</h3><div class="val" id="anPago">R$ 0,00</div></div><div class="kpi-card"><h3>Pendente</h3><div class="val" id="anPend">R$ 0,00</div></div></div><div class="table-container"><table><thead><tr><th>Proprietário</th><th>Boletins</th><th>Bruto</th><th>Descontos</th><th>Comissão</th><th>Repassado</th><th>Pendente</th></tr></thead><tbody id="tbAnual"></tbody></table></div></section>
+
+        </div>
+    </main>
+
+    <!-- MODAL: PROPRIETÁRIO -->
+    <div class="modal-overlay" id="modalProp">
+        <div class="modal-card" style="max-width:620px;">
+            <div class="modal-h">
+                <h2><i class="fas fa-user-tie"></i> Proprietário Especial</h2>
+                <button class="btn btn-outline btn-sm" onclick="fecharModal('modalProp')">X</button>
+            </div>
+            <form onsubmit="salvarProprietario(event)">
+                <div class="modal-b form-grid">
+                    <input type="hidden" id="propId">
+                    <div class="form-full"><label>Nome / Razão Social *</label><input id="propNome" required></div>
+                    <div><label>CPF / CNPJ</label><input id="propDoc" placeholder="000.000.000-00"></div>
+                    <div><label>Telefone / WhatsApp</label><input id="propTel" placeholder="(00) 00000-0000"></div>
+                    <div><label>Comissão LD Imóveis (%)</label><input id="propPerc" type="number" step="0.1" min="0" max="100" value="10"></div>
+                    <div><label>Calcular comissão sobre</label><select id="propBase"><option value="bruta">Receita bruta</option><option value="apos_descontos">Valor depois dos descontos</option></select></div>
+                    <div class="form-full"><label>Chave PIX / Dados Bancários</label><input id="propPix" placeholder="Chave para repasse"></div>
+                </div>
+                <div class="modal-f"><button class="btn btn-primary" type="submit">Salvar Proprietário</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: IMÓVEL -->
+    <div class="modal-overlay" id="modalImovel">
+        <div class="modal-card" style="max-width:620px;">
+            <div class="modal-h">
+                <h2><i class="fas fa-building"></i> Imóvel da Carteira</h2>
+                <button class="btn btn-outline btn-sm" onclick="fecharModal('modalImovel')">X</button>
+            </div>
+            <form onsubmit="salvarImovelBol(event)">
+                <div class="modal-b form-grid">
+                    <input type="hidden" id="imvId">
+                    <div class="form-full"><label>Proprietário *</label><select id="imvPropId" required></select></div>
+                    <div><label>Código Interno *</label><input id="imvCod" required placeholder="Ex: LD-101"></div>
+                    <div><label>Valor Mensal (R$) *</label><input id="imvVal" type="number" step="0.01" min="0" required></div>
+                    <div class="form-full"><label>Endereço Completo</label><input id="imvEnd" placeholder="Rua, número, bairro, cidade - UF"></div>
+                </div>
+                <div class="modal-f"><button class="btn btn-primary" type="submit">Salvar Imóvel</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalImportar"><div class="modal-card" style="max-width:850px"><div class="modal-h"><h2><i class="fas fa-cloud-arrow-down"></i> Puxar imóveis do Firebase</h2><button class="btn btn-outline btn-sm" onclick="fecharModal('modalImportar')">X</button></div><div class="modal-b"><p style="color:var(--text-muted)">Selecione o proprietário especial e marque os imóveis do cadastro principal.</p><label>Proprietário especial</label><select id="impProp"></select><div id="listaImportar" class="table-container" style="margin-top:12px;max-height:420px;overflow:auto"></div></div><div class="modal-f"><button class="btn btn-primary" onclick="importarSelecionados()">Importar selecionados</button></div></div></div>
+
+    <!-- MODAL: EDITOR DE BOLETIM -->
+    <div class="modal-overlay" id="modalBoletim">
+        <div class="modal-card">
+            <div class="modal-h">
+                <h2><i class="fas fa-file-invoice-dollar"></i> <span id="bolTitulo">Boletim</span></h2>
+                <button class="btn btn-outline btn-sm" onclick="fecharModal('modalBoletim')">X</button>
+            </div>
+            <div class="modal-b">
+                <input type="hidden" id="bolDocId">
+                <input type="hidden" id="bolPropId">
+
+                <div id="avisoFechado"></div><div class="subtitulo">Pagamento e controle</div><div class="form-grid"><div><label>Situação do repasse</label><select id="bolStatus" onchange="alterarControle()"><option value="pendente">Pendente</option><option value="pago">Pago</option><option value="parcial">Pago parcialmente</option><option value="atrasado">Atrasado</option></select></div><div><label>Data do pagamento</label><input id="bolDataPag" type="date" onchange="alterarControle()"></div><div><label>Valor pago (R$)</label><input id="bolValorPago" type="number" step="0.01" min="0" oninput="alterarControle()"></div><div class="form-full"><label>Observação do pagamento</label><input id="bolObsPag" oninput="alterarControle()" placeholder="Ex.: PIX realizado, pagamento parcial..."></div></div>
+                <div class="subtitulo">1. Imóveis da carteira — valor realmente recebido</div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Código</th><th>Endereço</th><th style="width:180px;">Recebido no mês (R$)</th></tr></thead>
+                        <tbody id="tbBolImoveis"></tbody>
+                    </table>
+                </div>
+
+                <div class="subtitulo">2. Descontos — informe de onde veio cada desconto</div>
+                <div id="boxDescontos"></div>
+                <button class="btn btn-outline btn-sm" onclick="addLinhaDesconto()"><i class="fas fa-plus"></i> Adicionar Desconto</button>
+                <button class="btn btn-outline btn-sm" onclick="copiarMesAnterior()"><i class="fas fa-copy"></i> Copiar mês anterior</button>
+
+                <div class="totais-box">
+                    <div class="linha-total"><span>Receita Bruta</span><strong id="totBruta">R$ 0,00</strong></div>
+                    <div class="linha-total"><span style="color:var(--yellow);">(–) Total de Descontos</span><strong style="color:var(--yellow);" id="totDesc">R$ 0,00</strong></div>
+                    <div class="linha-total"><span style="color:var(--blue);">(–) Comissão LD Imóveis
+                        <input type="number" id="bolPerc" class="perc-input" step="0.1" min="0" max="100" value="10" oninput="alterarPercentual(this.value)" aria-label="Percentual de comissão"> %
+                    </span><strong style="color:var(--blue);" id="totComissao">R$ 0,00</strong></div>
+                    <div class="linha-total liquido"><span>(=) Valor Líquido a Repassar</span><strong id="totLiquido">R$ 0,00</strong></div>
+                </div>
+
+                <div style="font-weight:700; color:var(--text-muted); font-size:0.85rem;">Pré-visualização do documento:</div>
+                <div id="bolPreview"></div>
+            </div>
+            <div class="modal-f">
+                <button class="btn btn-outline" onclick="fecharModal('modalBoletim')">Fechar</button>
+                <button class="btn btn-success" onclick="enviarWhatsAppEditor()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                <button class="btn btn-outline" onclick="baixarPDFEditor()"><i class="fas fa-vial"></i> PDF de teste</button>
+                <button class="btn btn-outline" onclick="gerarReciboEditor()"><i class="fas fa-receipt"></i> Recibo</button>
+                <button class="btn btn-outline" id="btnFecharBol" onclick="alternarFechamento()"><i class="fas fa-lock"></i> Fechar boletim</button>
+                <button class="btn btn-primary" id="btnSalvarBol" onclick="salvarBoletim()"><i class="fas fa-save"></i> Salvar Boletim</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VISUALIZAR BOLETIM -->
+    <div class="modal-overlay" id="modalVer">
+        <div class="modal-card">
+            <div class="modal-h">
+                <h2><i class="fas fa-eye"></i> Boletim</h2>
+                <button class="btn btn-outline btn-sm" onclick="fecharModal('modalVer')">X</button>
+            </div>
+            <div class="modal-b" id="verBody"></div>
+            <div class="modal-f">
+                <button class="btn btn-outline" onclick="fecharModal('modalVer')">Fechar</button>
+                <button class="btn btn-success" onclick="enviarWhatsAppVer()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                <button class="btn btn-primary" onclick="baixarPDFVer()"><i class="fas fa-download"></i> Baixar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script type="module">
+/* =====================================================
+   LD IMÓVEIS — BOLETINS DE MEDIÇÃO (PROPRIETÁRIOS ESPECIAIS)
+   Módulo separado, conectado ao MESMO Firebase (ld-imoveis).
+
+   Coleções novas (não mexem no painel principal):
+     bolProprietarios : proprietários especiais (com % de comissão)
+     bolImoveis       : imóveis da carteira (vinculados ao proprietário)
+     boletinsEspeciais: boletins salvos (snapshot dos imóveis + descontos)
+   ===================================================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",
+    authDomain: "ld-imoveis.firebaseapp.com",
+    projectId: "ld-imoveis",
+    storageBucket: "ld-imoveis.firebasestorage.app",
+    messagingSenderId: "871416060994",
+    appId: "1:871416060994:web:bf3b2ad3e07b18b80ca1db"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ================= ESTADO ================= */
+const state = { proprietarios: [], imoveis: [], boletins: [], imoveisGerais: [] };
+const unsubscribers = [];
+let editorDados = null;   // boletim aberto no editor
+let verDados = null;      // boletim aberto em visualização
+
+/* ================= UTILITÁRIOS ================= */
+const $ = (id) => document.getElementById(id);
+
+function esc(valor) {
+    return String(valor ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function moeda(n) {
+    return 'R$ ' + (Number(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function dataBR(iso) {
+    const p = String(iso || '').split('-');
+    return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : (iso || '--/--/----');
+}
+function hojeISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function competenciaBR(comp) {
+    const [ano, mes] = String(comp || '').split('-');
+    const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    return mes ? `${nomes[Number(mes) - 1]}/${ano}` : '--';
+}
+function competenciaAtual() {
+    return $('selCompetencia').value || hojeISO().slice(0, 7);
+}
+
+window.mostrarAlerta = (msg, tipo = 'sucesso') => {
+    const t = document.createElement('div');
+    t.className = 'toast-msg' + (tipo === 'erro' ? ' erro' : tipo === 'info' ? ' info' : '');
+    t.textContent = msg;
+    $('toastContainer').appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+};
+
+async function executarAcao(acao, msgSucesso) {
+    try {
+        await acao();
+        if (msgSucesso) window.mostrarAlerta(msgSucesso);
+        return true;
+    } catch (erro) {
+        console.error('[Boletins]', erro);
+        window.mostrarAlerta('Não foi possível concluir. Verifique sua conexão e permissões.', 'erro');
+        return false;
+    }
+}
+
+/* ================= AUTENTICAÇÃO ================= */
+function erroLoginTraduzido(err) {
+    const cod = (err && err.code) || '';
+    if (cod.includes('invalid-credential') || cod.includes('wrong-password') ||
+        cod.includes('user-not-found') || cod.includes('invalid-email')) return 'E-mail ou senha incorretos.';
+    if (cod.includes('too-many-requests')) return 'Muitas tentativas. Aguarde alguns minutos.';
+    if (cod.includes('network')) return 'Falha de conexão. Verifique sua internet.';
+    return 'Não foi possível entrar. Tente novamente.';
+}
+
+window.realizarLogin = async (e) => {
+    e.preventDefault();
+    const btn = $('btnLogin');
+    const caixaErro = $('loginErro');
+    caixaErro.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+    try {
+        await signInWithEmailAndPassword(auth, $('loginEmail').value, $('loginPass').value);
+        window.mostrarAlerta('Bem-vindo!');
+    } catch (err) {
+        caixaErro.textContent = erroLoginTraduzido(err);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Entrar no Sistema';
+    }
+};
+
+window.fazerLogout = () => signOut(auth);
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        $('loginScreen').style.display = 'none';
+        $('userEmailDisplay').textContent = user.email || '';
+        $('userNameDisplay').textContent = (user.email || '').split('@')[0];
+        $('userAvatarText').textContent = (user.email || '').slice(0, 2).toUpperCase();
+        escutarBancoDeDados();
+    } else {
+        pararEscuta();
+        $('loginScreen').style.display = 'flex';
+    }
+});
+
+/* ================= FIREBASE EM TEMPO REAL ================= */
+function pararEscuta() {
+    while (unsubscribers.length) {
+        try { unsubscribers.pop()(); } catch (e) { /* noop */ }
+    }
+}
+
+function escutarBancoDeDados() {
+    pararEscuta();
+    const fontes = [
+        ['bolProprietarios', (docs) => { state.proprietarios = docs; renderizarTudo(); }],
+        ['bolImoveis', (docs) => { state.imoveis = docs; renderizarTudo(); }],
+        ['boletinsEspeciais', (docs) => { state.boletins = docs; renderizarTudo(); }],
+        ['imoveis', (docs) => { state.imoveisGerais = docs; }]
+    ];
+    fontes.forEach(([nome, aplicar]) => {
+        unsubscribers.push(onSnapshot(
+            collection(db, nome),
+            (snap) => aplicar(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+            (erro) => console.error('Falha ao ouvir', nome, erro)
+        ));
+    });
+}
+
+/* ================= NAVEGAÇÃO / MODAIS ================= */
+window.toggleSidebar = () => $('sidebar').classList.toggle('open');
+
+window.navegar = (aba, elemento) => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+    $('tab-' + aba).classList.add('active');
+    if (elemento) elemento.classList.add('active');
+    $('sidebar').classList.remove('open');
+    renderizarTudo();
+};
+
+window.abrirModal = (id) => $(id).classList.add('active');
+
+window.fecharModal = (id) => {
+    $(id).classList.remove('active');
+    const frm = document.querySelector(`#${id} form`);
+    if (frm) frm.reset();
+};
+
+/* ================= PROPRIETÁRIOS ================= */
+window.editarProprietario = (id) => {
+    const p = state.proprietarios.find(x => x.id === id);
+    if (!p) return;
+    $('propId').value = p.id;
+    $('propNome').value = p.nome || '';
+    $('propDoc').value = p.doc || '';
+    $('propTel').value = p.tel || '';
+    $('propPix').value = p.pix || '';
+    $('propBase').value = p.baseComissao || 'bruta';
+    $('propPerc').value = (p.percentual !== undefined && p.percentual !== null && p.percentual !== '') ? p.percentual : 10;
+    window.abrirModal('modalProp');
+};
+
+window.salvarProprietario = async (e) => {
+    e.preventDefault();
+    const dados = {
+        nome: $('propNome').value.trim(),
+        doc: $('propDoc').value.trim(),
+        tel: $('propTel').value.trim(),
+        pix: $('propPix').value.trim(),
+        percentual: Number($('propPerc').value) || 0,
+        baseComissao: $('propBase').value || 'bruta'
+    };
+    const id = $('propId').value;
+    const ok = await executarAcao(() => id
+        ? updateDoc(doc(db, 'bolProprietarios', id), dados)
+        : addDoc(collection(db, 'bolProprietarios'), dados),
+        id ? 'Proprietário atualizado!' : 'Proprietário cadastrado!');
+    if (ok) window.fecharModal('modalProp');
+};
+
+window.excluirProprietario = async (id) => {
+    const qtd = state.imoveis.filter(i => i.propId === id).length;
+    const aviso = qtd > 0
+        ? `Este proprietário tem ${qtd} imóvel(is) vinculado(s). A exclusão NÃO apaga os imóveis nem os boletins antigos. Deseja continuar?`
+        : 'Excluir este proprietário especial?';
+    if (!confirm(aviso)) return;
+    await executarAcao(() => deleteDoc(doc(db, 'bolProprietarios', id)), 'Proprietário removido.');
+};
+
+/* ================= IMÓVEIS ================= */
+window.abrirModalImovel = () => {
+    $('imvId').value = '';
+    $('imvPropId').innerHTML = '<option value="">— Selecione —</option>' + state.proprietarios.map(p =>
+        `<option value="${esc(p.id)}">${esc(p.nome)}</option>`).join('');
+    window.abrirModal('modalImovel');
+};
+
+window.editarImovel = (id) => {
+    const i = state.imoveis.find(x => x.id === id);
+    if (!i) return;
+    window.abrirModalImovel();
+    $('imvId').value = i.id;
+    $('imvPropId').value = i.propId || '';
+    $('imvCod').value = i.codigo || '';
+    $('imvVal').value = i.valor || '';
+    $('imvEnd').value = i.endereco || '';
+};
+
+window.salvarImovelBol = async (e) => {
+    e.preventDefault();
+    const dados = {
+        propId: $('imvPropId').value,
+        codigo: $('imvCod').value.trim(),
+        endereco: $('imvEnd').value.trim(),
+        valor: Number($('imvVal').value) || 0
+    };
+    const id = $('imvId').value;
+    const ok = await executarAcao(() => id
+        ? updateDoc(doc(db, 'bolImoveis', id), dados)
+        : addDoc(collection(db, 'bolImoveis'), dados),
+        id ? 'Imóvel atualizado!' : 'Imóvel cadastrado!');
+    if (ok) window.fecharModal('modalImovel');
+};
+
+window.excluirItem = async (colecao, id) => {
+    if (!confirm('Esta exclusão é permanente. Deseja continuar?')) return;
+    await executarAcao(() => deleteDoc(doc(db, colecao, id)), 'Removido da base de dados!');
+};
+
+window.abrirImportadorFirebase = () => {
+    if (!state.proprietarios.length) return window.mostrarAlerta('Cadastre um proprietário especial primeiro.', 'erro');
+    $('impProp').innerHTML = state.proprietarios.map(p=>`<option value="${esc(p.id)}">${esc(p.nome)}</option>`).join('');
+    const usados=new Set(state.imoveis.map(i=>String(i.codigo||'').toUpperCase()));
+    $('listaImportar').innerHTML='<table><thead><tr><th></th><th>Código</th><th>Endereço</th><th>Valor</th></tr></thead><tbody>'+state.imoveisGerais.filter(i=>!usados.has(String(i.codigo||'').toUpperCase())).map((i,n)=>`<tr><td><input type="checkbox" class="imp-check" data-idx="${n}"></td><td>${esc(i.codigo)}</td><td>${esc(i.endereco)}</td><td>${moeda(i.valor)}</td></tr>`).join('')+'</tbody></table>';
+    window.__importaveis=state.imoveisGerais.filter(i=>!usados.has(String(i.codigo||'').toUpperCase())); window.abrirModal('modalImportar');
+};
+window.importarSelecionados = async () => { const propId=$('impProp').value; const idx=[...document.querySelectorAll('.imp-check:checked')].map(x=>Number(x.dataset.idx)); if(!idx.length)return window.mostrarAlerta('Marque pelo menos um imóvel.','erro'); let ok=0; for(const n of idx){const i=window.__importaveis[n]; if(await executarAcao(()=>addDoc(collection(db,'bolImoveis'),{propId,codigo:i.codigo||'',endereco:i.endereco||'',valor:Number(i.valor)||0,origemFirebaseId:i.id}),''))ok++;} window.fecharModal('modalImportar');window.mostrarAlerta(`${ok} imóvel(is) importado(s)!`);};
+
+/* ================= CÁLCULOS ================= */
+function imoveisDoProp(propId) {
+    return state.imoveis.filter(i => i.propId === propId);
+}
+
+function boletimDoProp(propId, competencia) {
+    return state.boletins.find(b => b.propId === propId && b.competencia === competencia);
+}
+
+function totaisDosImoveis(lista) {
+    return lista.reduce((a, i) => a + (Number(i.valor) || 0), 0);
+}
+
+function totaisDosDescontos(lista) {
+    return (lista || []).reduce((a, d) => a + (Number(d.valor) || 0), 0);
+}
+
+/* Receita Bruta – Descontos – Comissão (% sobre a receita bruta) = Líquido */
+function calcularTotais(dados) {
+    const receitaBruta = totaisDosImoveis(dados.imoveis || []);
+    const totalDescontos = totaisDosDescontos(dados.descontos || []);
+    const percentual = Math.max(0, Number(dados.percentual) || 0);
+    const baseComissao = dados.baseComissao || 'bruta';
+    const baseValor = baseComissao === 'apos_descontos' ? Math.max(0, receitaBruta - totalDescontos) : receitaBruta;
+    const comissao = baseValor * percentual / 100;
+    return {
+        receitaBruta, totalDescontos, percentual, baseComissao, comissao,
+        liquido: receitaBruta - totalDescontos - comissao
+    };
+}
+
+/* ================= GERAÇÃO EM LOTE ================= */
+window.gerarLote = async () => {
+    const comp = competenciaAtual();
+    if (!state.proprietarios.length) {
+        window.mostrarAlerta('Cadastre primeiro os proprietários especiais.', 'erro');
+        return;
+    }
+    const semImovel = state.proprietarios.filter(p => !imoveisDoProp(p.id).length);
+    const pendentes = state.proprietarios.filter(p => !boletimDoProp(p.id, comp));
+
+    if (!pendentes.length) {
+        window.mostrarAlerta('Todos os boletins desta competência já foram gerados.', 'info');
+        return;
+    }
+
+    const confirma = confirm(
+        `Gerar ${pendentes.length} boletim(ns) da competência ${competenciaBR(comp)}?\n\n` +
+        (semImovel.length ? `⚠ ${semImovel.length} proprietário(s) sem imóvel cadastrado.\n` : '') +
+        'Os descontos podem ser lançados depois, em cada boletim.'
+    );
+    if (!confirma) return;
+
+    let feitos = 0;
+    let seq = proximoNumeroSync(comp); // contador local evita números duplicados no lote
+    for (const p of pendentes) {
+        const imoveis = imoveisDoProp(p.id).map(i => ({
+            codigo: i.codigo || '', endereco: i.endereco || '', valor: Number(i.valor) || 0
+        }));
+        const numero = `BOL-${comp}-${String(seq).padStart(3, '0')}`;
+        const t = calcularTotais({ imoveis, descontos: [], percentual: p.percentual });
+        const ok = await executarAcao(() => addDoc(collection(db, 'boletinsEspeciais'), {
+            numero,
+            competencia: comp,
+            propId: p.id,
+            propNome: p.nome || '',
+            propDoc: p.doc || '',
+            propPix: p.pix || '',
+            propTel: p.tel || '',
+            percentual: t.percentual,
+            imoveis,
+            descontos: [],
+            receitaBruta: t.receitaBruta,
+            totalDescontos: 0,
+            comissao: t.comissao,
+            liquido: t.liquido,
+            criadoEm: new Date().toISOString(),
+            atualizadoEm: new Date().toISOString()
+        }));
+        if (ok) { feitos++; seq++; }
+    }
+    window.mostrarAlerta(`${feitos} boletim(ns) gerados! Agora lance os descontos em cada um.`);
+};
+
+function proximoNumeroSync(comp) {
+    const usados = state.boletins
+        .filter(b => b.competencia === comp)
+        .map(b => Number(String(b.numero || '').split('-').pop()) || 0);
+    return Math.max(0, ...usados) + 1;
+}
+
+/* ================= EDITOR DE BOLETIM ================= */
+window.abrirEditorBoletim = (propId) => {
+    const prop = state.proprietarios.find(p => p.id === propId);
+    if (!prop) return;
+    const comp = competenciaAtual();
+    const existente = boletimDoProp(propId, comp);
+    const imoveisCadastrados = imoveisDoProp(propId);
+
+    if (!existente && !imoveisCadastrados.length) {
+        window.mostrarAlerta('Este proprietário não tem imóveis cadastrados na carteira.', 'erro');
+        return;
+    }
+
+    editorDados = {
+        docId: existente ? existente.id : '',
+        numero: existente ? existente.numero : `BOL-${comp}-NOVO`,
+        competencia: comp,
+        propId,
+        propNome: prop.nome || '', propDoc: prop.doc || '', propPix: prop.pix || '', propTel: prop.tel || '',
+        percentual: existente && existente.percentual !== undefined && existente.percentual !== null
+            ? Number(existente.percentual) || 0
+            : (Number(prop.percentual) || 0),
+        imoveis: existente
+            ? existente.imoveis.map(i => ({ ...i }))
+            : imoveisCadastrados.map(i => ({ codigo: i.codigo || '', endereco: i.endereco || '', valor: Number(i.valor) || 0 })),
+        descontos: existente ? (existente.descontos || []).map(d => ({ ...d })) : [],
+        baseComissao: existente?.baseComissao || prop.baseComissao || 'bruta', statusPagamento: existente?.statusPagamento || 'pendente', dataPagamento: existente?.dataPagamento || '', valorPago: Number(existente?.valorPago)||0, observacaoPagamento: existente?.observacaoPagamento||'', fechado: !!existente?.fechado
+    };
+
+    $('bolDocId').value = editorDados.docId;
+    $('bolPropId').value = propId;
+    $('bolPerc').value = editorDados.percentual; $('bolStatus').value=editorDados.statusPagamento; $('bolDataPag').value=editorDados.dataPagamento; $('bolValorPago').value=editorDados.valorPago||''; $('bolObsPag').value=editorDados.observacaoPagamento;
+    $('bolTitulo').textContent = `Boletim — ${prop.nome} (${competenciaBR(comp)})`;
+    renderizarEditor();
+    window.abrirModal('modalBoletim');
+};
+
+function renderizarEditor() {
+    if (!editorDados) return;
+    $('avisoFechado').innerHTML=editorDados.fechado?'<div class="fechado-aviso">Boletim fechado. Reabra para alterar os valores.</div>':''; $('btnSalvarBol').disabled=editorDados.fechado; $('btnFecharBol').innerHTML=editorDados.fechado?'<i class="fas fa-lock-open"></i> Reabrir boletim':'<i class="fas fa-lock"></i> Fechar boletim';
+
+    $('tbBolImoveis').innerHTML = editorDados.imoveis.map((i, idx) => `
+        <tr>
+            <td><strong>${esc(i.codigo)}</strong></td>
+            <td>${esc(i.endereco)}</td>
+            <td><input type="number" step="0.01" min="0" value="${Number(i.valor) || 0}"
+                oninput="alterarValorImovel(${idx}, this.value)" aria-label="Valor do imóvel"></td>
+        </tr>`).join('') || '<tr><td colspan="3"><div class="empty-state">Nenhum imóvel na carteira.</div></td></tr>';
+
+    renderizarLinhasDesconto();
+    atualizarTotaisEditor();
+    atualizarPreviewEditor();
+}
+
+window.alterarValorImovel = (idx, valor) => {
+    editorDados.imoveis[idx].valor = Number(valor) || 0;
+    atualizarTotaisEditor();
+    atualizarPreviewEditor();
+};
+
+window.alterarPercentual = (valor) => {
+    editorDados.percentual = Math.max(0, Number(valor) || 0);
+    atualizarTotaisEditor();
+    atualizarPreviewEditor();
+};
+
+function renderizarLinhasDesconto() {
+    const opcoes = ['<option value="">— Geral / Não especificado —</option>']
+        .concat(editorDados.imoveis.map(i =>
+            `<option value="${esc(i.codigo)}">${esc(i.codigo)}</option>`)).join('');
+
+    $('boxDescontos').innerHTML = editorDados.descontos.map((d, idx) => `
+        <div class="linha-desconto">
+            <select onchange="alterarDesconto(${idx}, 'imovel', this.value)" aria-label="Imóvel do desconto">${opcoes}</select>
+            <select onchange="alterarDesconto(${idx}, 'categoria', this.value)"><option value="Outros">Outros</option><option value="Manutenção">Manutenção</option><option value="Material">Material</option><option value="Água">Água</option><option value="Energia">Energia</option><option value="Imposto">Imposto</option><option value="Taxa">Taxa</option></select>
+            <input placeholder="Origem do desconto" value="${esc(d.origem || '')}" oninput="alterarDesconto(${idx}, 'origem', this.value)">
+            <input placeholder="Observação / prestador / data" value="${esc(d.observacao || '')}" oninput="alterarDesconto(${idx}, 'observacao', this.value)">
+            <input type="number" step="0.01" min="0" placeholder="Valor R$" value="${Number(d.valor) || 0}"
+                oninput="alterarDesconto(${idx}, 'valor', this.value)" aria-label="Valor do desconto">
+            <button type="button" class="btn-lixo" onclick="removerDesconto(${idx})" aria-label="Remover desconto"><i class="fas fa-trash"></i></button>
+        </div>`).join('') ||
+        '<div class="empty-state" style="padding:12px;">Nenhum desconto lançado. Clique em "Adicionar Desconto".</div>';
+
+    // re-seleciona o imóvel de cada linha
+    editorDados.descontos.forEach((d, idx) => {
+        const sel = $('boxDescontos').children[idx]?.querySelector('select');
+        if (sel) sel.value = d.imovel || '';
+        const sels=$('boxDescontos').children[idx]?.querySelectorAll('select'); if(sels?.[1]) sels[1].value=d.categoria||'Outros';
+    });
+}
+
+window.addLinhaDesconto = () => {
+    editorDados.descontos.push({ imovel: '', categoria:'Outros', origem: '', observacao:'', valor: 0 });
+    renderizarLinhasDesconto();
+    atualizarTotaisEditor();
+    atualizarPreviewEditor();
+};
+
+window.alterarDesconto = (idx, campo, valor) => {
+    editorDados.descontos[idx][campo] = campo === 'valor' ? (Number(valor) || 0) : valor;
+    atualizarTotaisEditor();
+    atualizarPreviewEditor();
+};
+
+window.removerDesconto = (idx) => {
+    editorDados.descontos.splice(idx, 1);
+    renderizarLinhasDesconto();
+    atualizarTotaisEditor();
+    atualizarPreviewEditor();
+};
+
+window.alterarControle=()=>{if(!editorDados||editorDados.fechado)return;editorDados.statusPagamento=$('bolStatus').value;editorDados.dataPagamento=$('bolDataPag').value;editorDados.valorPago=Number($('bolValorPago').value)||0;editorDados.observacaoPagamento=$('bolObsPag').value;atualizarPreviewEditor();};
+window.alternarFechamento=async()=>{if(!editorDados)return;if(!editorDados.docId)return window.mostrarAlerta('Salve o boletim antes de fechá-lo.','erro');const novo=!editorDados.fechado;const ok=await executarAcao(()=>updateDoc(doc(db,'boletinsEspeciais',editorDados.docId),{fechado:novo,atualizadoEm:new Date().toISOString()}),novo?'Boletim fechado e protegido.':'Boletim reaberto.');if(ok){editorDados.fechado=novo;renderizarEditor();}};
+window.copiarMesAnterior=()=>{if(!editorDados||editorDados.fechado)return;let [a,m]=editorDados.competencia.split('-').map(Number);m--;if(!m){m=12;a--;}const ant=`${a}-${String(m).padStart(2,'0')}`;const b=state.boletins.find(x=>x.propId===editorDados.propId&&x.competencia===ant);if(!b)return window.mostrarAlerta('Não encontrei boletim do mês anterior.','erro');editorDados.imoveis=(b.imoveis||[]).map(x=>({...x}));editorDados.descontos=(b.descontos||[]).map(x=>({...x}));renderizarEditor();window.mostrarAlerta('Dados do mês anterior copiados.');};
+
+function atualizarTotaisEditor() {
+    const t = calcularTotais(editorDados);
+    $('totBruta').textContent = moeda(t.receitaBruta);
+    $('totDesc').textContent = moeda(t.totalDescontos);
+    $('totComissao').textContent = moeda(t.comissao);
+    $('totLiquido').textContent = moeda(t.liquido);
+}
+
+function atualizarPreviewEditor() {
+    $('bolPreview').innerHTML = montarPapel(editorDados);
+}
+
+/* ================= PAPEL DO BOLETIM (compartilhado: preview + PDF + WhatsApp) ================= */
+function montarPapel(dados, classeExtra = '') {
+    const t = calcularTotais(dados);
+    const linhasImoveis = (dados.imoveis || []).map(i => `
+        <tr>
+            <td>${esc(i.codigo)}</td>
+            <td>${esc(i.endereco)}</td>
+            <td class="td-right">${moeda(i.valor)}</td>
+        </tr>`).join('') ||
+        '<tr><td colspan="3" style="text-align:center; color:#888;">Nenhum imóvel informado</td></tr>';
+
+    const linhasDesc = (dados.descontos || []).length ? dados.descontos.map(d => `
+        <tr>
+            <td>${esc(d.imovel || 'Geral')}</td>
+            <td><strong>${esc(d.categoria||'Outros')}</strong> — ${esc(d.origem || '—')}${d.observacao?`<br><small>${esc(d.observacao)}</small>`:''}</td>
+            <td class="td-right">- ${moeda(d.valor)}</td>
+        </tr>`).join('') :
+        '<tr><td colspan="3" style="text-align:center; color:#888;">Nenhum desconto nesta competência</td></tr>';
+
+    return `
+    <div class="paper ${classeExtra}">
+        <div class="paper-header">
+            <div>
+                <div class="paper-logo">L<span>D</span> IMÓVEIS</div>
+                <div class="paper-sub">NEGÓCIOS IMOBILIÁRIOS</div>
+                <div class="paper-doc-title">BOLETIM DE MEDIÇÃO — PROPRIETÁRIO ESPECIAL</div>
+            </div>
+            <div class="paper-meta">
+                <div>Nº <strong>${esc(dados.numero)}</strong></div>
+                <div>Competência: <strong>${esc(competenciaBR(dados.competencia))}</strong></div>
+                <div>Emissão: <strong>${dataBR(hojeISO())}</strong></div>
+            </div>
+        </div>
+
+        <div class="paper-block">
+            <div class="paper-block-title">PROPRIETÁRIO</div>
+            <div style="font-size:13px; font-weight:700;">${esc(dados.propNome)}</div>
+            <div style="font-size:11px; color:#444;">CPF/CNPJ: ${esc(dados.propDoc || '—')}</div>
+            <div style="font-size:11px; color:#444;">PIX / Banco: ${esc(dados.propPix || '—')}</div>
+        </div>
+
+        <div class="paper-block">
+            <div class="paper-block-title">1. IMÓVEIS DA CARTEIRA — RECEITA</div>
+            <table class="paper-table">
+                <thead><tr><th style="width:90px;">Código</th><th>Endereço</th><th class="td-right" style="width:110px;">Valor Mensal</th></tr></thead>
+                <tbody>${linhasImoveis}</tbody>
+            </table>
+            <div class="paper-subtotal">Subtotal da Receita: <strong>${moeda(t.receitaBruta)}</strong></div>
+        </div>
+
+        <div class="paper-block">
+            <div class="paper-block-title">2. DESCONTOS — ORIGEM (DE ONDE VEIO O DESCONTO)</div>
+            <table class="paper-table">
+                <thead><tr><th style="width:90px;">Imóvel</th><th>Origem do Desconto</th><th class="td-right" style="width:110px;">Valor</th></tr></thead>
+                <tbody>${linhasDesc}</tbody>
+            </table>
+            <div class="paper-subtotal">Subtotal de Descontos: <strong>- ${moeda(t.totalDescontos)}</strong></div>
+        </div>
+
+        <div class="paper-resumo">
+            <div>Receita Bruta: <strong>${moeda(t.receitaBruta)}</strong></div>
+            <div>(–) Total de Descontos: <strong>${moeda(t.totalDescontos)}</strong></div>
+            <div>(–) Comissão LD Imóveis (${esc(String(t.percentual))}% sobre a receita bruta): <strong>${moeda(t.comissao)}</strong></div>
+            <div class="liquido">(=) VALOR LÍQUIDO A REPASSAR: ${moeda(t.liquido)}</div>
+        </div>
+
+        <div class="paper-block"><div class="paper-block-title">SITUAÇÃO DO REPASSE</div><div><strong>${esc(rotuloStatus(dados.statusPagamento))}</strong> · Valor pago: ${moeda(dados.valorPago)} · Data: ${dataBR(dados.dataPagamento)}</div>${dados.observacaoPagamento?`<div style="font-size:10px;margin-top:4px">${esc(dados.observacaoPagamento)}</div>`:''}</div>
+        <div class="paper-assinaturas">
+            <div>
+                <div class="assin">LD Imóveis</div>
+                <div class="assin-sub">Emitente</div>
+            </div>
+            <div>
+                <div class="assin">${esc(dados.propNome)}</div>
+                <div class="assin-sub">Proprietário Especial</div>
+            </div>
+        </div>
+    </div>`;
+}
+
+/* ================= SALVAR BOLETIM ================= */
+window.salvarBoletim = async () => {
+    if (!editorDados) return;
+    const invalidos = (editorDados.descontos || []).filter(d => !String(d.origem || '').trim());
+    if (invalidos.length) {
+        window.mostrarAlerta('Informe a ORIGEM de cada desconto (de onde veio o desconto).', 'erro');
+        return;
+    }
+
+    const t = calcularTotais(editorDados);
+    const agora = new Date().toISOString();
+    const dados = {
+        numero: editorDados.numero && !editorDados.numero.endsWith('-NOVO')
+            ? editorDados.numero
+            : `BOL-${editorDados.competencia}-${String(proximoNumeroSync(editorDados.competencia)).padStart(3, '0')}`,
+        competencia: editorDados.competencia,
+        propId: editorDados.propId,
+        propNome: editorDados.propNome,
+        propDoc: editorDados.propDoc,
+        propPix: editorDados.propPix,
+        propTel: editorDados.propTel || '',
+        percentual: t.percentual, baseComissao: editorDados.baseComissao || 'bruta', statusPagamento: editorDados.statusPagamento || 'pendente', dataPagamento: editorDados.dataPagamento || '', valorPago: Number(editorDados.valorPago)||0, observacaoPagamento: editorDados.observacaoPagamento||'', fechado: !!editorDados.fechado,
+        imoveis: editorDados.imoveis.map(i => ({
+            codigo: i.codigo || '', endereco: i.endereco || '', valor: Number(i.valor) || 0
+        })),
+        descontos: editorDados.descontos.map(d => ({
+            imovel: d.imovel || '', categoria:d.categoria||'Outros', origem: String(d.origem).trim(), observacao:d.observacao||'', valor: Number(d.valor) || 0
+        })),
+        receitaBruta: t.receitaBruta,
+        totalDescontos: t.totalDescontos,
+        comissao: t.comissao,
+        liquido: t.liquido,
+        atualizadoEm: agora
+    };
+
+    const id = $('bolDocId').value;
+    const ok = await executarAcao(async () => {
+        if (id) {
+            await updateDoc(doc(db, 'boletinsEspeciais', id), dados);
+        } else {
+            dados.criadoEm = agora;
+            const ref = await addDoc(collection(db, 'boletinsEspeciais'), dados);
+            $('bolDocId').value = ref.id;
+            editorDados.docId = ref.id;
+        }
+        editorDados.numero = dados.numero;
+    }, 'Boletim salvo na nuvem!');
+    if (ok) atualizarPreviewEditor();
+};
+
+function rotuloStatus(s){return ({pendente:'Pendente',pago:'Pago',parcial:'Pago parcialmente',atrasado:'Atrasado'})[s]||'Pendente';}
+function montarRecibo(d){const t=calcularTotais(d),v=Number(d.valorPago)||t.liquido;return `<div class="paper"><div class="paper-header"><div><div class="paper-logo">L<span>D</span> IMÓVEIS</div><div class="paper-sub">NEGÓCIOS IMOBILIÁRIOS</div></div><div class="paper-meta">REC-${esc(d.numero)}<br>Emissão: ${dataBR(hojeISO())}</div></div><div class="recibo-titulo">RECIBO DE REPASSE</div><div class="paper-block">Recebi(emos) de <strong>LD Imóveis</strong> o valor de <strong>${moeda(v)}</strong>, referente ao repasse da competência <strong>${esc(competenciaBR(d.competencia))}</strong>, dos imóveis administrados conforme Boletim <strong>${esc(d.numero)}</strong>.</div><div class="paper-block"><strong>Favorecido:</strong> ${esc(d.propNome)}<br><strong>CPF/CNPJ:</strong> ${esc(d.propDoc||'—')}<br><strong>PIX/Banco:</strong> ${esc(d.propPix||'—')}<br><strong>Data do pagamento:</strong> ${dataBR(d.dataPagamento||hojeISO())}</div><div class="paper-assinaturas"><div><div class="assin">LD Imóveis</div><div class="assin-sub">Pagador</div></div><div><div class="assin">${esc(d.propNome)}</div><div class="assin-sub">Recebedor</div></div></div></div>`;}
+window.gerarReciboEditor=()=>{if(editorDados)baixarPDF(montarRecibo(editorDados),`Recibo_${editorDados.numero}.pdf`);};
+window.gerarReciboSalvo=id=>{const b=state.boletins.find(x=>x.id===id);if(b)baixarPDF(montarRecibo(completarDados(b)),`Recibo_${b.numero}.pdf`);};
+
+/* ================= PDF (IMPORTANTE: precisa de fluxo normal!) =================
+   O html2canvas (dentro do html2pdf) NÃO renderiza elementos com
+   position:fixed/absolute ou fora da tela — o PDF sai em BRANCO.
+   A área de geração fica em fluxo normal, no <html>, e é removida depois. */
+function baixarPDF(html, filename) {
+    const area = document.createElement('div');
+    // O html2pdf trabalha melhor com a largura A4 em pixels.
+    // A folha ocupa 794 px e a margem segura fica dentro do próprio documento.
+    area.style.cssText = 'position:relative; z-index:99999; width:794px; min-width:794px; max-width:794px; flex:0 0 794px; box-sizing:border-box; overflow:visible; background:#fff;';
+    area.innerHTML = html;
+    document.body.classList.add('pdf-gerando');
+    document.body.appendChild(area);
+    return html2pdf().set({
+        margin: 0,
+        filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true, scrollX: 0, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+    }).from(area).save().then(() => {
+        area.remove();
+        document.body.classList.remove('pdf-gerando');
+    }).catch((e) => {
+        area.remove();
+        document.body.classList.remove('pdf-gerando');
+        throw e;
+    });
+}
+
+/* ================= VISUALIZAR ================= */
+window.verBoletim = (id) => {
+    const b = state.boletins.find(x => x.id === id);
+    if (!b) return;
+    verDados = completarDados(b);
+    $('verBody').innerHTML = montarPapel(verDados);
+    window.abrirModal('modalVer');
+};
+
+/* completa dados antigos com telefone/percentual do proprietário atual */
+function completarDados(b) {
+    const prop = state.proprietarios.find(p => p.id === b.propId) || {};
+    return {
+        ...b,
+        propTel: b.propTel || prop.tel || '',
+        percentual: (b.percentual !== undefined && b.percentual !== null) ? b.percentual : (Number(prop.percentual) || 0), baseComissao:b.baseComissao||prop.baseComissao||'bruta', statusPagamento:b.statusPagamento||'pendente', valorPago:Number(b.valorPago)||0, dataPagamento:b.dataPagamento||'', observacaoPagamento:b.observacaoPagamento||''
+    };
+}
+
+window.baixarPDFEditor = async () => {
+    if (!editorDados) return;
+    try {
+        window.mostrarAlerta('Gerando PDF...', 'info');
+        await baixarPDF(montarPapel(editorDados), `Boletim_${editorDados.numero}.pdf`);
+        window.mostrarAlerta('PDF baixado com sucesso!');
+    } catch (e) {
+        console.error(e);
+        window.mostrarAlerta('Erro ao gerar o PDF.', 'erro');
+    }
+};
+
+window.baixarPDFVer = async () => {
+    if (!verDados) return;
+    try {
+        window.mostrarAlerta('Gerando PDF...', 'info');
+        await baixarPDF(montarPapel(verDados), `Boletim_${verDados.numero}.pdf`);
+        window.mostrarAlerta('PDF baixado com sucesso!');
+    } catch (e) {
+        console.error(e);
+        window.mostrarAlerta('Erro ao gerar o PDF.', 'erro');
+    }
+};
+
+window.baixarPDFBoletimSalvo = async (id) => {
+    const b = state.boletins.find(x => x.id === id);
+    if (!b) return;
+    try {
+        window.mostrarAlerta('Gerando PDF...', 'info');
+        await baixarPDF(montarPapel(completarDados(b)), `Boletim_${b.numero}.pdf`);
+        window.mostrarAlerta('PDF baixado!');
+    } catch (e) {
+        console.error(e);
+        window.mostrarAlerta('Erro ao gerar o PDF.', 'erro');
+    }
+};
+
+window.baixarPDFLote = async () => {
+    const comp = competenciaAtual();
+    const lista = state.boletins.filter(b => b.competencia === comp);
+    if (!lista.length) {
+        window.mostrarAlerta('Não há boletins salvos nesta competência.', 'erro');
+        return;
+    }
+    try {
+        window.mostrarAlerta(`Gerando PDF do lote (${lista.length} boletins)...`, 'info');
+        const html = lista.map(b => montarPapel(completarDados(b), 'folha')).join('');
+        await baixarPDF(html, `Boletins_LDImoveis_${comp}.pdf`);
+        window.mostrarAlerta('PDF do lote baixado!');
+    } catch (e) {
+        console.error(e);
+        window.mostrarAlerta('Erro ao gerar o PDF do lote.', 'erro');
+    }
+};
+
+/* ================= WHATSAPP ================= */
+function numeroWhatsApp(tel) {
+    let n = String(tel || '').replace(/\D/g, '');
+    if (!n) return '';
+    n = n.replace(/^0+/, '');          // remove 0 de operadora
+    if (!n.startsWith('55')) n = '55' + n;
+    return n;
+}
+
+function montarMensagemWhatsApp(dados) {
+    const t = calcularTotais(dados);
+    const linhasDesc = (dados.descontos || []).map(d =>
+        `• ${d.imovel ? d.imovel + ' — ' : ''}${d.origem}: ${moeda(d.valor)}`).join('\n');
+    return [
+        '*LD Imóveis — Boletim de Medição*',
+        `Competência: ${competenciaBR(dados.competencia)}`,
+        `Proprietário: ${dados.propNome}`,
+        '',
+        `Receita Bruta: ${moeda(t.receitaBruta)}`,
+        `Descontos: ${moeda(t.totalDescontos)}`,
+        `Comissão LD Imóveis (${String(t.percentual)}%): ${moeda(t.comissao)}`,
+        `*Valor Líquido a Repassar: ${moeda(t.liquido)}*`,
+        linhasDesc ? '\n*Descontos (origem):*\n' + linhasDesc : '',
+        '',
+        '_O PDF do boletim será anexado em seguida._'
+    ].filter(l => l !== '').join('\n');
+}
+
+async function enviarWhatsApp(dados) {
+    const num = numeroWhatsApp(dados.propTel);
+    if (!num) {
+        window.mostrarAlerta('Cadastre o telefone/WhatsApp do proprietário para enviar.', 'erro');
+        return;
+    }
+    try {
+        // baixa o PDF primeiro para o usuário anexar na conversa
+        await baixarPDF(montarPapel(dados), `Boletim_${dados.numero}.pdf`);
+        window.mostrarAlerta('PDF baixado! Anexe-o na conversa do WhatsApp.', 'info');
+    } catch (e) {
+        console.error(e);
+    }
+    const url = `https://wa.me/${num}?text=${encodeURIComponent(montarMensagemWhatsApp(dados))}`;
+    window.open(url, '_blank');
+}
+
+window.enviarWhatsAppEditor = () => { if (editorDados) enviarWhatsApp(editorDados); };
+window.enviarWhatsAppVer = () => { if (verDados) enviarWhatsApp(verDados); };
+window.enviarWhatsAppBoletimSalvo = (id) => {
+    const b = state.boletins.find(x => x.id === id);
+    if (b) enviarWhatsApp(completarDados(b));
+};
+
+/* ================= RENDERIZAÇÃO ================= */
+function renderizarTudo() {
+    renderizarKPIs();
+    renderizarTabelaBoletins();
+    renderizarTabelaProprietarios();
+    popularFiltroImoveis();
+    renderizarImoveis();
+    popularFiltroHistorico(); renderizarHistorico(); renderizarAnual();
+}
+
+function renderizarKPIs() {
+    const comp = competenciaAtual();
+    const salvo = state.boletins.filter(b => b.competencia === comp);
+    let bruta = 0, descontos = 0, comissao = 0;
+    salvo.forEach(b => {
+        const t = calcularTotais(completarDados(b));
+        bruta += t.receitaBruta;
+        descontos += t.totalDescontos;
+        comissao += t.comissao;
+    });
+    $('kpiProps').textContent = state.proprietarios.length;
+    $('kpiBruta').textContent = moeda(bruta);
+    $('kpiDescontos').textContent = moeda(descontos);
+    $('kpiComissao').textContent = moeda(comissao);
+    $('kpiLiquido').textContent = moeda(bruta - descontos - comissao);
+}
+
+function renderizarTabelaBoletins() {
+    const comp = competenciaAtual();
+    const tb = $('tbBoletins');
+    if (!state.proprietarios.length) {
+        tb.innerHTML = '<tr><td colspan="8"><div class="empty-state">Nenhum proprietário especial cadastrado ainda.</div></td></tr>';
+        return;
+    }
+    tb.innerHTML = [...state.proprietarios]
+        .sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || '')))
+        .map(p => {
+            const imoveis = imoveisDoProp(p.id);
+            const bol = boletimDoProp(p.id, comp);
+            const t = calcularTotais(bol
+                ? completarDados(bol)
+                : { imoveis, descontos: [], percentual: p.percentual });
+            return `
+            <tr>
+                <td><strong>${esc(p.nome)}</strong></td>
+                <td>${imoveis.length}</td>
+                <td>${moeda(t.receitaBruta)}</td>
+                <td style="color:var(--yellow);">${moeda(t.totalDescontos)}</td>
+                <td style="color:var(--blue);">${moeda(t.comissao)}</td>
+                <td style="color:var(--green); font-weight:700;">${moeda(t.liquido)}</td>
+                <td>${bol
+                    ? '<span class="badge badge-ok">Gerado</span>'
+                    : '<span class="badge badge-pend">Pendente</span>'}</td>
+                <td style="white-space:nowrap;">
+                    <button class="btn btn-primary btn-sm" onclick="abrirEditorBoletim('${p.id}')">
+                        <i class="fas fa-pen"></i> ${bol ? 'Editar' : 'Montar'}
+                    </button>
+                    ${bol ? `
+                    <button class="btn btn-outline btn-sm" onclick="verBoletim('${bol.id}')" aria-label="Visualizar"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-outline btn-sm" onclick="baixarPDFBoletimSalvo('${bol.id}')" aria-label="PDF"><i class="fas fa-file-pdf" style="color:var(--red-main);"></i></button>
+                    <button class="btn btn-success btn-sm" onclick="enviarWhatsAppBoletimSalvo('${bol.id}')" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></button>` : ''}
+                </td>
+            </tr>`;
+        }).join('');
+}
+
+function renderizarTabelaProprietarios() {
+    const tb = $('tbProprietarios');
+    if (!state.proprietarios.length) {
+        tb.innerHTML = '<tr><td colspan="7"><div class="empty-state">Nenhum proprietário especial cadastrado.</div></td></tr>';
+        return;
+    }
+    tb.innerHTML = [...state.proprietarios]
+        .sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || '')))
+        .map(p => `
+        <tr>
+            <td><strong>${esc(p.nome)}</strong></td>
+            <td>${esc(p.doc)}</td>
+            <td>${esc(p.tel)}</td>
+            <td>${esc(p.pix)}</td>
+            <td>${esc(String(p.percentual ?? 10))}%</td>
+            <td>${imoveisDoProp(p.id).length}</td>
+            <td>
+                <button class="btn btn-outline btn-sm" onclick="editarProprietario('${p.id}')" aria-label="Editar"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-outline btn-sm" onclick="excluirProprietario('${p.id}')" aria-label="Excluir"><i class="fas fa-trash" style="color:var(--red-main);"></i></button>
+            </td>
+        </tr>`).join('');
+}
+
+function popularFiltroImoveis() {
+    const sel = $('filtroPropImoveis');
+    const atual = sel.value;
+    sel.innerHTML = '<option value="">— Todos os proprietários —</option>' + state.proprietarios.map(p =>
+        `<option value="${esc(p.id)}">${esc(p.nome)}</option>`).join('');
+    sel.value = atual;
+}
+
+window.renderizarImoveis = () => {
+    const tb = $('tbImoveis');
+    const filtro = $('filtroPropImoveis').value;
+    const busca = ($('buscaImovel').value || '').toLowerCase();
+    const lista = state.imoveis
+        .filter(i => !filtro || i.propId === filtro)
+        .filter(i => !busca || String(i.codigo || '').toLowerCase().includes(busca) || String(i.endereco || '').toLowerCase().includes(busca))
+        .sort((a, b) => String(a.codigo || '').localeCompare(String(b.codigo || '')));
+
+    if (!lista.length) {
+        tb.innerHTML = '<tr><td colspan="5"><div class="empty-state">Nenhum imóvel encontrado.</div></td></tr>';
+        return;
+    }
+    tb.innerHTML = lista.map(i => {
+        const prop = state.proprietarios.find(p => p.id === i.propId);
+        return `
+        <tr>
+            <td><strong>${esc(i.codigo)}</strong></td>
+            <td>${esc(i.endereco)}</td>
+            <td>${esc(prop ? prop.nome : '—')}</td>
+            <td style="font-weight:700;">${moeda(i.valor)}</td>
+            <td>
+                <button class="btn btn-outline btn-sm" onclick="editarImovel('${i.id}')" aria-label="Editar"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-outline btn-sm" onclick="excluirItem('bolImoveis','${i.id}')" aria-label="Excluir"><i class="fas fa-trash" style="color:var(--red-main);"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
+};
+
+function popularFiltroHistorico(){const e=$('histProp');if(!e)return;const v=e.value;e.innerHTML='<option value="">Todos</option>'+state.proprietarios.map(p=>`<option value="${esc(p.id)}">${esc(p.nome)}</option>`).join('');e.value=v;}
+function renderizarHistorico(){const tb=$('tbHistorico');if(!tb)return;const fp=$('histProp')?.value||'',fc=$('histComp')?.value||'',fs=$('histStatus')?.value||'',q=($('histBusca')?.value||'').toLowerCase();const lista=[...state.boletins].filter(b=>(!fp||b.propId===fp)&&(!fc||b.competencia===fc)&&(!fs||(b.statusPagamento||'pendente')===fs)&&(!q||String(b.numero||'').toLowerCase().includes(q))).sort((a,b)=>String(b.competencia||'').localeCompare(String(a.competencia||''))||String(a.propNome||'').localeCompare(String(b.propNome||'')));if(!lista.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state">Nenhum boletim encontrado.</div></td></tr>';return;}tb.innerHTML=lista.map(b=>`<tr><td><strong>${esc(b.numero)}</strong>${b.fechado?' <i class="fas fa-lock" title="Fechado"></i>':''}</td><td>${esc(competenciaBR(b.competencia))}</td><td>${esc(b.propNome)}</td><td style="color:var(--green);font-weight:700">${moeda(b.liquido)}</td><td class="status-${esc(b.statusPagamento||'pendente')}">${esc(rotuloStatus(b.statusPagamento))}<br><small>${moeda(b.valorPago)}</small></td><td>${esc(dataBR(String(b.atualizadoEm||'').slice(0,10)))}</td><td><div class="acoes-flex"><button class="btn btn-outline btn-sm" onclick="verBoletim('${b.id}')"><i class="fas fa-eye"></i></button><button class="btn btn-outline btn-sm" onclick="baixarPDFBoletimSalvo('${b.id}')"><i class="fas fa-file-pdf"></i></button><button class="btn btn-outline btn-sm" onclick="gerarReciboSalvo('${b.id}')"><i class="fas fa-receipt"></i></button><button class="btn btn-success btn-sm" onclick="enviarWhatsAppBoletimSalvo('${b.id}')"><i class="fab fa-whatsapp"></i></button><button class="btn btn-outline btn-sm" onclick="excluirItem('boletinsEspeciais','${b.id}')"><i class="fas fa-trash"></i></button></div></td></tr>`).join('');}
+function renderizarAnual(){const tb=$('tbAnual');if(!tb)return;const ano=String($('anoResumo').value||new Date().getFullYear());const bs=state.boletins.filter(b=>String(b.competencia||'').startsWith(ano));let G={bruta:0,desc:0,com:0,pago:0,pend:0};const linhas=state.proprietarios.map(p=>{const x=bs.filter(b=>b.propId===p.id);let z={bruta:0,desc:0,com:0,pago:0,pend:0};x.forEach(b=>{const t=calcularTotais(completarDados(b));z.bruta+=t.receitaBruta;z.desc+=t.totalDescontos;z.com+=t.comissao;z.pago+=Number(b.valorPago)||0;z.pend+=Math.max(0,t.liquido-(Number(b.valorPago)||0));});Object.keys(G).forEach(k=>G[k]+=z[k]);return {p,x,z};}).filter(r=>r.x.length);$('anBruta').textContent=moeda(G.bruta);$('anDesc').textContent=moeda(G.desc);$('anCom').textContent=moeda(G.com);$('anPago').textContent=moeda(G.pago);$('anPend').textContent=moeda(G.pend);tb.innerHTML=linhas.map(r=>`<tr><td><strong>${esc(r.p.nome)}</strong></td><td>${r.x.length}</td><td>${moeda(r.z.bruta)}</td><td>${moeda(r.z.desc)}</td><td>${moeda(r.z.com)}</td><td>${moeda(r.z.pago)}</td><td>${moeda(r.z.pend)}</td></tr>`).join('')||'<tr><td colspan="7"><div class="empty-state">Nenhum boletim neste ano.</div></td></tr>';}
+
+/* ================= INICIALIZAÇÃO ================= */
+(function inicializar() {
+    $('selCompetencia').value = hojeISO().slice(0, 7); $('anoResumo').value=new Date().getFullYear();
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const aberto = document.querySelector('.modal-overlay.active');
+        if (aberto) window.fecharModal(aberto.id);
+    });
+    document.querySelectorAll('.modal-overlay').forEach(ov => {
+        ov.addEventListener('mousedown', (e) => {
+            if (e.target === ov) window.fecharModal(ov.id);
+        });
+    });
+
+    renderizarTudo();
+})();
+
+/* CONTROLE CENTRAL LD — perfil específico e bloqueio em tempo real */
+const __LD_ADMIN_PRINCIPAL='matheusslvdsz@gmail.com',__LD_PERFIS_PERMITIDOS=['admin', 'financeiro'];
+let __ldBloqueando=false,__ldPerfilStop=null;
+async function __ldBloquear(__motivo){if(__ldBloqueando)return;__ldBloqueando=true;if(__ldPerfilStop)try{__ldPerfilStop()}catch(e){}try{const a=await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');await a.signOut(auth)}catch(e){}document.body.innerHTML=`<main style="min-height:100vh;display:grid;place-items:center;background:#050505;color:#fff;font-family:Arial,sans-serif;padding:20px"><section style="max-width:540px;text-align:center;background:#141414;border:1px solid #3b3b3b;border-radius:18px;padding:32px"><div style="font-size:48px;color:#e50914">●</div><h1>Acesso bloqueado</h1><p style="color:#aaa;line-height:1.65">${__motivo}</p><button onclick="location.reload()" style="padding:11px 16px;border:0;border-radius:9px;background:#d80b15;color:#fff;font-weight:800">Voltar ao login</button></section></main>`}
+onAuthStateChanged(auth,async u=>{if(!u||__ldBloqueando)return;const email=String(u.email||'').trim().toLowerCase();if(email===__LD_ADMIN_PRINCIPAL)return;try{const fs=await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js'),ref=fs.doc(db,'usuariosSistema',email);const validar=s=>{const d=s.exists()?s.data():null;if(!d||d.ativo!==true)return __ldBloquear('Este usuário não possui autorização ativa.');if(!__LD_PERFIS_PERMITIDOS.includes(String(d.perfil||'').toLowerCase()))return __ldBloquear('Boletins estão disponíveis para Administração e Financeiro.')};let snap;try{snap=await fs.getDocFromServer(ref)}catch(e){snap=await fs.getDoc(ref)}await validar(snap);if(!__ldBloqueando)__ldPerfilStop=fs.onSnapshot(ref,validar,()=>__ldBloquear('Não foi possível confirmar sua permissão.'))}catch(e){console.error('[LD Permissões]',e);await __ldBloquear('Não foi possível confirmar sua permissão.')}});
+
+</script>
+<div class="ld-versao">LD Sistemas · versão 2026</div></body>
+</html>
+

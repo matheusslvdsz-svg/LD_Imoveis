@@ -1,0 +1,218 @@
+============================================================
+ LD IMÓVEIS — REGRAS RESTRITAS POR PERFIL + VITRINE PÚBLICA
+============================================================
+
+ADMINISTRADOR PRINCIPAL: matheusslvdsz@gmail.com
+VERSÃO: 27/10/2026
+
+Cole somente a parte entre as linhas no Firebase Console > Firestore > Regras:
+https://console.firebase.google.com/project/ld-imoveis/firestore/rules
+
+------------------------------------------------------------
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function logado() {
+      return request.auth != null && request.auth.token.email is string;
+    }
+    function email() {
+      return request.auth.token.email;
+    }
+    function principal() {
+      return logado() && email() == 'matheusslvdsz@gmail.com';
+    }
+    function caminhoCadastro() {
+      return /databases/$(database)/documents/usuariosSistema/$(email());
+    }
+    function temCadastro() {
+      return logado() && exists(caminhoCadastro());
+    }
+    function cadastro() {
+      return get(caminhoCadastro()).data;
+    }
+    function perfilValido() {
+      return temCadastro() && cadastro().perfil in ['admin', 'financeiro', 'corretor', 'manutencao', 'consulta'];
+    }
+    function ativo() {
+      return principal() || (perfilValido() && cadastro().ativo == true);
+    }
+    function perfil(nome) {
+      return principal() || (ativo() && cadastro().perfil == nome);
+    }
+    function admin() { return principal() || perfil('admin'); }
+    function financeiro() { return admin() || perfil('financeiro'); }
+    function corretor() { return admin() || perfil('corretor'); }
+    function manutencao() { return admin() || perfil('manutencao'); }
+    function consulta() { return admin() || perfil('consulta'); }
+    function equipeOperacional() {
+      return principal() || (ativo() && cadastro().perfil in ['admin', 'financeiro', 'corretor', 'manutencao', 'consulta']);
+    }
+
+    // USUÁRIOS E PERFIS
+    match /usuariosSistema/{usuarioEmail} {
+      allow read: if admin() || (logado() && email() == usuarioEmail);
+      allow create, update, delete: if admin();
+    }
+
+    // VITRINE PÚBLICA
+    match /vitrineImoveis/{imovelId} {
+      allow read: if true;
+      allow create, update, delete: if admin();
+      match /fotos/{fotoId} {
+        allow read: if true;
+        allow create, update, delete: if admin();
+      }
+    }
+    match /vitrineConfig/{configId} {
+      allow read: if true;
+      allow create, update, delete: if admin();
+    }
+    match /vitrineContatos/{contatoId} {
+      allow create: if request.resource.data.keys().hasAll(['nome', 'telefone'])
+                    && request.resource.data.nome is string
+                    && request.resource.data.nome.size() >= 2
+                    && request.resource.data.nome.size() <= 120
+                    && request.resource.data.telefone is string
+                    && request.resource.data.telefone.size() >= 8
+                    && request.resource.data.telefone.size() <= 30;
+      allow read, update, delete: if admin();
+    }
+
+    // CADASTRO CENTRAL DE IMÓVEIS
+    match /imoveis/{imovelId} {
+      allow read: if equipeOperacional();
+      allow create, delete: if admin();
+      allow update: if admin() || (corretor() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','atualizadoEm','atualizadoPor','origemAtualizacao']) && request.resource.data.status in ['disponivel','alugado','venda']);
+      match /fotos/{fotoId} {
+        allow read: if equipeOperacional();
+        allow create, update, delete: if admin() || manutencao();
+      }
+    }
+    match /proprietarios/{id} {
+      allow read: if admin() || financeiro() || corretor() || manutencao() || consulta();
+      allow create, update, delete: if admin() || financeiro();
+    }
+    match /inquilinos/{id} {
+      allow read: if admin() || financeiro() || corretor() || manutencao() || consulta();
+      allow create, update, delete: if admin() || financeiro();
+    }
+    match /contratos/{id} {
+      allow read: if admin() || financeiro() || corretor() || manutencao() || consulta();
+      allow create, update, delete: if admin() || financeiro();
+    }
+    match /historicoContratos/{id} {
+      allow read: if admin() || financeiro() || consulta();
+      allow create, update: if admin() || financeiro();
+      allow delete: if admin();
+    }
+    match /auditoriaSistema/{id} {
+      allow read, create, update: if admin();
+      allow delete: if false;
+    }
+
+    // FINANCEIRO E BOLETINS
+    match /financeiro/{id} {
+      allow read, create, update: if financeiro();
+      allow delete: if admin();
+    }
+    match /fechamentos/{id} {
+      allow read, create, update: if financeiro();
+      allow delete: if admin();
+    }
+    match /boletinsEspeciais/{id} {
+      allow read, create, update: if financeiro();
+      allow delete: if admin();
+    }
+    match /bolProprietarios/{id} {
+      allow read, create, update: if financeiro();
+      allow delete: if admin();
+    }
+    match /bolImoveis/{id} {
+      allow read, create, update: if financeiro();
+      allow delete: if admin();
+    }
+
+    // CRM E AGENDA GERAIS
+    match /leads/{id} {
+      allow read, create, update: if corretor();
+      allow delete: if admin();
+    }
+    match /eventos/{id} {
+      allow read, create, update: if corretor() || financeiro();
+      allow delete: if admin();
+    }
+
+    // MANUTENÇÃO
+    match /manutencoes/{id} {
+      allow read: if admin() || manutencao() || financeiro() || consulta();
+      allow create, update: if admin() || manutencao();
+      allow delete: if admin();
+    }
+
+    // ÁREA INDIVIDUAL DOS CORRETORES
+    match /corretores/{uid} {
+      allow read: if admin() || (corretor() && request.auth.uid == uid);
+      allow create, update: if admin() || (corretor() && request.auth.uid == uid);
+      allow delete: if admin();
+    }
+    match /imoveisCorretores/{id} {
+      allow read: if admin() || (corretor() && resource.data.corretorId == request.auth.uid);
+      allow create, update, delete: if admin();
+    }
+    match /leadsCorretores/{id} {
+      // CRM operacional compartilhado entre o Painel e todos os perfis Corretor ativos.
+      // Exclusão continua exclusiva do administrador.
+      allow read, create, update: if corretor();
+      allow delete: if admin();
+    }
+    match /tarefasCorretores/{id} {
+      allow read: if admin() || (corretor() && resource.data.corretorId == request.auth.uid);
+      allow create: if admin() || (corretor() && request.resource.data.corretorId == request.auth.uid);
+      allow update: if admin() || (corretor()
+                    && resource.data.corretorId == request.auth.uid
+                    && request.resource.data.corretorId == request.auth.uid);
+      allow delete: if admin();
+    }
+    match /negociosCorretores/{id} {
+      allow read: if admin() || (corretor() && resource.data.corretorId == request.auth.uid);
+      allow create: if admin() || (corretor() && request.resource.data.corretorId == request.auth.uid);
+      allow update: if admin() || (corretor()
+                    && resource.data.corretorId == request.auth.uid
+                    && request.resource.data.corretorId == request.auth.uid);
+      allow delete: if admin();
+    }
+    match /boletinsCorretores/{id} {
+      allow read: if admin() || (corretor() && resource.data.corretorId == request.auth.uid);
+      allow create, update, delete: if admin();
+    }
+    match /historicoCorretores/{id} {
+      allow read: if admin() || (corretor() && resource.data.uid == request.auth.uid);
+      allow create: if corretor() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if admin();
+    }
+
+    // TUDO O QUE NÃO FOI EXPRESSAMENTE AUTORIZADO FICA BLOQUEADO
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+------------------------------------------------------------
+
+PERFIS PRONTOS
+- admin: acesso completo.
+- financeiro: contratos, cadastros relacionados, financeiro, fechamentos, boletins e documentos.
+- corretor: imóveis em leitura, CRM, agenda e carteira individual.
+- manutencao: imóveis em leitura, fotos e manutenções.
+- consulta: leitura dos cadastros operacionais permitidos.
+
+PUBLICAÇÃO
+1. Faça backup das regras atuais no Firebase Console.
+2. Cole somente o bloco de regras entre as linhas.
+3. Use o simulador do Firebase antes de publicar.
+4. Teste primeiro com o administrador principal.
+5. Teste uma conta de cada perfil.
+6. Confirme que usuário inativo e usuário sem cadastro são bloqueados.
+
+ATENÇÃO
+Estas regras removem a leitura genérica de coleções desconhecidas. Se um novo módulo criar uma coleção, ela deverá ser adicionada explicitamente antes da publicação desse módulo.
