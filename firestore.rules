@@ -175,11 +175,13 @@ service cloud.firestore {
     // INSPECOES DE IMOVEIS - todos os perfis ativos leem; consulta e somente leitura
     match /inspecoes/{id} {
       allow read: if equipeOperacional();
-      allow create, update, delete: if principal() || (ativo() && cadastro().perfil in ['admin', 'financeiro', 'corretor', 'manutencao']);
+      allow create, update: if principal() || (ativo() && cadastro().perfil in ['admin', 'financeiro', 'corretor', 'manutencao']);
+      allow delete: if admin();
     }
     match /inspecaoImoveis/{id} {
       allow read: if equipeOperacional();
-      allow create, update, delete: if principal() || (ativo() && cadastro().perfil in ['admin', 'financeiro', 'corretor', 'manutencao']);
+      allow create, update: if principal() || (ativo() && cadastro().perfil in ['admin', 'financeiro', 'corretor', 'manutencao']);
+      allow delete: if admin();
     }
 
     match /{document=**} {

@@ -1,0 +1,18 @@
+LD IMOVEIS - PACOTE COMPLETO v1.1.1
+
+CORRECOES PRIORITARIAS
+1. Dados de inspecao nao persistem no localStorage e sao limpos sem autenticacao.
+2. Sincronizacao grava somente registros novos/alterados, em lotes seguros, sem exclusao implicita.
+3. Exclusao definitiva de laudos e cronograma somente pelo administrador.
+4. Ajuda atualizada: nuvem autenticada como fonte oficial.
+
+PUBLICACAO SEGURA
+- Fazer backup e conferir o Git.
+- Substituir os arquivos correspondentes no repositorio.
+- Publicar firestore.rules pelo Console e testar no simulador.
+- Executar firebase deploy --only hosting.
+- Testar admin, financeiro, corretor, manutencao e consulta.
+- Nao executar firebase init.
+
+VERSAO BASE: v1.1.0
+VERSAO CANDIDATA: v1.1.1

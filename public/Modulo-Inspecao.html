@@ -378,7 +378,7 @@ body.somente-leitura #btSalvar, body.somente-leitura #btAddImovel, body.somente-
     <span class="mark">LD</span>
     <div>
       <b>Inspeção de Imóveis</b>
-      <span class="sub">módulo operacional · v2.2</span>
+      <span class="sub">módulo operacional · v2.3</span>
     </div>
   </div>
   <nav id="nav">
@@ -692,14 +692,13 @@ body.somente-leitura #btSalvar, body.somente-leitura #btAddImovel, body.somente-
   <div class="card">
     <h2>Onde ficam os dados</h2>
     <p style="font-size:13.5px;line-height:1.75;color:#d8d8d8">
-      Tudo fica <b style="color:#fff">no navegador deste computador</b> (armazenamento local).
-      Não sobe para nenhum servidor. Isso significa:
+      Os dados oficiais ficam <b style="color:#fff">na nuvem autenticada da LD Imóveis</b>.
+      Esta página mantém os dados apenas na memória durante a sessão. Isso significa:
     </p>
     <ul style="line-height:1.95;font-size:13.5px;color:#d8d8d8">
-      <li>Funciona sem internet — importante em vistoria de campo.</li>
-      <li>Trocar de navegador ou limpar os dados do site <b style="color:#fff">apaga os
-        laudos</b>.</li>
-      <li>Use <b style="color:#fff">Backup (.json)</b> toda semana e guarde o arquivo.</li>
+      <li>É necessário estar autenticado e conectado à internet para acessar e sincronizar os dados.</li>
+      <li>Ao sair da conta, os dados operacionais são removidos da memória desta página.</li>
+      <li>O arquivo de <b style="color:#fff">Backup (.json)</b> deve ser usado somente conforme o procedimento administrativo da LD.</li>
     </ul>
   </div>
 
@@ -747,20 +746,16 @@ function lsOk(){
   catch(e){ return false; }
 }
 const TEM_LS = lsOk();
-const ler = k => {
-  if (!TEM_LS) return MEM[k] || [];
-  try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e){ return MEM[k] || []; }
-};
+/* Segurança v1.1.1: dados operacionais não são restaurados do localStorage.
+   A nuvem autenticada é a fonte oficial; MEM existe apenas durante a sessão da página. */
+const ler = k => MEM[k] || [];
 const gravar = (k,v) => {
   if (window.LD_INSPECAO_SOMENTE_LEITURA) {
     alert('Seu perfil possui acesso somente para consulta.');
     return false;
   }
   MEM[k] = v;
-  if (TEM_LS) {
-    try { localStorage.setItem(k, JSON.stringify(v)); }
-    catch(e){ console.warn('[Inspeção] cache local indisponível', e); }
-  }
+  /* Não persistir laudos, endereços ou proprietários no navegador. */
   if (window.LD_INSPECAO_NUVEM) window.LD_INSPECAO_NUVEM.sincronizar(k, v);
   return true;
 };
@@ -1290,7 +1285,7 @@ function renderControle(){
     const ims = ler(LS_IMOVEIS);
     const im = ims.find(x => x.codigo === b.dataset.alto);
     if (!im) return;
-    im.altoValor = !im.altoValor;
+    im.altoValor = !im.altoValor; im.__alteradoLocal = true;
     gravar(LS_IMOVEIS, ims);
     renderControle();
   });
@@ -1410,13 +1405,13 @@ function renderLaudos(){
         <td>${(l.pendencias||[]).length}</td>
         <td>${esc(l.responsavel || '—')}</td>
         <td><button class="btn ghost" data-ver="${l.id}">Abrir</button>
-            <button class="btn ghost" data-del="${l.id}">Apagar</button></td>
+            ${window.LD_INSPECAO_PODE_EXCLUIR ? `<button class="btn ghost" data-del="${l.id}">Apagar</button>` : ''}</td>
       </tr>`).join('')}</tbody></table></div>`;
     box.querySelectorAll('[data-ver]').forEach(b => b.onclick = () => carregarLaudo(b.dataset.ver));
-    box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+    box.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+      if (!window.LD_INSPECAO_PODE_EXCLUIR) return alert('Somente o administrador pode apagar laudos.');
       if (!confirm('Apagar este laudo? Não tem como desfazer.')) return;
-      gravar(LS_LAUDOS, ler(LS_LAUDOS).filter(x => x.id !== b.dataset.del));
-      renderLaudos();
+      if(await window.LD_INSPECAO_NUVEM.excluir(LS_LAUDOS,b.dataset.del)){MEM[LS_LAUDOS]=ler(LS_LAUDOS).filter(x=>x.id!==b.dataset.del);renderLaudos();atualizarHero()}
     });
   }
 
@@ -1786,13 +1781,14 @@ function renderImoveis(){
         <button class="btn ghost" data-end="${n}" title="Endereço ou link do Maps">Endereço</button>
         ${i.lat != null || i.end
           ? `<a class="btn ghost" href="${linkMapsImovel(i)}" target="_blank" rel="noopener">Maps</a>` : ''}
-        <button class="btn ghost" data-rm="${n}">Remover</button>
+        ${window.LD_INSPECAO_PODE_EXCLUIR ? `<button class="btn ghost" data-rm="${n}">Remover</button>` : ''}
       </div></td>
     </tr>`).join('')}</tbody></table></div>`;
 
-  box.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => {
-    const ims2 = ler(LS_IMOVEIS); ims2.splice(+b.dataset.rm, 1);
-    gravar(LS_IMOVEIS, ims2); renderImoveis();
+  box.querySelectorAll('[data-rm]').forEach(b => b.onclick = async () => {
+    if(!window.LD_INSPECAO_PODE_EXCLUIR)return alert('Somente o administrador pode remover registros do cronograma.');
+    const ims2=ler(LS_IMOVEIS),im=ims2[+b.dataset.rm];if(!im||!confirm('Remover este registro do cronograma?'))return;
+    const id=idSeguro(im);if(await window.LD_INSPECAO_NUVEM.excluir(LS_IMOVEIS,id)){MEM[LS_IMOVEIS]=ims2.filter((_,i)=>i!==+b.dataset.rm);renderImoveis()}
   });
   box.querySelectorAll('[data-end]').forEach(b => b.onclick = () => {
     const ims2 = ler(LS_IMOVEIS), im = ims2[+b.dataset.end];
@@ -1805,7 +1801,7 @@ function renderImoveis(){
       '  • endereço escrito: Rua 77A, Qd-54 Lt-01, Nova Carajás', atual);
     if (novo === null) return;
     const t = novo.trim();
-    im.end = t;
+    im.end = t; im.__alteradoLocal = true;
     const c = extraiCoords(t);
     if (c){ im.lat = c.lat; im.lng = c.lng; }
     else { delete im.lat; delete im.lng; }
@@ -2192,14 +2188,25 @@ let perfil=null, pronto=false, ocupados={laudos:new Set(),imoveis:new Set()};
 const mapa={ld_inspecoes_v2:'inspecoes',ld_imoveis_v2:'inspecaoImoveis'};
 const idSeguro=x=>String(x.id||x.codigo||crypto.randomUUID()).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,180);
 async function sincronizar(chave,lista){
- if(!pronto||window.LD_INSPECAO_SOMENTE_LEITURA)return;
- const nome=mapa[chave]; if(!nome)return;
- try{const batch=writeBatch(db), atuais=new Set(); for(const item of lista){const id=idSeguro(item),dados={...item,id,atualizadoEm:new Date().toISOString(),atualizadoPor:auth.currentUser?.email||''};atuais.add(id);batch.set(doc(db,nome,id),dados,{merge:true})} for(const id of ocupados[chave===LS_LAUDOS?'laudos':'imoveis'])if(!atuais.has(id))batch.delete(doc(db,nome,id));await batch.commit();ocupados[chave===LS_LAUDOS?'laudos':'imoveis']=atuais;status.textContent='Nuvem sincronizada';status.className='nuvem-status ok'}catch(e){console.error(e);status.textContent='Falha ao sincronizar';status.className='nuvem-status erro';alert('Não foi possível sincronizar a inspeção: '+e.message)}}
-window.LD_INSPECAO_NUVEM={sincronizar};
+ if(!pronto||window.LD_INSPECAO_SOMENTE_LEITURA)return false;
+ const nome=mapa[chave]; if(!nome)return false;
+ try{
+   const slot=chave===LS_LAUDOS?'laudos':'imoveis', conhecidos=ocupados[slot], novos=lista.filter(item=>!conhecidos.has(idSeguro(item)) || item.__alteradoLocal===true);
+   if(!novos.length){status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true}
+   /* Batch limitado e sem exclusões implícitas: nenhum estado desatualizado apaga dados de outro usuário. */
+   for(let inicio=0;inicio<novos.length;inicio+=400){const batch=writeBatch(db);for(const item of novos.slice(inicio,inicio+400)){const id=idSeguro(item),dados={...item,id,atualizadoEm:new Date().toISOString(),atualizadoPor:auth.currentUser?.email||''};delete dados.__alteradoLocal;batch.set(doc(db,nome,id),dados,{merge:true});conhecidos.add(id)}await batch.commit()}
+   status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true
+ }catch(e){console.error(e);status.textContent='Falha ao sincronizar';status.className='nuvem-status erro';alert('Não foi possível sincronizar a inspeção: '+e.message);return false}}
+async function excluir(chave,id){
+ if(!pronto||!window.LD_INSPECAO_PODE_EXCLUIR){alert('Somente o administrador pode apagar registros definitivamente.');return false}
+ const nome=mapa[chave];if(!nome)return false;
+ try{const batch=writeBatch(db);batch.delete(doc(db,nome,id));await batch.commit();status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true}catch(e){console.error(e);alert('Não foi possível apagar: '+e.message);return false}
+}
+window.LD_INSPECAO_NUVEM={sincronizar,excluir};
 function atualizarTelas(){try{renderLaudos();renderImoveis();renderControle();atualizarHero();if(document.querySelector('#nav button[data-tab="painel"]')?.classList.contains('on'))renderPainel()}catch(e){console.warn(e)}}
-function ouvir(nome,chave,slot){onSnapshot(collection(db,nome),s=>{const a=s.docs.map(d=>({id:d.id,...d.data()}));MEM[chave]=a;ocupados[slot]=new Set(s.docs.map(d=>d.id));if(TEM_LS)localStorage.setItem(chave,JSON.stringify(a));atualizarTelas();status.textContent='Nuvem sincronizada';status.className='nuvem-status ok'},e=>{console.error(e);status.textContent='Acesso à nuvem negado';status.className='nuvem-status erro'})}
+function ouvir(nome,chave,slot){onSnapshot(collection(db,nome),s=>{const a=s.docs.map(d=>({id:d.id,...d.data()}));MEM[chave]=a;ocupados[slot]=new Set(s.docs.map(d=>d.id));atualizarTelas();status.textContent='Nuvem sincronizada';status.className='nuvem-status ok'},e=>{console.error(e);status.textContent='Acesso à nuvem negado';status.className='nuvem-status erro'})}
 function ouvirImoveisReais(){onSnapshot(collection(db,'imoveis'),s=>{const dl=document.getElementById('listaImoveisReais');const reais=s.docs.map(d=>({id:d.id,...d.data()}));dl.innerHTML=reais.map(i=>`<option value="${esc(i.codigo||i.id)}">${esc(i.endereco||'')} · ${esc(i.tipo||'')}</option>`).join('');window.LD_IMOVEIS_REAIS=reais;document.getElementById('fCodigo').addEventListener('change',e=>{const i=reais.find(x=>String(x.codigo||x.id)===e.target.value);if(!i)return;document.getElementById('fEndereco').value=i.endereco||'';document.getElementById('fProprietario').value=i.proprietarioNome||i.proprietario||'';const t=String(i.tipo||'').toLowerCase();document.getElementById('fTipo').value=t.includes('comerc')?'C':t.includes('galp')?'G':'R';renderChecklist()})})}
-onAuthStateChanged(auth,async user=>{if(!user){status.textContent='Entre pelo Painel Gerencial';status.className='nuvem-status erro';document.body.classList.add('somente-leitura');return}const email=(user.email||'').toLowerCase();if(email===ADMIN)perfil={perfil:'admin',ativo:true};else{const p=await getDoc(doc(db,'usuariosSistema',email));perfil=p.exists()?p.data():null}if(!perfil||perfil.ativo!==true||!['admin','financeiro','corretor','manutencao','consulta'].includes(perfil.perfil)){status.textContent='Acesso não autorizado';status.className='nuvem-status erro';document.body.innerHTML='<div style="padding:40px;color:white;font-family:Arial">Acesso não autorizado ao módulo de inspeção.</div>';return}window.LD_INSPECAO_SOMENTE_LEITURA=perfil.perfil==='consulta';document.body.classList.toggle('somente-leitura',window.LD_INSPECAO_SOMENTE_LEITURA);pronto=true;ouvir('inspecoes',LS_LAUDOS,'laudos');ouvir('inspecaoImoveis',LS_IMOVEIS,'imoveis');ouvirImoveisReais()});
+onAuthStateChanged(auth,async user=>{if(!user){MEM[LS_LAUDOS]=[];MEM[LS_IMOVEIS]=[];try{localStorage.removeItem(LS_LAUDOS);localStorage.removeItem(LS_IMOVEIS)}catch(e){}atualizarTelas();status.textContent='Entre pelo Painel Gerencial';status.className='nuvem-status erro';document.body.classList.add('somente-leitura');return}const email=(user.email||'').toLowerCase();if(email===ADMIN)perfil={perfil:'admin',ativo:true};else{const p=await getDoc(doc(db,'usuariosSistema',email));perfil=p.exists()?p.data():null}if(!perfil||perfil.ativo!==true||!['admin','financeiro','corretor','manutencao','consulta'].includes(perfil.perfil)){status.textContent='Acesso não autorizado';status.className='nuvem-status erro';document.body.innerHTML='<div style="padding:40px;color:white;font-family:Arial">Acesso não autorizado ao módulo de inspeção.</div>';return}window.LD_INSPECAO_SOMENTE_LEITURA=perfil.perfil==='consulta';window.LD_INSPECAO_PODE_EXCLUIR=perfil.perfil==='admin';document.body.classList.toggle('somente-leitura',window.LD_INSPECAO_SOMENTE_LEITURA);pronto=true;ouvir('inspecoes',LS_LAUDOS,'laudos');ouvir('inspecaoImoveis',LS_IMOVEIS,'imoveis');ouvirImoveisReais()});
 </script>
 
 <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a52a6c244c7d6922',t:'MTc5MzM2MzMzMw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a52a6c244c7d6922',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
