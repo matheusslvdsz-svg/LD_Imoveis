@@ -670,6 +670,8 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
 
 /* CICLO CONTRATUAL, DOCUMENTOS E ALERTAS */
 .alertas-contrato{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:0 0 14px}.alerta-ct{background:#111;border:1px solid #333;border-left:4px solid #e50914;border-radius:9px;padding:11px}.alerta-ct b,.alerta-ct span{display:block}.alerta-ct b{font-size:1.15rem}.alerta-ct span{font-size:.66rem;color:#999;text-transform:uppercase;font-weight:800}.alerta-lista{background:#111;border:1px solid #333;border-radius:10px;margin-bottom:14px;padding:12px}.alerta-item{display:flex;justify-content:space-between;gap:10px;padding:8px;border-bottom:1px solid #282828;font-size:.75rem}.alerta-item:last-child{border:0}.alerta-item strong{color:#ff757d}.ciclo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ciclo-checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ciclo-checks label{background:#161616;border:1px solid #333;border-radius:7px;padding:9px;font-size:.73rem}.historico-ct{margin-top:12px}.historico-ct div{padding:8px;border-bottom:1px solid #292929}.historico-ct small{display:block;color:#888}@media(max-width:750px){.alertas-contrato{grid-template-columns:1fr 1fr}.ciclo-grid,.ciclo-checks{grid-template-columns:1fr}}
+.inspecao-frame{width:100%;height:calc(100vh - 105px);min-height:720px;border:1px solid var(--border);border-radius:14px;background:#060606;display:block}
+@media(max-width:768px){.inspecao-frame{height:calc(100vh - 78px);min-height:620px;border-radius:10px}}
 </style>
 <style>
 /* Pesquisa de imóveis — padrão original do Painel */
@@ -741,6 +743,7 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
             <a class="nav-link" data-aba="imoveis" onclick="navegar('imoveis', this)"><i class="fas fa-building"></i> Imóveis</a>
             <a class="nav-link" data-aba="fotos" onclick="navegar('fotos', this)"><i class="fas fa-images"></i> Fotos dos Imóveis</a>
             <a class="nav-link" data-aba="agenda" onclick="navegar('agenda', this)"><i class="fas fa-calendar-alt"></i> Agenda de Eventos</a>
+            <a class="nav-link" data-aba="inspecoes" onclick="navegar('inspecoes', this)"><i class="fas fa-clipboard-check"></i> Inspeção de Imóveis</a>
 
             <div class="nav-title">Clientes e Vendas</div>
             <a class="nav-link" data-aba="inquilinos" onclick="navegar('inquilinos', this)"><i class="fas fa-users"></i> Inquilinos</a>
@@ -1298,6 +1301,10 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
                 </div>
             </section>
 
+            <section class="tab" id="tab-inspecoes">
+                <iframe class="inspecao-frame" id="frameInspecoes" src="Modulo-Inspecao.html" title="Inspeção de Imóveis — LD Imóveis" loading="lazy"></iframe>
+            </section>
+
             <section class="tab" id="tab-usuarios"><div class="header"><div><h1>Usuários e <span>Permissões</span></h1><div class="sub">Controle quem entra no sistema e o que cada pessoa pode fazer</div></div><button class="btn btn-primary" onclick="abrirUsuario()"><i class="fas fa-user-plus"></i> Adicionar Usuário</button></div><div class="kpi-grid"><div class="kpi-card"><h3>Usuários cadastrados</h3><div class="val" id="usrTotal">0</div></div><div class="kpi-card" style="border-left-color:var(--green)"><h3>Ativos</h3><div class="val" id="usrAtivos">0</div></div><div class="kpi-card" style="border-left-color:var(--red-main)"><h3>Bloqueados</h3><div class="val" id="usrBloqueados">0</div></div></div><div class="table-container"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Situação</th><th>Última alteração</th><th>Ações</th></tr></thead><tbody id="tbUsuarios"></tbody></table></div><div class="card" style="margin-top:16px"><h3>O que cada perfil pode fazer</h3><div class="table-container"><table><thead><tr><th>Perfil</th><th>Acesso principal</th></tr></thead><tbody><tr><td><b>Administrador</b></td><td>Acesso completo, inclusive usuários e exclusões.</td></tr><tr><td><b>Financeiro</b></td><td>Financeiro, contratos, fechamentos e consultas.</td></tr><tr><td><b>Corretor</b></td><td>Imóveis, clientes, CRM, agenda e contratos.</td></tr><tr><td><b>Manutenção</b></td><td>Imóveis, fotos, agenda e manutenções.</td></tr><tr><td><b>Consulta</b></td><td>Visualiza o sistema, mas não pode gravar nem apagar.</td></tr></tbody></table></div></div></section>
         </div>
     </main>
@@ -1824,11 +1831,11 @@ setTimeout(() => { try { window.abrirAbaDoLink(); } catch (e) { /* noop */ } }, 
 
 const ADMIN_PRINCIPAL = 'matheusslvdsz@gmail.com';
 const PERFIS = {
- admin:{nome:'Administrador',abas:['dashboard','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','financeiro','fechamento','manutencao','usuarios','auditoria'],grava:true},
- financeiro:{nome:'Financeiro',abas:['dashboard','imoveis','inquilinos','proprietarios','contratos','financeiro','fechamento'],grava:true},
- corretor:{nome:'Corretor',abas:['dashboard','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos'],grava:false},
- manutencao:{nome:'Manutenção',abas:['dashboard','imoveis','fotos','agenda','manutencao'],grava:true},
- consulta:{nome:'Consulta',abas:['dashboard','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','financeiro','fechamento','manutencao'],grava:false}
+ admin:{nome:'Administrador',abas:['dashboard','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','financeiro','fechamento','manutencao','inspecoes','usuarios','auditoria'],grava:true},
+ financeiro:{nome:'Financeiro',abas:['dashboard','imoveis','inquilinos','proprietarios','contratos','financeiro','fechamento','inspecoes'],grava:true},
+ corretor:{nome:'Corretor',abas:['dashboard','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','inspecoes'],grava:false},
+ manutencao:{nome:'Manutenção',abas:['dashboard','imoveis','fotos','agenda','manutencao','inspecoes'],grava:true},
+ consulta:{nome:'Consulta',abas:['dashboard','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','financeiro','fechamento','manutencao','inspecoes'],grava:false}
 };
 let perfilLogado=null, usuariosSistema=[], unsubUsuarios=null, unsubPerfilAtual=null, bloqueioForcado=false;
 function idUsuario(email){return String(email||'').trim().toLowerCase()}
@@ -4237,5 +4244,5 @@ window.renderFilaFotos = renderFilaFotos;
     window.atualizarPreviewFechamento();
 })();
 </script>
-<div class="ld-versao">LD Sistemas · versão 2026</div></body>
+<div class="ld-versao">LD Sistemas · versão 2026</div><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a52a77800965083b',t:'MTc5MzM2Mzc5OQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a52a77800965083b',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
