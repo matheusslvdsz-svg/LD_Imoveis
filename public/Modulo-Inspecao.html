@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060606">
+<title>Inspeção de Imóveis · LD Imóveis</title>
+<meta name="description" content="Checklist de vistoria, laudo em PDF e cronograma de inspeções — LD Imóveis">
+<style>
+/* ==========================================================================
+   LD IMÓVEIS · INSPEÇÃO DE IMÓVEIS · v2.1
+   Paleta herdada da Central de Sistemas:
+   --red #e50914 · --red2 #b80009 · --bg #060606 · --panel #0d0d0d
+   --card #151515 · --line #2b2b2b · --txt #f5f5f5 · --mut #9b9b9b
+   --green #36d17c · --gold #d6b36a
+   ========================================================================== */
+:root{
+  --red:#e50914;
+  --red2:#b80009;
+  --red-claro:#ff6565;
+  --bg:#060606;
+  --panel:#0d0d0d;
+  --card:#151515;
+  --card2:#0f0f0f;
+  --line:#2b2b2b;
+  --line2:#1e1e1e;
+  --txt:#f5f5f5;
+  --mut:#9b9b9b;
+  --mut2:#6c6c6c;
+  --green:#36d17c;
+  --gold:#d6b36a;
+  --raio:12px;
+  --barra:76px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--txt);
+  font:14px/1.5 Arial,Helvetica,sans-serif;min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0;font-weight:800;letter-spacing:-.02em}
+button,input,select,textarea{font:inherit}
+:focus-visible{outline:2px solid var(--red-claro);outline-offset:2px}
+::selection{background:rgba(229,9,20,.35)}
+
+/* ---------------- topo ---------------- */
+.top{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;gap:18px;
+  min-height:var(--barra);padding:10px max(16px,calc((100% - 1320px)/2));
+  background:rgba(8,8,8,.96);border-bottom:1px solid #262626;
+  backdrop-filter:blur(14px);
+}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.mark{
+  width:44px;height:44px;flex:none;border-radius:11px;
+  background:linear-gradient(145deg,var(--red),var(--red2));
+  display:grid;place-items:center;font-weight:900;font-size:15px;letter-spacing:-.5px;
+  box-shadow:0 6px 18px rgba(229,9,20,.28);
+}
+.brand b{display:block;font-size:13.5px;letter-spacing:-.01em;white-space:nowrap}
+.brand .sub{display:block;font-size:10px;color:var(--mut2);letter-spacing:.09em;text-transform:uppercase}
+
+nav#nav{display:flex;gap:6px;margin-left:auto;overflow-x:auto;scrollbar-width:none;padding:2px}
+nav#nav::-webkit-scrollbar{display:none}
+nav#nav button{
+  display:flex;align-items:center;gap:7px;flex:none;
+  background:transparent;border:1px solid transparent;color:var(--mut);
+  padding:9px 14px;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;
+  transition:.16s;white-space:nowrap;
+}
+nav#nav button:hover{color:var(--txt);background:#141414}
+nav#nav button.on{
+  background:linear-gradient(145deg,#1d1d1d,#141414);
+  border-color:#3a3a3a;color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+nav#nav button.on svg{stroke:var(--red-claro)}
+nav#nav svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ---------------- faixa de identidade ---------------- */
+.hero{
+  border-bottom:1px solid #202020;
+  background:
+    radial-gradient(circle at 84% 0,rgba(229,9,20,.13),transparent 32%),
+    linear-gradient(180deg,#101010,#080808);
+}
+.hero-in{padding:30px max(16px,calc((100% - 1320px)/2)) 24px;
+  display:grid;grid-template-columns:1fr 340px;gap:34px;align-items:end}
+.eyebrow{color:var(--red-claro);font-weight:900;letter-spacing:.18em;
+  font-size:10px;text-transform:uppercase}
+.hero h1{
+  font-size:clamp(26px,4vw,40px);line-height:1.05;margin:10px 0 12px;
+  letter-spacing:-.035em;max-width:640px;
+}
+.hero h1 em{color:var(--red);font-style:normal}
+.hero p{color:#a8a8a8;max-width:600px;line-height:1.6;font-size:14px;margin:0}
+.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.summary div{border:1px solid var(--line);border-radius:var(--raio);
+  background:var(--card2);padding:12px 13px}
+.summary b{display:block;font-size:21px;letter-spacing:-.03em;line-height:1.15}
+.summary span{color:#858585;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em}
+.summary div.alerta b{color:var(--red-claro)}
+
+/* ---------------- estrutura ---------------- */
+.wrap{max-width:1320px;margin:auto;padding:20px max(16px,calc((100% - 1320px)/2)) 96px}
+
+.card{
+  background:linear-gradient(145deg,#171717,#101010);
+  border:1px solid var(--line);border-radius:14px;
+  padding:16px 17px;margin-bottom:14px;
+}
+.card > h2{
+  font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;
+  color:#bdbdbd;margin-bottom:13px;display:flex;align-items:center;gap:9px;
+}
+.card > h2::before{
+  content:"";width:3px;height:13px;border-radius:2px;background:var(--red);flex:none;
+}
+.card > h2 .muted{text-transform:none;letter-spacing:0;font-weight:400}
+
+.grid{display:grid;gap:11px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+
+/* ---------------- campos ---------------- */
+label{display:block;font-size:9.5px;font-weight:800;color:var(--mut2);
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px}
+input,select,textarea{
+  width:100%;background:#111;border:1px solid #303030;color:var(--txt);
+  border-radius:10px;padding:11px 12px;font-size:14px;transition:.15s;
+}
+input::placeholder,textarea::placeholder{color:#5a5a5a}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(229,9,20,.12);
+  background:#0c0c0c;
+}
+select{appearance:none;background-image:
+  url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:11px;padding-right:32px}
+textarea{resize:vertical;min-height:76px}
+input[type="date"]{color-scheme:dark}
+input[type="checkbox"]{accent-color:var(--red)}
+
+/* ---------------- botões ---------------- */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:linear-gradient(145deg,#1e1e1e,#161616);
+  border:1px solid #343434;color:var(--txt);
+  padding:10px 15px;border-radius:10px;font-size:13px;font-weight:700;
+  cursor:pointer;transition:.16s;white-space:nowrap;
+}
+.btn:hover{border-color:#5c5c5c;background:#202020;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.red{
+  background:linear-gradient(145deg,var(--red),var(--red2));
+  border-color:#ff3b45;color:#fff;font-weight:800;
+  box-shadow:0 6px 18px rgba(229,9,20,.22);
+}
+.btn.red:hover{background:linear-gradient(145deg,#f3121e,#c50009);border-color:#ff5f67}
+.btn.green{background:linear-gradient(145deg,#2fae67,#228a51);border-color:#3ec97b;color:#04140c;font-weight:800}
+.btn.ghost{background:transparent;border-color:#333}
+.btn.ghost:hover{background:#171717}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;flex:none}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--mut);font-size:12px}
+.hide{display:none!important}
+.mono{font-family:Consolas,ui-monospace,Menlo,monospace;font-size:12px}
+
+/* ---------------- checklist ---------------- */
+.grupo{
+  border:1px solid var(--line);border-radius:var(--raio);margin-bottom:9px;
+  overflow:hidden;background:#121212;
+}
+.grupo > .cab{
+  display:flex;align-items:center;gap:11px;padding:12px 14px;
+  background:linear-gradient(145deg,#1a1a1a,#131313);cursor:pointer;user-select:none;
+  border-left:3px solid var(--red);transition:.15s;
+}
+.grupo.col > .cab{border-left-color:#3a3a3a}
+.grupo > .cab:hover{background:#1e1e1e}
+.grupo > .cab .num{
+  width:25px;height:25px;border-radius:7px;background:#262626;
+  display:grid;place-items:center;font-size:11px;font-weight:900;color:var(--mut);flex:none;
+}
+.grupo > .cab h3{font-size:13px;flex:1;letter-spacing:-.01em}
+.grupo > .cab .mini{font-size:10.5px;color:var(--mut2);font-weight:800;
+  background:#1c1c1c;padding:3px 8px;border-radius:20px;flex:none}
+.grupo .itens{padding:2px 0}
+.grupo.col .itens{display:none}
+
+.item{
+  display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;
+  padding:10px 14px;border-top:1px solid var(--line2);
+}
+.item:first-child{border-top:none}
+.item:hover{background:rgba(255,255,255,.017)}
+.item .txt{font-size:13px;line-height:1.45;min-width:0}
+.item .txt .id{color:var(--mut2);font-weight:800;font-size:10.5px;margin-right:7px;
+  font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:8.5px;font-weight:900;padding:2px 6px;
+  border-radius:5px;margin-left:7px;vertical-align:1.5px;letter-spacing:.04em}
+.tag.crit{background:rgba(229,9,20,.14);color:#ff8b91;border:1px solid rgba(229,9,20,.3)}
+.tag.novo{background:rgba(214,179,106,.12);color:var(--gold);border:1px solid rgba(214,179,106,.28)}
+
+.notas{display:flex;gap:5px;flex:none}
+.notas button{
+  width:38px;height:36px;border-radius:9px;border:1px solid #333;
+  background:#0e0e0e;color:var(--mut);font-weight:800;font-size:13px;
+  cursor:pointer;transition:.14s;
+}
+.notas button:hover{border-color:#5a5a5a;color:var(--txt);transform:translateY(-1px)}
+.notas button[data-v="3"].on{background:var(--green);border-color:var(--green);color:#04140c;box-shadow:0 4px 12px rgba(54,209,124,.28)}
+.notas button[data-v="2"].on{background:#2b7f56;border-color:#3b9f6c;color:#eafff4}
+.notas button[data-v="1"].on{background:var(--gold);border-color:var(--gold);color:#1a1204;box-shadow:0 4px 12px rgba(214,179,106,.25)}
+.notas button[data-v="0"].on{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 4px 12px rgba(229,9,20,.3)}
+.notas button[data-v="na"].on{background:#3a3a3a;border-color:#575757;color:#fff}
+
+/* ---------------- placar ---------------- */
+.placar{
+  position:fixed;left:0;right:0;bottom:0;z-index:45;
+  background:rgba(8,8,8,.97);border-top:1px solid #2b2b2b;
+  padding:10px max(16px,calc((100% - 1320px)/2));
+  backdrop-filter:blur(14px);
+}
+.placar .inner{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.score{font-size:27px;font-weight:900;letter-spacing:-.04em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.score small{font-size:10.5px;font-weight:700;color:var(--mut2);letter-spacing:0}
+.pill{font-size:10px;font-weight:900;padding:6px 12px;border-radius:20px;
+  letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.pill.ok{background:rgba(54,209,124,.13);color:var(--green);border:1px solid rgba(54,209,124,.3)}
+.pill.warn{background:rgba(214,179,106,.13);color:var(--gold);border:1px solid rgba(214,179,106,.3)}
+.pill.bad{background:rgba(229,9,20,.13);color:#ff8b91;border:1px solid rgba(229,9,20,.32)}
+.pill.blk{background:var(--red);color:#fff;border:1px solid #ff3b45;
+  box-shadow:0 0 0 3px rgba(229,9,20,.16)}
+.prog{flex:1;min-width:100px;height:6px;background:#242424;border-radius:20px;overflow:hidden}
+.prog > i{display:block;height:100%;background:var(--green);width:0;
+  border-radius:20px;transition:width .25s}
+
+/* ---------------- tabelas ---------------- */
+.tabela-rolagem{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:11px 11px;border-bottom:1px solid var(--line2);
+  vertical-align:middle}
+th{
+  font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut2);
+  font-weight:900;background:#131313;position:sticky;top:0;
+}
+tbody tr:hover td{background:rgba(255,255,255,.022)}
+td b{color:#fff}
+
+/* ---------------- avisos e estados ---------------- */
+.aviso{
+  border:1px solid rgba(214,179,106,.26);border-left:3px solid var(--gold);
+  background:rgba(214,179,106,.06);padding:12px 14px;border-radius:0 10px 10px 0;
+  font-size:12.5px;margin-bottom:12px;line-height:1.55;
+}
+.aviso.red{border-color:rgba(229,9,20,.28);border-left-color:var(--red);background:rgba(229,9,20,.06)}
+.aviso.blue{border-color:rgba(90,150,210,.26);border-left-color:#5b9bd5;background:rgba(91,155,213,.06)}
+.aviso b{color:#fff}
+
+.vazio{padding:30px 12px;text-align:center;color:var(--mut2);font-size:13px;
+  display:flex;flex-direction:column;align-items:center;gap:10px}
+.vazio svg{width:30px;height:30px;stroke:#3a3a3a;fill:none;stroke-width:1.5}
+
+.kpi{
+  background:linear-gradient(145deg,#181818,#101010);
+  border:1px solid var(--line);border-radius:var(--raio);padding:14px;
+}
+.kpi b{display:block;font-size:26px;font-weight:900;letter-spacing:-.04em;line-height:1.1}
+.kpi span{font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--mut2);font-weight:800}
+
+/* ---------------- pendências ---------------- */
+.pend{
+  border:1px solid var(--line);border-radius:var(--raio);padding:13px;
+  margin-bottom:10px;background:#121212;
+}
+.pend .topo{display:flex;justify-content:space-between;gap:10px;
+  align-items:flex-start;margin-bottom:11px}
+.pend .topo .quem{font-size:12.5px;line-height:1.5;min-width:0}
+
+/* ---------------- impressão ---------------- */
+#printArea{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  .top,.hero,.placar,.wrap,.noprint{display:none!important}
+  #printArea{display:block}
+  #printArea h1{font-size:18px;margin-bottom:2px}
+  #printArea table{font-size:10.5px}
+  #printArea th,#printArea td{border:1px solid #999;color:#000;padding:4px 6px}
+  #printArea th{background:#eee;position:static}
+  .prt-head{border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}
+  .prt-b{font-weight:800}
+}
+
+/* ---------------- responsivo ---------------- */
+@media (max-width:980px){
+  .hero-in{grid-template-columns:1fr;gap:20px}
+  .summary{grid-template-columns:repeat(4,1fr)}
+  .g4{grid-template-columns:1fr 1fr}
+}
+@media (max-width:760px){
+  :root{--barra:64px}
+  .brand .sub{display:none}
+  .brand b{font-size:12.5px}
+  nav#nav button{padding:8px 11px;font-size:12px}
+  nav#nav button svg{width:14px;height:14px}
+  .mark{width:38px;height:38px;border-radius:9px;font-size:13px}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .item{grid-template-columns:1fr;gap:9px;padding:11px 13px}
+  .notas{justify-content:space-between}
+  .notas button{flex:1;width:auto;height:40px;font-size:14px}
+  .summary{grid-template-columns:1fr 1fr}
+  .placar{padding:9px 14px;padding-bottom:calc(9px + env(safe-area-inset-bottom))}
+  .score{font-size:23px}
+  .wrap{padding-bottom:112px}
+}
+
+/* telas muito estreitas: só a marca, navegação rolando */
+@media (max-width:520px){
+  .chk-inline{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);
+    text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer}
+  .chk-inline input{width:auto;margin:0}
+  #tabelaControle table td:last-child{white-space:nowrap}
+  #tabelaControle .venc{color:var(--red-claro);font-weight:700}
+  #tabelaControle .prox{font-variant-numeric:tabular-nums}
+  .regras-mini{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .regras-mini h3{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut);
+    margin:0 0 7px}
+  .regras-mini table{font-size:12.5px}
+  @media (max-width:760px){
+    .regras-mini{grid-template-columns:1fr}
+    #kpisControle{grid-template-columns:1fr 1fr}
+    /* no celular: código, situação, próxima e status bastam */
+    #tabelaControle table th:nth-child(2), #tabelaControle table td:nth-child(2),
+    #tabelaControle table th:nth-child(3), #tabelaControle table td:nth-child(3),
+    #tabelaControle table th:nth-child(4), #tabelaControle table td:nth-child(4),
+    #tabelaControle table th:nth-child(5), #tabelaControle table td:nth-child(5){
+      display:none}
+    #tabelaControle table td:last-child .row{flex-direction:column;gap:4px;align-items:stretch}
+    #tabelaControle table td, #tabelaControle table th{padding:9px 7px;font-size:12px}
+    #tabelaControle .pill{font-size:9px;padding:3px 7px}
+  }
+  /* Cronograma no celular: esconde TIPO para a tabela caber sem arrastar */
+  #rota table th:nth-child(3), #rota table td:nth-child(3),
+  #rota table th:nth-child(5), #rota table td:nth-child(5){display:none}
+  #rota table td, #rota table th{padding:10px 8px; font-size:12px}
+  #rota table td:last-child{white-space:nowrap}
+  #rota table td:last-child .mini, #rota table td:last-child .btn{padding:6px 9px; font-size:10px}
+
+  .brand b{display:none}
+  .top{gap:10px;padding-left:13px;padding-right:13px}
+  nav#nav{margin-left:auto}
+  nav#nav button{padding:8px 10px;gap:5px}
+  #pItens{display:none}
+  .hero-in{padding-top:22px}
+  .hero h1{font-size:24px}
+  .summary b{font-size:18px}
+  .card{padding:14px}
+  .btn{padding:10px 13px;font-size:12.5px}
+}
+
+body.somente-leitura #btSalvar, body.somente-leitura #btAddImovel, body.somente-leitura #btExemplo, body.somente-leitura #btImportar, body.somente-leitura #btTudo3, body.somente-leitura #btLimpar{display:none!important}
+.nuvem-status{position:fixed;right:14px;bottom:14px;z-index:80;background:#111;border:1px solid #333;border-radius:20px;padding:7px 11px;font-size:11px;color:#9b9b9b}.nuvem-status.ok{color:#62dc95;border-color:#245f3d}.nuvem-status.erro{color:#ff7d83;border-color:#7a2228}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="mark">LD</span>
+    <div>
+      <b>Inspeção de Imóveis</b>
+      <span class="sub">módulo operacional · v2.2</span>
+    </div>
+  </div>
+  <nav id="nav">
+    <button data-tab="nova" class="on">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Nova inspeção</button>
+    <button data-tab="laudos">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+      Laudos</button>
+    <button data-tab="rota">
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Cronograma</button>
+    <button data-tab="controle">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg>
+      Controle</button>
+    <button data-tab="painel">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+      Painel</button>
+    <button data-tab="ajuda">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg>
+      Ajuda</button>
+  </nav>
+</header>
+
+<section class="hero" id="hero">
+  <div class="hero-in">
+    <div>
+      <div class="eyebrow">LD Imóveis · vistorias</div>
+      <h1>Checklist de conservação<br>e <em>laudo na hora</em></h1>
+      <p>64 itens que se ajustam ao tipo do imóvel. A nota e o bloqueio de segurança são
+        calculados enquanto você preenche — e o laudo sai em PDF no mesmo dia.</p>
+    </div>
+    <div class="summary">
+      <div><b id="hLaudos">0</b><span>Laudos</span></div>
+      <div><b id="hBloq">0</b><span>Bloqueados</span></div>
+      <div><b id="hItens">64</b><span>Itens</span></div>
+      <div><b id="hCrit">13</b><span>Críticos</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+
+<!-- ==================== NOVA INSPEÇÃO ==================== -->
+<section id="tab-nova">
+
+  <div class="card">
+    <h2>Identificação do imóvel</h2>
+    <div class="grid g3">
+      <div><label>Código do imóvel</label><input id="fCodigo" list="listaImoveisReais" placeholder="Selecione um imóvel"><datalist id="listaImoveisReais"></datalist></div>
+      <div><label>Tipo</label>
+        <select id="fTipo">
+          <option value="R">Residencial (casa, apto, kitnet)</option>
+          <option value="C">Comercial (loja, sala)</option>
+          <option value="G">Galpão / depósito</option>
+        </select>
+      </div>
+      <div><label>Data da inspeção</label><input id="fData" type="date"></div>
+    </div>
+    <div class="grid g2" style="margin-top:11px">
+      <div><label>Endereço</label><input id="fEndereco" placeholder="Rua, nº, quadra e lote, bairro"></div>
+      <div><label>Proprietário</label><input id="fProprietario" placeholder="Nome do proprietário"></div>
+    </div>
+    <div class="grid g4" style="margin-top:11px">
+      <div><label>Tipo de vistoria</label>
+        <select id="fVistoria">
+          <option value="Entrada">Entrada (antes das chaves)</option>
+          <option value="Periódica">Periódica (semestral)</option>
+          <option value="Saída">Saída (fim de contrato)</option>
+          <option value="Rápida">Rápida externa</option>
+        </select>
+      </div>
+      <div><label>Responsável</label><input id="fResponsavel" placeholder="Quem vistoriou"></div>
+      <div><label>Leitura água</label><input id="fAgua" placeholder="0000"></div>
+      <div><label>Leitura luz</label><input id="fLuz" placeholder="0000"></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <label style="margin:0;display:flex;align-items:center;gap:9px;cursor:pointer;
+        text-transform:none;letter-spacing:0;font-size:13px;color:var(--txt);font-weight:400">
+        <input type="checkbox" id="fChaves"
+          style="width:18px;height:18px;accent-color:var(--red);flex:none">
+        Chaves e controles conferidos
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Checklist <span id="contItens" class="muted"></span></h2>
+    <div class="muted" style="margin-bottom:13px;line-height:1.6">
+      Nota de 0 a 3 por item. Use <b style="color:var(--txt)">—</b> para o que não existe no
+      imóvel (piscina em apartamento, mezanino). Itens com
+      <span class="tag crit">CRÍTICO</span> bloqueiam a locação se receberem nota 0.
+    </div>
+    <div class="row" style="margin-bottom:13px">
+      <button class="btn ghost" id="btAbrir">Abrir todos</button>
+      <button class="btn ghost" id="btFechar">Fechar todos</button>
+      <button class="btn ghost" id="btTudo3">Pendentes = 3</button>
+      <button class="btn ghost" id="btLimpar">Limpar notas</button>
+    </div>
+    <div id="checklist"></div>
+  </div>
+
+  <div class="card" id="cardPendencias">
+    <h2>Pendências <span class="muted" id="contPend"></span></h2>
+    <div class="muted" style="margin-bottom:13px;line-height:1.6">
+      Todo item com nota 0 ou 1 aparece aqui. Descreva o problema, confirme a prioridade e o
+      prazo. Padrão: <b style="color:var(--red-claro)">P1 em 7 dias</b>,
+      P2 em 30, P3 no próximo ciclo.
+    </div>
+    <div id="pendencias"></div>
+  </div>
+
+  <div class="card">
+    <h2>Observações e fechamento</h2>
+    <textarea id="fObs" placeholder="O que não se encaixa no checklist: relato do inquilino, conduta do condomínio, acesso difícil, desgaste natural × dano na saída…"></textarea>
+    <div class="row" style="margin-top:13px">
+      <button class="btn red" id="btSalvar">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+        Salvar laudo</button>
+      <button class="btn" id="btImprimir">
+        <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+        Imprimir / PDF</button>
+      <button class="btn ghost" id="btNovo">Novo laudo</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== LAUDOS ==================== -->
+<section id="tab-laudos" class="hide">
+  <div class="card">
+    <h2>Laudos salvos</h2>
+    <div class="row" style="margin-bottom:13px">
+      <input id="buscaLaudo" placeholder="Buscar por código, endereço ou responsável"
+        style="flex:1;min-width:220px">
+      <button class="btn ghost" id="btXLS">Baixar para Excel</button>
+      <button class="btn ghost" id="btCSV">Exportar CSV</button>
+      <button class="btn ghost" id="btBackup">Backup (.json)</button>
+    </div>
+    <div id="tabelaLaudos"></div>
+  </div>
+
+  <div class="card">
+    <h2>Comparar entrada × saída</h2>
+    <div class="muted" style="margin-bottom:13px;line-height:1.6">
+      Escolha o laudo de entrada e o de saída do mesmo imóvel. O sistema mostra item por item
+      o que piorou — é isso que sustenta a retenção de caução.
+    </div>
+    <div class="grid g2">
+      <div><label>Laudo de entrada</label><select id="selEntrada"></select></div>
+      <div><label>Laudo de saída</label><select id="selSaida"></select></div>
+    </div>
+    <div class="row" style="margin-top:11px"><button class="btn" id="btComparar">Comparar</button></div>
+    <div id="resultadoComparacao" style="margin-top:15px"></div>
+  </div>
+</section>
+
+<!-- ==================== CRONOGRAMA ==================== -->
+<section id="tab-rota" class="hide">
+  <div class="card">
+    <h2>Imóveis cadastrados</h2>
+    <div class="aviso blue">
+      <b>Não use nome de inquilino aqui.</b> Este cadastro é o que circula impresso.
+      Identifique por código — o vínculo código → inquilino fica no sistema gerencial.
+    </div>
+    <div class="grid g4">
+      <div><label>Código</label><input id="iCodigo" placeholder="LD-0012"></div>
+      <div><label>Região / bairro</label><input id="iRegiao" placeholder="Nova Carajás"></div>
+      <div><label>Tipo</label>
+        <select id="iTipo"><option value="R">Residencial</option>
+          <option value="C">Comercial</option><option value="G">Galpão</option></select>
+      </div>
+      <div><label>Situação</label>
+        <select id="iStatus"><option value="vago">Vago</option>
+          <option value="ocupado">Ocupado</option><option value="obra">Em obra</option></select>
+      </div>
+    </div>
+    <div style="margin-top:11px">
+      <label>Endereço ou link do Google Maps
+        <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--mut2)">
+          — cole o link do Maps, ou as coordenadas, ou o endereço escrito</span></label>
+      <input id="iEnd" placeholder="Cole aqui o link do Google Maps · ou -6.0673, -49.9023 · ou Rua 77A, Qd-54 Lt-01">
+    </div>
+    <div class="row" style="margin-top:11px">
+      <button class="btn red" id="btAddImovel">Adicionar imóvel</button>
+      <button class="btn ghost" id="btImportar">Importar lista (CSV)</button>
+      <input type="file" id="fileCSV" accept=".csv,.txt" class="hide">
+      <button class="btn ghost" id="btExemplo">Carregar exemplos</button>
+      <span class="muted" id="msgImovel"></span>
+    </div>
+    <div id="tabelaImoveis" style="margin-top:15px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Capacidade da equipe</h2>
+    <div class="grid g4">
+      <div><label>Dias de campo / semana</label><input id="cDias" type="number" value="3" min="1" max="7"></div>
+      <div><label>Horas por dia</label><input id="cHoras" type="number" value="5" min="1" max="12" step="0.5"></div>
+      <div><label>Deslocamento (min)</label><input id="cDesl" type="number" value="15" min="0" max="90"></div>
+      <div><label>Vistoria rápida quinzenal</label>
+        <select id="cRapida"><option value="nao">Não</option><option value="sim">Sim</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Rota do mês</h2>
+    <div class="row" style="margin-bottom:13px">
+      <button class="btn red" id="btGerarRota">Gerar rota</button>
+      <label class="chk-inline">
+        <input type="checkbox" id="cSoVencidas">
+        Incluir só imóveis com vistoria vencida ou vencendo em 7 dias
+      </label>
+      <button class="btn" id="btImprimirRota">Imprimir rota</button>
+    </div>
+    <div id="diagnostico"></div>
+    <div id="rota"></div>
+  </div>
+</section>
+
+<!-- ==================== CONTROLE DE VISTORIAS ==================== -->
+<section id="tab-controle" class="hide">
+  <div class="card">
+    <h2>Controle de vistorias</h2>
+    <div class="muted" style="margin-bottom:14px;line-height:1.65">
+      Cada imóvel tem uma <b>data prevista</b> de vistoria, calculada pela situação dele
+      (vago 30 dias · alto valor 15 dias · ocupado 180 dias) e pela data do último laudo.
+      <b>Nada é digitado duas vezes:</b> o cadastro vem da aba Cronograma e a última vistoria
+      vem dos laudos salvos.
+    </div>
+    <div class="grid g4" id="kpisControle"></div>
+    <div class="row" style="margin-top:14px">
+      <input id="buscaControle" placeholder="Buscar por código, região ou situação"
+             style="flex:1;min-width:200px">
+      <button class="btn ghost" id="btSoPendentes">Só pendentes</button>
+      <button class="btn ghost" id="btAtualizarControle">Atualizar</button>
+    </div>
+    <div id="alertasControle" style="margin-top:13px"></div>
+    <div id="tabelaControle" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Regra aplicada — folha de bolso</h2>
+    <div class="muted" style="margin-bottom:14px">
+      A mesma regra do documento (Anexo D). Confira antes de dar a nota.
+    </div>
+    <div id="regrasControle"></div>
+  </div>
+</section>
+
+<!-- ==================== PAINEL ==================== -->
+<section id="tab-painel" class="hide">
+  <div class="card">
+    <h2>Situação dos laudos</h2>
+    <div class="grid g4" id="kpis"></div>
+  </div>
+  <div class="card">
+    <h2>Controle de vistorias</h2>
+    <div id="painelControle"></div>
+  </div>
+  <div class="card">
+    <h2>Imóveis bloqueados</h2>
+    <div id="listaBloqueados"></div>
+  </div>
+  <div class="card">
+    <h2>Pendências por prioridade</h2>
+    <div id="listaPendencias"></div>
+  </div>
+</section>
+
+<!-- ==================== AJUDA ==================== -->
+<section id="tab-ajuda" class="hide">
+  <div class="card">
+    <h2>Como usar</h2>
+    <ol style="line-height:1.95;padding-left:20px;font-size:13.5px;color:#d8d8d8">
+      <li><b style="color:#fff">Nova inspeção:</b> preencha a identificação e o tipo do imóvel.
+        O checklist se ajusta sozinho — apartamento não mostra item de galpão.</li>
+      <li>Dê nota de 0 a 3 em cada item. Use <b style="color:#fff">—</b> quando o item não
+        existe no imóvel.</li>
+      <li>O placar no rodapé calcula a média em tempo real e avisa se há bloqueio.</li>
+      <li>Preencha as pendências (aparecem automaticamente para notas 0 e 1).</li>
+      <li><b style="color:#fff">Salvar laudo.</b> Em <b style="color:#fff">Laudos</b> você
+        imprime, exporta para Excel ou compara entrada com saída.</li>
+      <li><b style="color:#fff">Controle:</b> a agenda de vistorias. Cada imóvel cadastrado no
+        Cronograma ganha uma data prevista — último laudo + a frequência da situação (vago 30
+        dias, alto valor 15, ocupado 180). Quem está vencido aparece em vermelho e o botão
+        <b style="color:#fff">Vistoriar</b> já abre a inspeção preenchida.</li>
+      <li><b style="color:#fff">Painel:</b> mostra as vistorias vencidas, as que vencem em 7
+        dias, os bloqueios e as pendências P1/P2/P3 — tudo vindo dos mesmos laudos.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Cálculo da nota</h2>
+    <div class="mono" style="background:#0b0b0b;border:1px solid var(--line);
+      border-radius:10px;padding:14px;margin-bottom:13px;text-align:center;color:#fff">
+      nota (%) = soma das notas ÷ (3 × itens avaliados) × 100
+    </div>
+    <div class="tabela-rolagem">
+      <table>
+        <thead><tr><th>Faixa</th><th>Classificação</th><th>Conduta</th></tr></thead>
+        <tbody id="tabelaFaixas"></tbody>
+      </table>
+    </div>
+    <div class="aviso red" style="margin-top:13px">
+      <b>Bloqueio é diferente de média.</b> Um imóvel pode ter 97% e estar bloqueado, se um item
+      crítico (elétrica, gás, estrutura, incêndio) recebeu nota 0. Média alta não libera imóvel
+      com risco de segurança.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Onde ficam os dados</h2>
+    <p style="font-size:13.5px;line-height:1.75;color:#d8d8d8">
+      Tudo fica <b style="color:#fff">no navegador deste computador</b> (armazenamento local).
+      Não sobe para nenhum servidor. Isso significa:
+    </p>
+    <ul style="line-height:1.95;font-size:13.5px;color:#d8d8d8">
+      <li>Funciona sem internet — importante em vistoria de campo.</li>
+      <li>Trocar de navegador ou limpar os dados do site <b style="color:#fff">apaga os
+        laudos</b>.</li>
+      <li>Use <b style="color:#fff">Backup (.json)</b> toda semana e guarde o arquivo.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Privacidade</h2>
+    <div class="aviso">
+      Este módulo <b>não tem campo para nome de inquilino</b>, de propósito. Lista de imóveis
+      com nome de morador é dado pessoal e não deve circular em PDF ou planilha por WhatsApp.
+      O vínculo código ↔ inquilino fica no sistema gerencial, que exige login.
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<!-- ==================== PLACAR ==================== -->
+<div class="placar noprint" id="placar">
+  <div class="inner">
+    <div class="score" id="pScore">—<small> / 100</small></div>
+    <div class="pill" id="pClasse">sem notas</div>
+    <div class="pill blk hide" id="pBloqueio">bloqueado</div>
+    <div class="prog"><i id="pBar"></i></div>
+    <div class="muted" id="pItens">0 de 0 avaliados</div>
+    <div class="muted" id="pPend">0 pendências</div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+/* ============================================================
+   DADOS
+   ============================================================ */
+const BASE = {"versao":"2.2","notas":"Fonte única do checklist. Alimenta o modulo HTML, a planilha e os PDFs. Nota 0–3. crítico=true significa: nota 0 bloqueia a locação independentemente da média.","tipos":{"R":"Residencial (casa, apartamento, kitnet)","C":"Comercial (loja, sala)","G":"Galpão / depósito"},"grupos":[{"id":"1","nome":"Fachada e área externa","aplica":"Todos os tipos","itens":[{"id":"1.1","t":"Pintura externa (descascamento, manchas, mofo)","tipos":["R","C","G"],"critico":false},{"id":"1.2","t":"Calçada, rampa e acesso (trincas, desníveis, risco de queda)","tipos":["R","C","G"],"critico":false},{"id":"1.3","t":"Portão e porta de entrada (funcionamento, fechadura, automação, interfone)","tipos":["R","C"],"critico":false},{"id":"1.4","t":"Janelas externas (vidros, esquadrias, vedação, telas)","tipos":["R","C"],"critico":false},{"id":"1.5","t":"Telhado, calhas e rufos (telhas soltas, infiltrações, entupimento)","tipos":["R","C","G"],"critico":true},{"id":"1.6","t":"Jardim, piso externo e drenagem","tipos":["R"],"critico":false},{"id":"1.7","t":"Área de lazer quando houver (piscina, churrasqueira, deck)","tipos":["R"],"critico":false},{"id":"1.8","t":"Sinais de praga urbana (cupim, formigueiro, ninhos, fezes, rastros)","tipos":["R","C","G"],"critico":false,"novo":true}]},{"id":"2","nome":"Área social (sala, hall, corredores)","aplica":"Residencial e comercial","itens":[{"id":"2.1","t":"Pintura de paredes e teto (manchas, trincas, mofo)","tipos":["R","C"],"critico":false},{"id":"2.2","t":"Piso e rodapés (desgaste, trincas, desníveis, barulhos)","tipos":["R","C"],"critico":false},{"id":"2.3","t":"Forro (manchas de infiltração, placas soltas)","tipos":["R","C"],"critico":false},{"id":"2.4","t":"Portas internas (dobradiças, fechaduras, batentes, ajuste)","tipos":["R","C"],"critico":false},{"id":"2.5","t":"Janelas (esquadrias, trilhos, vidros, telas)","tipos":["R","C"],"critico":false},{"id":"2.6","t":"Iluminação (lâmpadas, luminárias, interruptores)","tipos":["R","C"],"critico":false},{"id":"2.7","t":"Tomadas e pontos elétricos (funcionamento, fixação)","tipos":["R","C"],"critico":true},{"id":"2.8","t":"Lavabo/social quando houver (mesmos itens de banheiro)","tipos":["R","C"],"critico":false},{"id":"2.9","t":"Odor de mofo, esgoto ou coisa fechada (imóvel sem uso)","tipos":["R","C"],"critico":false,"novo":true},{"id":"2.10","t":"Mofo e bolor em paredes e teto (umidade do período chuvoso)","tipos":["R","C"],"critico":false,"novo":true}]},{"id":"3","nome":"Dormitórios","aplica":"Residencial","itens":[{"id":"3.1","t":"Pintura, piso e forro","tipos":["R"],"critico":false},{"id":"3.2","t":"Porta e janela (vedação, ruído, trava de segurança)","tipos":["R"],"critico":false},{"id":"3.3","t":"Tomadas e interruptores","tipos":["R"],"critico":true},{"id":"3.4","t":"Armários embutidos quando houver (dobradiças, corrediças, odores, fundo úmido)","tipos":["R"],"critico":false},{"id":"3.5","t":"Ventilação e iluminação","tipos":["R"],"critico":false},{"id":"3.6","t":"Ar-condicionado quando houver (filtros, dreno, funcionamento)","tipos":["R","C"],"critico":false},{"id":"3.7","t":"Telas e proteção contra insetos (mosquiteiro)","tipos":["R"],"critico":false,"novo":true}]},{"id":"4","nome":"Cozinha e área de serviço","aplica":"Residencial","itens":[{"id":"4.1","t":"Bancadas e cuba (trincas, vedação, manchas)","tipos":["R"],"critico":false},{"id":"4.2","t":"Armários (fixação, dobradiças, odores)","tipos":["R"],"critico":false},{"id":"4.3","t":"Pia, torneira e sifão (vazamentos, entupimento)","tipos":["R"],"critico":false},{"id":"4.4","t":"Instalação de gás (registro, mangueira dentro da validade, vedação)","tipos":["R"],"critico":true},{"id":"4.5","t":"Exaustão/coifa","tipos":["R"],"critico":false},{"id":"4.6","t":"Tomadas específicas (fogão, forno, geladeira, máquina de lavar)","tipos":["R"],"critico":true},{"id":"4.7","t":"Tanque e área de varal","tipos":["R"],"critico":false},{"id":"4.8","t":"Piso antiderrapante quando houver","tipos":["R"],"critico":false}]},{"id":"5","nome":"Banheiros","aplica":"Residencial e comercial","itens":[{"id":"5.1","t":"Rejuntamento e azulejos (falhas, fungos)","tipos":["R","C"],"critico":false},{"id":"5.2","t":"Vaso sanitário (vedação, descarga, fixação)","tipos":["R","C"],"critico":false},{"id":"5.3","t":"Box, vidro e kit hidráulico","tipos":["R","C"],"critico":false},{"id":"5.4","t":"Pia, torneira e sifão","tipos":["R","C"],"critico":false},{"id":"5.5","t":"Espelho e acessórios","tipos":["R","C"],"critico":false},{"id":"5.6","t":"Extrator/ventilação","tipos":["R","C"],"critico":false},{"id":"5.7","t":"Chuveiro (resistência, registro, aterramento, vazamentos)","tipos":["R","C"],"critico":true}]},{"id":"6","nome":"Sistemas do imóvel","aplica":"Todos os tipos","itens":[{"id":"6.1","t":"Elétrica: quadro identificado, disjuntores, DR quando exigido, ausência de fiação emendada ou aparente, aterramento","tipos":["R","C","G"],"critico":true},{"id":"6.2","t":"Hidráulica: vazamentos visíveis, pressão da água, registros funcionando","tipos":["R","C","G"],"critico":false},{"id":"6.3","t":"Gás: central, tubulação, registro e ventilação","tipos":["R","C","G"],"critico":true},{"id":"6.4","t":"Climatização: ar-condicionado, ventiladores, drenos sem gotejamento","tipos":["R","C"],"critico":false},{"id":"6.5","t":"Segurança: interfone, câmeras, portão automático, fechaduras, detectores","tipos":["R","C"],"critico":false},{"id":"6.6","t":"Vaga de garagem (piso, demarcação, portão)","tipos":["R","C"],"critico":false},{"id":"6.7","t":"Caixa d'água: tampa, limpeza e data da última higienização","tipos":["R","C"],"critico":false,"novo":true}]},{"id":"7","nome":"Bloco comercial — lojas e salas","aplica":"Somente comercial","itens":[{"id":"7.1","t":"Vitrine e fachada (vidros, esquadrias, iluminação de fachada, letreiro)","tipos":["C"],"critico":false},{"id":"7.2","t":"Piso comercial (porcelanato/granito, trincas, rodapé)","tipos":["C"],"critico":false},{"id":"7.3","t":"Forro e luminárias plafon","tipos":["C"],"critico":false},{"id":"7.4","t":"Pontos de energia e capacidade elétrica (monofásico/trifásico)","tipos":["C"],"critico":true},{"id":"7.5","t":"WC de funcionários e de clientes","tipos":["C"],"critico":false},{"id":"7.6","t":"Divisórias e forro de gesso","tipos":["C"],"critico":false},{"id":"7.7","t":"Climatização (split ou central)","tipos":["C"],"critico":false},{"id":"7.8","t":"Mezanino quando houver (escada, guarda-corpo)","tipos":["C"],"critico":false}]},{"id":"8","nome":"Bloco galpão","aplica":"Somente galpão","itens":[{"id":"8.1","t":"Estrutura (pilares, treliças, telhas, iluminação zenital, infiltrações)","tipos":["G"],"critico":true},{"id":"8.2","t":"Piso industrial (juntas, trincas, nivelamento, capacidade)","tipos":["G"],"critico":false},{"id":"8.3","t":"Portões de carga (dimensões, funcionamento, automação)","tipos":["G"],"critico":false},{"id":"8.4","t":"Rede de combate a incêndio (hidrantes, extintores, sprinklers, validade dos laudos)","tipos":["G"],"critico":true},{"id":"8.5","t":"Instalações elétricas de força e quadros","tipos":["G"],"critico":true},{"id":"8.6","t":"Escritório anexo e vestiário","tipos":["G"],"critico":false},{"id":"8.7","t":"Pátio de manobra, drenagem e cercania","tipos":["G"],"critico":false},{"id":"8.8","t":"Documentação de habite-se/AVCB quando exigível","tipos":["G"],"critico":false},{"id":"8.9","t":"Sinalização de rota de fuga e iluminação de emergência","tipos":["G","C"],"critico":true,"novo":true}]}],"notas_descricao":[{"nota":3,"rotulo":"Ótimo","desc":"Novo ou em perfeito estado, sem reparo necessário. Prazo: nenhum."},{"nota":2,"rotulo":"Bom","desc":"Leve desgaste de uso, estética preservada, não exige reparo. Prazo: nenhum."},{"nota":1,"rotulo":"Regular","desc":"Desgaste visível, pequeno defeito, reparo simples recomendado. Prazo: P3 ou P2."},{"nota":0,"rotulo":"Crítico","desc":"Defeito funcional, dano ou risco de segurança. Prazo: P1 se risco, senão P2."}],"faixas":[{"min":90,"max":100,"rotulo":"ÓTIMO","conduta":"Pronto para locação; manter manutenção rotineira."},{"min":75,"max":89.99,"rotulo":"BOM","conduta":"Locável; pequenos ajustes que valorizam a visita."},{"min":60,"max":74.99,"rotulo":"REGULAR","conduta":"Reparos programados antes de nova locação; reavaliar preço."},{"min":40,"max":59.99,"rotulo":"RUIM","conduta":"Reforma parcial necessária; risco de afastar candidatos."},{"min":0,"max":39.99,"rotulo":"CRÍTICO","conduta":"Intervenção urgente; suspender divulgação."}],"prioridades":[{"cod":"P1","prazo":7,"rotulo":"Urgente","desc":"Risco de segurança e itens que inviabilizam a locação. Nota 0 em qualquer item crítico."},{"cod":"P2","prazo":30,"rotulo":"Importante","desc":"Afeta apresentação e valor percebido. Nota 0 em item não crítico; nota 1 em item crítico."},{"cod":"P3","prazo":90,"rotulo":"Programado","desc":"Cosmético e preventivo. Nota 1 em item comum."}],"frequencia":[{"situacao":"vago","rotulo":"Imóvel vago","dias":30,"desc":"Inspeção completa a cada 30 dias.","obs":"Base da carteira."},{"situacao":"alto_valor","rotulo":"Alto valor ou vacância acima de 60 dias","dias":15,"desc":"Inspeção a cada 15 dias enquanto durar a vacância.","obs":"Onde a vistoria externa protege dinheiro."},{"situacao":"ocupado","rotulo":"Imóvel ocupado","dias":180,"desc":"Inspeção semestral.","obs":"Fora da rota mensal."},{"situacao":"obra","rotulo":"Em obra / reforma","dias":null,"desc":"Fora do controle periódico até a obra terminar.","obs":"Reinspecionar antes de anunciar."}]};
+
+const LS_LAUDOS = 'ld_inspecoes_v2';
+const LS_IMOVEIS = 'ld_imoveis_v2';
+
+/* Armazenamento: usa localStorage quando disponivel. Em previa/sandbox o
+   navegador bloqueia, entao cai para memoria e avisa o usuario. */
+const MEM = {};
+let AVISOU = false;
+function lsOk(){
+  try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }
+  catch(e){ return false; }
+}
+const TEM_LS = lsOk();
+const ler = k => {
+  if (!TEM_LS) return MEM[k] || [];
+  try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e){ return MEM[k] || []; }
+};
+const gravar = (k,v) => {
+  if (window.LD_INSPECAO_SOMENTE_LEITURA) {
+    alert('Seu perfil possui acesso somente para consulta.');
+    return false;
+  }
+  MEM[k] = v;
+  if (TEM_LS) {
+    try { localStorage.setItem(k, JSON.stringify(v)); }
+    catch(e){ console.warn('[Inspeção] cache local indisponível', e); }
+  }
+  if (window.LD_INSPECAO_NUVEM) window.LD_INSPECAO_NUVEM.sincronizar(k, v);
+  return true;
+};
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money0 = n => (Math.round(n*10)/10).toLocaleString('pt-BR');
+
+/* estado da inspeção em andamento */
+let atual = { notas:{}, pendencias:{} };
+
+/* ============================================================
+   NAVEGAÇÃO
+   ============================================================ */
+document.querySelectorAll('#nav button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#nav button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    ['nova','laudos','rota','controle','painel','ajuda'].forEach(t => {
+      document.getElementById('tab-'+t).classList.toggle('hide', t !== b.dataset.tab);
+    });
+    document.getElementById('placar').classList.toggle('hide', b.dataset.tab !== 'nova');
+    document.getElementById('hero').classList.toggle('hide', b.dataset.tab !== 'nova');
+    document.getElementById('btImprimirRota').classList.toggle('hide', b.dataset.tab !== 'rota');
+    if (b.dataset.tab === 'laudos') renderLaudos();
+    if (b.dataset.tab === 'controle') renderControle();
+    if (b.dataset.tab === 'rota') { renderImoveis(); }
+    if (b.dataset.tab === 'painel') renderPainel();
+    window.scrollTo(0,0);
+  };
+});
+
+/* ============================================================
+   CHECKLIST
+   ============================================================ */
+function itensDoTipo(tipo){
+  const out = [];
+  BASE.grupos.forEach(g => {
+    const itens = g.itens.filter(i => i.tipos.includes(tipo));
+    if (itens.length) out.push({ ...g, itens });
+  });
+  return out;
+}
+
+function renderChecklist(){
+  const tipo = document.getElementById('fTipo').value;
+  const grupos = itensDoTipo(tipo);
+  const html = grupos.map(g => `
+    <div class="grupo" data-g="${g.id}">
+      <div class="cab">
+        <span class="num">${g.id}</span>
+        <h3>${esc(g.nome)}</h3>
+        <span class="mini" data-mini="${g.id}"></span>
+      </div>
+      <div class="itens">
+        ${g.itens.map(i => `
+          <div class="item">
+            <div class="txt">
+              <span class="id">${i.id}</span>${esc(i.t)}
+              ${i.critico ? '<span class="tag crit">CRÍTICO</span>' : ''}
+              ${i.novo ? '<span class="tag novo">NOVO</span>' : ''}
+            </div>
+            <div class="notas" data-item="${i.id}">
+              <button data-v="3">3</button><button data-v="2">2</button>
+              <button data-v="1">1</button><button data-v="0">0</button>
+              <button data-v="na" title="Não existe neste imóvel">—</button>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+
+  const box = document.getElementById('checklist');
+  box.innerHTML = html;
+
+  box.querySelectorAll('.cab').forEach(c => {
+    c.onclick = () => c.parentElement.classList.toggle('col');
+  });
+  box.querySelectorAll('.notas button').forEach(b => {
+    b.onclick = () => {
+      const id = b.parentElement.dataset.item;
+      const v = b.dataset.v;
+      if (atual.notas[id] === v) delete atual.notas[id];
+      else atual.notas[id] = v;
+      sincronizarBotoes();
+      calcular();
+    };
+  });
+  sincronizarBotoes();
+  const n = grupos.reduce((s,g) => s + g.itens.length, 0);
+  document.getElementById('contItens').textContent =
+    `· ${n} itens aplicáveis a ${BASE.tipos[tipo]}`;
+  calcular();
+}
+
+function sincronizarBotoes(){
+  document.querySelectorAll('.notas').forEach(g => {
+    const v = atual.notas[g.dataset.item];
+    g.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  });
+  // contador por grupo
+  document.querySelectorAll('.grupo').forEach(g => {
+    const ids = [...g.querySelectorAll('.notas')].map(x => x.dataset.item);
+    const feitos = ids.filter(id => atual.notas[id] !== undefined).length;
+    const el = g.querySelector('[data-mini]');
+    if (el) el.textContent = `${feitos}/${ids.length}`;
+  });
+}
+
+/* ============================================================
+   CÁLCULO
+   ============================================================ */
+function todosItens(tipo){
+  const out = [];
+  BASE.grupos.forEach(g => g.itens.forEach(i => { if (i.tipos.includes(tipo)) out.push({...i, grupo:g.nome}); }));
+  return out;
+}
+
+function calcular(){
+  const tipo = document.getElementById('fTipo').value;
+  const itens = todosItens(tipo);
+  const avaliados = itens.filter(i => {
+    const v = atual.notas[i.id];
+    return v !== undefined && v !== 'na';
+  });
+  const soma = avaliados.reduce((s,i) => s + Number(atual.notas[i.id]), 0);
+  const media = avaliados.length ? (soma / (3 * avaliados.length)) * 100 : null;
+
+  const zeradosCriticos = itens.filter(i => i.critico && atual.notas[i.id] === '0');
+  const bloqueado = zeradosCriticos.length > 0;
+
+  let classe = null;
+  if (media !== null){
+    classe = BASE.faixas.find(f => media >= f.min && media <= f.max) || BASE.faixas[4];
+  }
+
+  // placar
+  const s = document.getElementById('pScore');
+  s.innerHTML = (media === null ? '—' : money0(media)) + '<small> / 100</small>';
+  const pc = document.getElementById('pClasse');
+  if (classe){
+    pc.textContent = classe.rotulo;
+    pc.className = 'pill ' + (media >= 75 ? 'ok' : media >= 60 ? 'warn' : 'bad');
+    pc.title = classe.conduta;
+  } else { pc.textContent = 'SEM NOTAS'; pc.className = 'pill'; }
+  document.getElementById('pBloqueio').classList.toggle('hide', !bloqueado);
+  document.getElementById('pBar').style.width = (media || 0) + '%';
+  document.getElementById('pBar').style.background = media === null ? '#3a3f4b'
+    : media >= 75 ? 'var(--green)' : media >= 60 ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('pItens').textContent = `${avaliados.length} de ${itens.length} avaliados`;
+  const pends = montarPendencias();
+  document.getElementById('pPend').textContent = `${pends.length} pendência${pends.length===1?'':'s'}`;
+
+  renderPendencias(pends);
+  return { media, classe, bloqueado, zeradosCriticos, pends };
+}
+
+function classificaPrioridade(item, nota){
+  if (nota === 0) return item.critico ? 'P1' : 'P2';
+  if (nota === 1) return item.critico ? 'P2' : 'P3';
+  return null;
+}
+
+function montarPendencias(){
+  const tipo = document.getElementById('fTipo').value;
+  const itens = todosItens(tipo);
+  const out = [];
+  itens.forEach(i => {
+    const v = atual.notas[i.id];
+    if (v === '0' || v === '1'){
+      const nota = Number(v);
+      const pr = classificaPrioridade(i, nota);
+      const salvo = atual.pendencias[i.id] || {};
+      out.push({
+        id: i.id, grupo: i.grupo, texto: i.t, nota, critico: i.critico,
+        prioridade: salvo.prioridade || pr,
+        prazoAuto: pr,
+        desc: salvo.desc || '',
+        responsavel: salvo.responsavel || '',
+        prazo: salvo.prazo || prazoISO(pr),
+        situacao: salvo.situacao || 'aberto'
+      });
+    }
+  });
+  return out;
+}
+
+function prazoISO(p){
+  const d = new Date();
+  d.setDate(d.getDate() + (BASE.prioridades.find(x => x.cod === p)?.prazo || 30));
+  return d.toISOString().slice(0,10);
+}
+
+function renderPendencias(pends){
+  const box = document.getElementById('pendencias');
+  document.getElementById('contPend').textContent = `· ${pends.length}`;
+  if (!pends.length){
+    box.innerHTML = `<div class="vazio">Nenhuma pendência. Notas 0 e 1 aparecem aqui automaticamente.</div>`;
+    return;
+  }
+  box.innerHTML = pends.map(p => `
+    <div class="pend">
+      <div class="topo">
+        <div class="quem"><b>${p.id}</b> · ${esc(p.texto)}
+          ${p.critico ? '<span class="tag crit">CRÍTICO</span>' : ''}</div>
+        <span class="pill ${p.nota===0?'bad':'warn'}">nota ${p.nota}</span>
+      </div>
+      <div class="grid g4">
+        <div><label>Prioridade</label>
+          <select data-pd="${p.id}" data-campo="prioridade">
+            ${BASE.prioridades.map(x => `<option value="${x.cod}" ${p.prioridade===x.cod?'selected':''}>${x.cod} — ${x.rotulo}</option>`).join('')}
+          </select></div>
+        <div><label>Prazo</label><input type="date" data-pd="${p.id}" data-campo="prazo" value="${p.prazo}"></div>
+        <div><label>Responsável pelo reparo</label><input data-pd="${p.id}" data-campo="responsavel" value="${esc(p.responsavel)}" placeholder="Proprietário / imobiliária"></div>
+        <div><label>Situação</label>
+          <select data-pd="${p.id}" data-campo="situacao">
+            ${['aberto','em execução','resolvido'].map(x => `<option ${p.situacao===x?'selected':''}>${x}</option>`).join('')}
+          </select></div>
+      </div>
+      <div style="margin-top:8px"><label>Descrição objetiva do problema</label>
+        <input data-pd="${p.id}" data-campo="desc" value="${esc(p.desc)}" placeholder="Ex.: infiltração ativa no forro do banheiro, mancha de 40cm"></div>
+    </div>`).join('');
+
+  box.querySelectorAll('[data-pd]').forEach(el => {
+    el.onchange = el.oninput = () => {
+      const id = el.dataset.pd;
+      atual.pendencias[id] = atual.pendencias[id] || {};
+      atual.pendencias[id][el.dataset.campo] = el.value;
+      if (el.dataset.campo === 'prioridade'){
+        atual.pendencias[id].prazo = prazoISO(el.value);
+        const inp = box.querySelector(`input[data-pd="${id}"][data-campo="prazo"]`);
+        if (inp) inp.value = atual.pendencias[id].prazo;
+      }
+      // atualiza só o contador, sem redesenhar (perderia o foco)
+      document.getElementById('pPend').textContent =
+        `${montarPendencias().length} pendências`;
+    };
+  });
+}
+
+/* ============================================================
+   SALVAR / IMPRIMIR
+   ============================================================ */
+function coletarLaudo(){
+  const tipo = document.getElementById('fTipo').value;
+  const r = calcular();
+  return {
+    id: 'L' + Date.now(),
+    criadoEm: new Date().toISOString(),
+    codigo: document.getElementById('fCodigo').value.trim(),
+    tipo, endereco: document.getElementById('fEndereco').value.trim(),
+    proprietario: document.getElementById('fProprietario').value.trim(),
+    data: document.getElementById('fData').value,
+    vistoria: document.getElementById('fVistoria').value,
+    responsavel: document.getElementById('fResponsavel').value.trim(),
+    agua: document.getElementById('fAgua').value.trim(),
+    luz: document.getElementById('fLuz').value.trim(),
+    chaves: document.getElementById('fChaves').checked,
+    obs: document.getElementById('fObs').value.trim(),
+    notas: { ...atual.notas },
+    pendencias: montarPendencias(),
+    media: r.media, classe: r.classe ? r.classe.rotulo : null,
+    bloqueado: r.bloqueado,
+    itensAvaliados: todosItens(tipo).filter(i => atual.notas[i.id] !== undefined && atual.notas[i.id] !== 'na').length
+  };
+}
+
+document.getElementById('btSalvar').onclick = () => {
+  const l = coletarLaudo();
+  if (!l.codigo){ alert('Preencha o código do imóvel antes de salvar.'); return; }
+  if (l.itensAvaliados === 0){ alert('Nenhum item foi avaliado. Dê nota pelo menos nos itens do checklist.'); return; }
+  const laudos = ler(LS_LAUDOS);
+  laudos.unshift(l);
+  gravar(LS_LAUDOS, laudos);
+  atualizarHero();
+  renderControle();
+  renderPainel();
+  alert(`Laudo salvo.\n\nImóvel: ${l.codigo}\nNota: ${l.media === null ? '—' : money0(l.media)}/100 (${l.classe})\n`
+    + (l.bloqueado ? 'ATENÇÃO: imóvel BLOQUEADO por item crítico com nota 0.' : 'Sem bloqueio de segurança.'));
+};
+
+document.getElementById('btNovo').onclick = () => {
+  if (!confirm('Limpar a tela para começar um novo laudo? O que não foi salvo será perdido.')) return;
+  ['fCodigo','fEndereco','fProprietario','fResponsavel','fAgua','fLuz','fObs'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fChaves').checked = false;
+  atual = { notas:{}, pendencias:{} };
+  document.getElementById('fData').value = new Date().toISOString().slice(0,10);
+  renderChecklist();
+};
+
+document.getElementById('btAbrir').onclick = () => document.querySelectorAll('.grupo').forEach(g => g.classList.remove('col'));
+document.getElementById('btFechar').onclick = () => document.querySelectorAll('.grupo').forEach(g => g.classList.add('col'));
+document.getElementById('btTudo3').onclick = () => {
+  if (!confirm('Marcar como 3 (Ótimo) todos os itens ainda sem nota? Use quando o imóvel estiver realmente bom.')) return;
+  document.querySelectorAll('.notas').forEach(g => {
+    if (atual.notas[g.dataset.item] === undefined) atual.notas[g.dataset.item] = '3';
+  });
+  sincronizarBotoes(); calcular();
+};
+document.getElementById('btLimpar').onclick = () => {
+  if (!confirm('Limpar todas as notas desta inspeção?')) return;
+  atual.notas = {}; atual.pendencias = {};
+  sincronizarBotoes(); calcular();
+};
+
+/* ============================================================
+   IMPRESSÃO DO LAUDO
+   ============================================================ */
+function imprimirLaudo(l){
+  const itens = todosItens(l.tipo);
+  const pends = l.pendencias || [];
+  const linhas = itens.map(i => {
+    const v = l.notas[i.id];
+    const nota = v === undefined || v === 'na' ? '—' : v;
+    return `<tr><td>${i.id}</td><td>${esc(i.t)}</td><td style="text-align:center">${nota}</td></tr>`;
+  }).join('');
+  const pLinhas = pends.length ? pends.map((p,n) => `<tr>
+      <td>${n+1}</td><td>${p.id} · ${esc(p.grupo)}</td><td>${esc(p.desc || p.texto)}</td>
+      <td style="text-align:center">${p.nota}</td><td style="text-align:center">${p.prioridade}</td>
+      <td>${esc(p.responsavel || '—')}</td><td>${p.prazo || '—'}</td><td>${esc(p.situacao || 'aberto')}</td>
+    </tr>`).join('') : '<tr><td colspan="8">Nenhuma pendência registrada.</td></tr>';
+
+  document.getElementById('printArea').innerHTML = `
+    <div class="prt-head">
+      <h1>Laudo de Inspeção de Imóvel</h1>
+      <div>LD Imóveis · documento operacional · ${esc(l.vistoria)}</div>
+    </div>
+    <table style="margin-bottom:12px">
+      <tr><th style="width:26%">Código do imóvel</th><td>${esc(l.codigo)}</td>
+          <th style="width:20%">Data</th><td>${esc(l.data || '—')}</td></tr>
+      <tr><th>Endereço</th><td colspan="3">${esc(l.endereco || '—')}</td></tr>
+      <tr><th>Proprietário</th><td>${esc(l.proprietario || '—')}</td>
+          <th>Responsável</th><td>${esc(l.responsavel || '—')}</td></tr>
+      <tr><th>Tipo</th><td>${esc(BASE.tipos[l.tipo])}</td>
+          <th>Tipo de vistoria</th><td>${esc(l.vistoria)}</td></tr>
+      <tr><th>Leitura água</th><td>${esc(l.agua || '—')}</td>
+          <th>Leitura luz</th><td>${esc(l.luz || '—')}</td></tr>
+      <tr><th>Chaves conferidas</th><td colspan="3">${l.chaves ? 'Sim' : 'Não'}</td></tr>
+      <tr><th>Nota geral</th><td class="prt-b">${l.media === null ? '—' : money0(l.media) + ' / 100'} — ${esc(l.classe || '—')}</td>
+          <th>Situação</th><td class="prt-b">${l.bloqueado ? 'BLOQUEADO' : 'Liberado'}</td></tr>
+    </table>
+
+    <h2 style="font-size:13px;margin:14px 0 6px">Checklist item por item</h2>
+    <table><thead><tr><th style="width:9%">Item</th><th>Descrição</th><th style="width:9%">Nota</th></tr></thead>
+      <tbody>${linhas}</tbody></table>
+
+    <h2 style="font-size:13px;margin:14px 0 6px">Pendências e reparos</h2>
+    <table><thead><tr><th style="width:4%">#</th><th style="width:14%">Item</th><th>Problema</th>
+      <th style="width:6%">Nota</th><th style="width:7%">Prior.</th><th style="width:13%">Responsável</th>
+      <th style="width:9%">Prazo</th><th style="width:10%">Situação</th></tr></thead>
+      <tbody>${pLinhas}</tbody></table>
+
+    <h2 style="font-size:13px;margin:14px 0 6px">Observações gerais</h2>
+    <div style="border:1px solid #999;min-height:52px;padding:6px">${esc(l.obs || '')}</div>
+
+    <p style="margin-top:18px;font-size:10px">
+      Nota = soma das notas ÷ (3 × itens avaliados) × 100. Item com nota 0 em segurança
+      (elétrica, gás, estrutura, incêndio) bloqueia a locação independentemente da média.
+      Documento gerado em ${new Date().toLocaleString('pt-BR')}.
+    </p>
+
+    <table style="margin-top:22px">
+      <tr><th style="width:50%">Responsável pela vistoria</th><th>Locatário / proprietário</th></tr>
+      <tr><td style="height:46px"></td><td></td></tr>
+    </table>`;
+  window.print();
+}
+
+document.getElementById('btImprimir').onclick = () => imprimirLaudo(coletarLaudo());
+
+
+/* ============================================================
+   CONTROLE DE VISTORIAS
+   Regra única: a data prevista sai do último laudo + a frequência
+   da situação do imóvel (BASE.frequencia). Nada é digitado à mão.
+   ============================================================ */
+const FREQ = {};
+(BASE.frequencia || []).forEach(f => { FREQ[f.situacao] = f; });
+
+const hojeISO = () => new Date().toISOString().slice(0, 10);
+const somaDias = (iso, n) => {
+  const d = new Date(iso + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+const diasEntre = (deISO, ateISO) =>
+  Math.round((new Date(ateISO + 'T12:00:00') - new Date(deISO + 'T12:00:00')) / 86400000);
+const brData = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '—';
+
+/* frequência em dias para um imóvel (null = fora do controle) */
+function frequenciaDoImovel(im){
+  if (im.status === 'obra') return null;
+  if (im.status === 'ocupado') return FREQ.ocupado ? FREQ.ocupado.dias : 180;
+  if (im.altoValor) return FREQ.alto_valor ? FREQ.alto_valor.dias : 15;
+  return FREQ.vago ? FREQ.vago.dias : 30;
+}
+
+/* situação de um imóvel: emdia | avencer | vencida | sem | obra */
+function controleDoImovel(im, laudos){
+  const meus = laudos.filter(l => l.codigo === im.codigo && l.data)
+    .sort((a, b) => String(b.data).localeCompare(String(a.data)));
+  const ultimo = meus[0] || null;
+  const dias = frequenciaDoImovel(im);
+  if (dias === null)
+    return { status: 'obra', ultimo, dias: null, proxima: null, restam: null, passa: null };
+  if (!ultimo)
+    return { status: 'sem', ultimo: null, dias, proxima: null, restam: null, passa: null };
+  const proxima = somaDias(ultimo.data, dias);
+  const restam = diasEntre(hojeISO(), proxima);   // negativo = atrasada
+  const status = restam < 0 ? 'vencida' : restam <= 7 ? 'avencer' : 'emdia';
+  return { status, ultimo, dias, proxima, restam, passa: restam < 0 ? -restam : 0 };
+}
+
+const ROTULO_STATUS = {
+  vencida: ['VENCIDA', 'bad'], avencer: ['A VENCER', 'warn'], emdia: ['EM DIA', 'ok'],
+  sem: ['SEM LAUDO', 'blk'], obra: ['EM OBRA', 'bad']
+};
+
+/* junta cadastro + laudos numa lista só */
+function controleGeral(){
+  const ims = ler(LS_IMOVEIS);
+  const laudos = ler(LS_LAUDOS);
+  const linhas = ims.map(im => ({ im, ...controleDoImovel(im, laudos) }));
+  const ordem = { vencida: 0, sem: 1, avencer: 2, emdia: 3, obra: 4 };
+  linhas.sort((a, b) =>
+    (ordem[a.status] - ordem[b.status]) ||
+    ((b.passa || 0) - (a.passa || 0)) ||
+    String(a.im.codigo).localeCompare(String(b.im.codigo)));
+  const cadastrados = new Set(ims.map(i => i.codigo));
+  const fora = [...new Set(laudos.map(l => l.codigo))].filter(c => c && !cadastrados.has(c));
+  return { linhas, fora, laudos };
+}
+
+function resumoControle(linhas){
+  const c = { vencida: 0, avencer: 0, emdia: 0, sem: 0, obra: 0 };
+  linhas.forEach(l => { c[l.status] = (c[l.status] || 0) + 1; });
+  return c;
+}
+
+let SO_PENDENTES = false;
+
+function renderControle(){
+  const { linhas, fora } = controleGeral();
+  const c = resumoControle(linhas);
+  const pct = n => linhas.length ? Math.round(n / linhas.length * 100) : 0;
+
+  document.getElementById('kpisControle').innerHTML = `
+    <div class="kpi"><span>Vencidas</span>
+      <b style="color:${c.vencida ? 'var(--red)' : 'var(--green)'}">${c.vencida}</b>
+      <span class="mini">${pct(c.vencida)}% da carteira</span></div>
+    <div class="kpi"><span>Vencem em 7 dias</span>
+      <b style="color:${c.avencer ? 'var(--gold)' : 'var(--green)'}">${c.avencer}</b>
+      <span class="mini">agendar esta semana</span></div>
+    <div class="kpi"><span>Em dia</span>
+      <b style="color:var(--green)">${c.emdia}</b>
+      <span class="mini">${c.sem} sem laudo · ${c.obra} em obra</span></div>
+    <div class="kpi"><span>Imóveis no controle</span>
+      <b>${linhas.length - c.obra}</b>
+      <span class="mini">${linhas.length} cadastrados</span></div>`;
+
+  /* avisos de topo */
+  const avisos = [];
+  if (fora.length) avisos.push(`<div class="aviso" style="margin-bottom:11px">
+      <b>${fora.length} código(s) com laudo fora do cadastro:</b> ${fora.map(esc).join(', ')}.
+      O controle só calcula a próxima vistoria de imóvel cadastrado.
+      <div class="row" style="margin-top:9px">
+        <button class="btn ghost" id="btCadastrarFora">Cadastrar automaticamente</button></div>
+    </div>`);
+  if (c.vencida) avisos.push(`<div class="aviso red" style="margin-bottom:11px">
+      <b>${c.vencida} vistoria(s) vencida(s).</b> A rotina da carteira vaga não está sendo
+      cumprida — gere a rota com o filtro de vencidas ligado.</div>`);
+  document.getElementById('alertasControle').innerHTML = avisos.join('');
+  const bf = document.getElementById('btCadastrarFora');
+  if (bf) bf.onclick = () => cadastrarForaDoCadastro(fora);
+
+  /* tabela */
+  const q = (document.getElementById('buscaControle').value || '').toLowerCase();
+  let lista = linhas.slice();
+  if (SO_PENDENTES) lista = lista.filter(l => l.status === 'vencida' || l.status === 'avencer' || l.status === 'sem');
+  if (q) lista = lista.filter(l => [l.im.codigo, l.im.regiao, l.im.status].join(' ').toLowerCase().includes(q));
+  document.getElementById('btSoPendentes').textContent = SO_PENDENTES ? 'Ver todos' : 'Só pendentes';
+
+  const box = document.getElementById('tabelaControle');
+  if (!linhas.length){
+    box.innerHTML = `<div class="vazio">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Nenhum imóvel cadastrado.<br>Cadastre na aba Cronograma para o controle começar a contar.</span></div>`;
+    return;
+  }
+  if (!lista.length){
+    box.innerHTML = `<div class="vazio">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <span>Nenhuma vistoria pendente com esse filtro.</span></div>`;
+    return;
+  }
+
+  box.innerHTML = `<div class="tabela-rolagem"><table><thead><tr>
+      <th>Código</th><th>Região</th><th>Situação</th><th>Regra</th>
+      <th>Última</th><th>Próxima</th><th>Status</th><th></th></tr></thead><tbody>
+    ${lista.map(l => {
+      const [rot, cls] = ROTULO_STATUS[l.status];
+      const detalhe = l.status === 'vencida' ? `· ${l.passa} dias de atraso`
+        : l.status === 'avencer' ? `· em ${l.restam} dia(s)` : '';
+      return `<tr data-vistoriar="${esc(l.im.codigo)}" style="cursor:pointer" title="Abrir vistoria de ${esc(l.im.codigo)}">
+        <td><b>${esc(l.im.codigo)}</b></td>
+        <td class="muted">${esc(l.im.regiao)}</td>
+        <td>${l.im.status === 'vago'
+            ? `<span class="pill warn">Vago${l.im.altoValor ? ' ★' : ''}</span>`
+            : l.im.status === 'obra' ? '<span class="pill bad">Em obra</span>'
+            : '<span class="pill ok">Ocupado</span>'}</td>
+        <td class="muted">${l.dias === null ? '—' : l.dias + ' d'}</td>
+        <td class="muted">${brData(l.ultimo && l.ultimo.data)}</td>
+        <td class="prox"><b class="${l.status === 'vencida' ? 'venc' : ''}">${brData(l.proxima)}</b></td>
+        <td><span class="pill ${cls}">${rot}</span>
+              <span class="mini" style="display:block;margin-top:3px">${detalhe}</span></td>
+        <td><div class="row" style="gap:5px">
+          <button class="btn ghost" data-vistoriar="${esc(l.im.codigo)}">Vistoriar</button>
+          ${l.ultimo ? `<button class="btn ghost" data-abrir="${esc(l.ultimo.id)}">Laudo</button>` : ''}
+          <button class="btn ghost" data-alto="${esc(l.im.codigo)}"
+            title="Alternar alto valor (15 dias)">${l.im.altoValor ? '★ 15d' : '30d'}</button>
+        </div></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+
+  box.querySelectorAll('[data-vistoriar]').forEach(b => b.onclick = ev => {
+    ev.stopPropagation();
+    iniciarVistoria(b.dataset.vistoriar);
+  });
+  box.querySelectorAll('[data-abrir]').forEach(b => b.onclick = () => carregarLaudo(b.dataset.abrir));
+  box.querySelectorAll('[data-alto]').forEach(b => b.onclick = () => {
+    const ims = ler(LS_IMOVEIS);
+    const im = ims.find(x => x.codigo === b.dataset.alto);
+    if (!im) return;
+    im.altoValor = !im.altoValor;
+    gravar(LS_IMOVEIS, ims);
+    renderControle();
+  });
+
+  renderRegrasControle();
+}
+
+/* folha de bolso dentro da aba */
+function renderRegrasControle(){
+  const alvo = document.getElementById('regrasControle');
+  if (!alvo) return;
+  const cores = { 3: 'var(--green)', 2: 'var(--green)', 1: 'var(--gold)', 0: 'var(--red-claro)' };
+  const notas = [...BASE.notas_descricao].sort((a, b) => b.nota - a.nota);
+  const faixas = [...BASE.faixas].sort((a, b) => b.min - a.min);
+  alvo.innerHTML = `<div class="regras-mini">
+    <div>
+      <h3>1 · Critério de nota</h3>
+      <div class="tabela-rolagem"><table><thead><tr><th>Nota</th><th>Significado</th></tr></thead><tbody>
+        ${notas.map(n => `<tr><td><b style="color:${cores[n.nota]};font-size:15px">${n.nota}</b>
+          ${esc(n.rotulo)}</td><td class="muted">${esc(n.desc)}</td></tr>`).join('')}
+      </tbody></table></div>
+      <h3 style="margin-top:14px">3 · Prioridade do reparo</h3>
+      <div class="tabela-rolagem"><table><thead><tr><th>Prior.</th><th>Prazo</th><th>Quando</th></tr></thead><tbody>
+        ${BASE.prioridades.map(p => `<tr><td><b>${p.cod}</b> ${esc(p.rotulo)}</td>
+          <td>${p.prazo} dias</td><td class="muted">${esc(p.desc)}</td></tr>`).join('')}
+      </tbody></table></div>
+    </div>
+    <div>
+      <h3>2 · Faixa da nota final</h3>
+      <div class="tabela-rolagem"><table><thead><tr><th>Faixa</th><th>Classe</th><th>Conduta</th></tr></thead><tbody>
+        ${faixas.map(f => `<tr><td><b>${f.min}–${f.max === 100 ? 100 : Math.round(f.max)}%</b></td>
+          <td><b>${esc(f.rotulo)}</b></td><td class="muted">${esc(f.conduta)}</td></tr>`).join('')}
+      </tbody></table></div>
+      <h3 style="margin-top:14px">4 · Frequência de inspeção</h3>
+      <div class="tabela-rolagem"><table><thead><tr><th>Situação</th><th>Intervalo</th><th>Observação</th></tr></thead><tbody>
+        ${(BASE.frequencia || []).map(f => `<tr><td><b>${esc(f.rotulo)}</b></td>
+          <td>${f.dias === null ? 'fora do ciclo' : 'cada ' + f.dias + ' dias'}</td>
+          <td class="muted">${esc(f.obs || '')}</td></tr>`).join('')}
+      </tbody></table></div>
+    </div>
+  </div>
+  <div class="aviso red" style="margin-top:14px">
+    <b>Bloqueio.</b> Nota 0 em item crítico bloqueia a locação até a correção,
+    independentemente da nota geral. O bloqueio é conferido antes da média.
+  </div>`;
+}
+
+/* abre a aba Nova inspeção já preenchida */
+function iniciarVistoria(codigo){
+  const im = ler(LS_IMOVEIS).find(x => x.codigo === codigo);
+  const l = ler(LS_LAUDOS).find(x => x.codigo === codigo);
+  irPara('nova');
+  atual = { notas: {}, pendencias: {} };
+  document.getElementById('fCodigo').value = codigo;
+  document.getElementById('fData').value = hojeISO();
+  document.getElementById('fVistoria').value = 'Periódica';
+  if (im){
+    document.getElementById('fTipo').value = im.tipo;
+    document.getElementById('fEndereco').value = im.end || '';
+  } else if (l){
+    document.getElementById('fTipo').value = l.tipo || 'R';
+    document.getElementById('fEndereco').value = l.endereco || '';
+  }
+  renderChecklist();
+  document.getElementById('fCodigo').scrollIntoView({ block: 'center' });
+}
+
+/* imóvel que tem laudo mas não está no cadastro */
+function cadastrarForaDoCadastro(codigos){
+  const ims = ler(LS_IMOVEIS);
+  const laudos = ler(LS_LAUDOS);
+  codigos.forEach(cod => {
+    if (ims.some(i => i.codigo === cod)) return;
+    const l = laudos.find(x => x.codigo === cod);
+    ims.push({ codigo: cod, regiao: 'a definir', tipo: (l && l.tipo) || 'R',
+               status: 'vago', end: (l && l.endereco) || '' });
+  });
+  gravar(LS_IMOVEIS, ims);
+  renderControle();
+  renderImoveis();
+}
+
+function irPara(tab){
+  const b = document.querySelector(`#nav button[data-tab="${tab}"]`);
+  if (b) b.click();
+}
+
+/* eventos da aba */
+document.getElementById('buscaControle').oninput = renderControle;
+document.getElementById('btAtualizarControle').onclick = renderControle;
+document.getElementById('btSoPendentes').onclick = () => { SO_PENDENTES = !SO_PENDENTES; renderControle(); };
+
+/* ============================================================
+   LAUDOS SALVOS
+   ============================================================ */
+function renderLaudos(){
+  const laudos = ler(LS_LAUDOS);
+  const q = (document.getElementById('buscaLaudo').value || '').toLowerCase();
+  const fil = laudos.filter(l => !q ||
+    [l.codigo, l.endereco, l.responsavel].join(' ').toLowerCase().includes(q));
+  const box = document.getElementById('tabelaLaudos');
+  if (!fil.length){
+    box.innerHTML = `<div class="vazio">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+      <span>Nenhum laudo salvo ainda.<br>Faça a primeira inspeção na aba ao lado.</span></div>`;
+  } else {
+    box.innerHTML = `<div class="tabela-rolagem"><table><thead><tr>
+        <th>Código</th><th>Data</th><th>Vistoria</th><th>Nota</th><th>Situação</th>
+        <th>Pend.</th><th>Responsável</th><th></th></tr></thead><tbody>
+      ${fil.map(l => `<tr>
+        <td><b>${esc(l.codigo)}</b><br><span class="muted">${esc(l.endereco || '')}</span></td>
+        <td>${esc(l.data || '—')}</td>
+        <td>${esc(l.vistoria)}</td>
+        <td><b>${l.media === null ? '—' : money0(l.media)}</b></td>
+        <td>${l.bloqueado ? '<span class="pill blk">BLOQUEADO</span>'
+              : `<span class="pill ${l.media>=75?'ok':l.media>=60?'warn':'bad'}">${esc(l.classe||'—')}</span>`}</td>
+        <td>${(l.pendencias||[]).length}</td>
+        <td>${esc(l.responsavel || '—')}</td>
+        <td><button class="btn ghost" data-ver="${l.id}">Abrir</button>
+            <button class="btn ghost" data-del="${l.id}">Apagar</button></td>
+      </tr>`).join('')}</tbody></table></div>`;
+    box.querySelectorAll('[data-ver]').forEach(b => b.onclick = () => carregarLaudo(b.dataset.ver));
+    box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+      if (!confirm('Apagar este laudo? Não tem como desfazer.')) return;
+      gravar(LS_LAUDOS, ler(LS_LAUDOS).filter(x => x.id !== b.dataset.del));
+      renderLaudos();
+    });
+  }
+
+  // selects de comparação
+  const opts = laudos.map(l => `<option value="${l.id}">${esc(l.codigo)} · ${esc(l.data)} · ${esc(l.vistoria)}</option>`).join('');
+  ['selEntrada','selSaida'].forEach(id => {
+    const s = document.getElementById(id);
+    s.innerHTML = laudos.length ? opts : '<option value="">nenhum laudo</option>';
+    if (id === 'selSaida'){
+      const e = laudos.find(x => x.vistoria === 'Saída');
+      if (e) s.value = e.id;
+      else if (s.options.length > 1) s.selectedIndex = Math.min(1, s.options.length-1);
+    } else {
+      const e = laudos.find(x => x.vistoria === 'Entrada');
+      if (e) s.value = e.id;
+    }
+  });
+}
+
+function carregarLaudo(id){
+  const l = ler(LS_LAUDOS).find(x => x.id === id);
+  if (!l) return;
+  document.querySelector('#nav button[data-tab="nova"]').click();
+  document.getElementById('fCodigo').value = l.codigo || '';
+  document.getElementById('fTipo').value = l.tipo || 'R';
+  document.getElementById('fEndereco').value = l.endereco || '';
+  document.getElementById('fProprietario').value = l.proprietario || '';
+  document.getElementById('fData').value = l.data || '';
+  document.getElementById('fVistoria').value = l.vistoria || 'Periódica';
+  document.getElementById('fResponsavel').value = l.responsavel || '';
+  document.getElementById('fAgua').value = l.agua || '';
+  document.getElementById('fLuz').value = l.luz || '';
+  document.getElementById('fChaves').checked = !!l.chaves;
+  document.getElementById('fObs').value = l.obs || '';
+  atual = { notas: { ...(l.notas||{}) }, pendencias: {} };
+  (l.pendencias||[]).forEach(p => { atual.pendencias[p.id] = { ...p }; });
+  renderChecklist();
+}
+
+document.getElementById('buscaLaudo').oninput = renderLaudos;
+
+document.getElementById('btCSV').onclick = () => {
+  const laudos = ler(LS_LAUDOS);
+  if (!laudos.length){ alert('Nenhum laudo para exportar.'); return; }
+  const cab = ['codigo','data','tipo','vistoria','responsavel','media','classe','bloqueado','itens_avaliados','num_pendencias','pendencias_P1'];
+  const linhas = laudos.map(l => [
+    l.codigo, l.data, BASE.tipos[l.tipo], l.vistoria, l.responsavel,
+    l.media === null ? '' : (Math.round(l.media*10)/10), l.classe,
+    l.bloqueado ? 'SIM' : 'NAO', l.itensAvaliados,
+    (l.pendencias||[]).length,
+    (l.pendencias||[]).filter(p => p.prioridade === 'P1').length
+  ]);
+  const csv = [cab, ...linhas].map(r => r.map(c => `"${String(c??'').replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  baixar('laudos-inspecao.csv', '\uFEFF' + csv, 'text/csv;charset=utf-8');
+};
+
+
+/* ============================================================
+   EXPORTAR PARA EXCEL (SpreadsheetML - abre no Excel, LibreOffice
+   e Google Sheets, com 3 abas: Laudos, Itens e Pendencias)
+   ============================================================ */
+const xmlEsc = s => String(s ?? '')
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&apos;')
+  .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');
+
+function planilhaXml(nome, cabecalho, linhas){
+  const cel = (v, tipo, negrito) => {
+    const tipoEfetivo = tipo === 'Number' ? 'Number' : 'String';
+    const texto = tipo === 'Number' ? (v === '' || v === null || v === undefined ? '' : v) : xmlEsc(v);
+    const estilo = negrito ? ' ss:StyleID="cab"' : '';
+    if (texto === '') return `<Cell${estilo}/>`;
+    return `<Cell${estilo}><Data ss:Type="${tipoEfetivo}">${texto}</Data></Cell>`;
+  };
+  const cab = cabecalho.map(c => cel(c, 'String', true)).join('');
+  const corpo = linhas.map(l => '<Row>' + l.map(([v,t]) => cel(v, t || 'String')).join('') + '</Row>').join('');
+  return `<Worksheet ss:Name="${xmlEsc(nome)}"><Table>
+    <Column ss:Width="90"/><Column ss:Width="120"/><Column ss:Width="260"/>
+    <Column ss:Width="80"/><Column ss:Width="80"/><Column ss:Width="80"/>
+    <Column ss:Width="120"/><Column ss:Width="100"/><Column ss:Width="110"/>
+    <Column ss:Width="200"/>
+    <Row>${cab}</Row>${corpo}</Table>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <FreezePanes/><SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane>
+      <ActivePane>2</ActivePane>
+    </WorksheetOptions></Worksheet>`;
+}
+
+function exportarExcel(){
+  const laudos = ler(LS_LAUDOS);
+  if (!laudos.length){ alert('Nenhum laudo salvo para exportar. Faça uma inspeção primeiro.'); return; }
+
+  // --- aba 1: resumo de cada laudo ---
+  const cabL = ['Código','Data','Tipo','Vistoria','Responsável','Nota','Classificação',
+                'Bloqueado','Itens avaliados','Pendências','P1'];
+  const linL = laudos.map(l => [
+    [l.codigo||'','String'], [l.data||'','String'], [BASE.tipos[l.tipo]||'','String'],
+    [l.vistoria||'','String'], [l.responsavel||'','String'],
+    [l.media===null?'':Math.round(l.media*10)/10,'Number'],
+    [l.classe||'','String'], [l.bloqueado?'SIM':'NÃO','String'],
+    [l.itensAvaliados||0,'Number'], [(l.pendencias||[]).length,'Number'],
+    [(l.pendencias||[]).filter(p=>p.prioridade==='P1').length,'Number']
+  ]);
+
+  // --- aba 2: nota item por item ---
+  const cabI = ['Código','Data','Item','Grupo','Descrição','Nota','Crítico','Pendência'];
+  const linI = [];
+  laudos.forEach(l => {
+    const pends = l.pendencias || [];
+    todosItens(l.tipo).forEach(i => {
+      const v = l.notas[i.id];
+      if (v === undefined) return;
+      const p = pends.find(x => x.id === i.id);
+      linI.push([
+        [l.codigo||'','String'], [l.data||'','String'], [i.id,'String'],
+        [i.grupo,'String'], [i.t,'String'],
+        [v === 'na' ? 'NA' : Number(v), v === 'na' ? 'String' : 'Number'],
+        [i.critico?'SIM':'','String'],
+        [p ? (p.prioridade + ' · ' + (p.desc || 'sem descrição')) : '','String']
+      ]);
+    });
+  });
+
+  // --- aba 3: pendências ---
+  const cabP = ['Código','Data','Item','Grupo','Problema','Nota','Prioridade','Prazo','Responsável','Situação'];
+  const linP = [];
+  laudos.forEach(l => (l.pendencias||[]).forEach(p => {
+    linP.push([
+      [l.codigo||'','String'], [l.data||'','String'], [p.id,'String'],
+      [p.grupo||'','String'], [p.desc || p.texto || '','String'],
+      [p.nota,'Number'], [p.prioridade||'','String'], [p.prazo||'','String'],
+      [p.responsavel||'','String'], [p.situacao||'aberto','String']
+    ]);
+  }));
+  if (!linP.length) linP.push([['(sem pendências)','String']]);
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+<Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+    <Alignment ss:Vertical="Center"/>
+    <Font ss:FontName="Calibri" ss:Size="10"/>
+  </Style>
+  <Style ss:ID="cab">
+    <Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#FFFFFF"/>
+    <Interior ss:Color="#14161B" ss:Pattern="Solid"/>
+  </Style>
+</Styles>
+${planilhaXml('Laudos', cabL, linL)}
+${planilhaXml('Itens', cabI, linI)}
+${planilhaXml('Pendencias', cabP, linP)}
+</Workbook>`;
+
+  const hoje = new Date().toISOString().slice(0,10);
+  baixar(`inspecao-${hoje}.xls`, '\uFEFF' + xml, 'application/vnd.ms-excel;charset=utf-8');
+  alert('Arquivo gerado com ' + laudos.length + ' laudo(s), ' + linI.length +
+        ' nota(s) de item e ' + linP.length + ' pendência(s).\n\n' +
+        'O Excel pode avisar que "a extensão não corresponde ao formato". ' +
+        'É normal: o arquivo é XML de planilha, o Excel abre sem problema. Clique em Sim.');
+}
+document.getElementById('btXLS').onclick = exportarExcel;
+
+/* ============================================================
+   IMPORTAR LISTA DE IMÓVEIS (CSV)
+   Formato por linha:  codigo;regiao;tipo;situacao
+   tipo = R, C ou G  ·  situacao = vago, ocupado ou obra
+   ============================================================ */
+document.getElementById('btImportar').onclick = () => document.getElementById('fileCSV').click();
+
+document.getElementById('fileCSV').onchange = ev => {
+  const arq = ev.target.files[0];
+  if (!arq) return;
+  const leitor = new FileReader();
+  leitor.onload = () => {
+    const texto = String(leitor.result || '');
+    const linhas = texto.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const ims = ler(LS_IMOVEIS);
+    let novos = 0, repetidos = 0, invalidos = 0;
+    const mapaTipo = {r:'R', residencial:'R', c:'C', comercial:'C', g:'G', galpao:'G', 'galpão':'G'};
+    linhas.forEach((l, n) => {
+      if (n === 0 && /c[oó]digo/i.test(l)) return;           // pula cabeçalho
+      const p = l.split(/[;,\t]/).map(x => x.trim());
+      if (p.length < 3){ invalidos++; return; }
+      const codigo = p[0], regiao = p[1];
+      const tipo = mapaTipo[(p[2]||'').toLowerCase()] || 'R';
+      let sit = (p[3] || 'vago').toLowerCase();
+      if (!['vago','ocupado','obra'].includes(sit)) sit = 'vago';
+      if (!codigo || !regiao){ invalidos++; return; }
+      if (ims.some(x => x.codigo === codigo)){ repetidos++; return; }
+      ims.push({ codigo, regiao, tipo, status: sit });
+      novos++;
+    });
+    gravar(LS_IMOVEIS, ims);
+    renderImoveis();
+    document.getElementById('msgImovel').textContent =
+      `${novos} importado(s), ${repetidos} repetido(s), ${invalidos} linha(s) inválida(s).`;
+    ev.target.value = '';
+    alert(`Importação concluída.\n\n${novos} imóvel(is) novo(s)\n` +
+          `${repetidos} já existia(m)\n${invalidos} linha(s) sem código ou região\n\n` +
+          `Total cadastrado: ${ims.length}`);
+  };
+  leitor.readAsText(arq, 'utf-8');
+};
+
+document.getElementById('btBackup').onclick = () => {
+  const dados = { versao: BASE.versao, exportadoEm: new Date().toISOString(),
+    laudos: ler(LS_LAUDOS), imoveis: ler(LS_IMOVEIS) };
+  baixar('backup-inspecao.json', JSON.stringify(dados, null, 2), 'application/json');
+};
+
+function baixar(nome, conteudo, mime){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([conteudo], { type: mime }));
+  a.download = nome;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ============================================================
+   COMPARAÇÃO ENTRADA × SAÍDA
+   ============================================================ */
+document.getElementById('btComparar').onclick = () => {
+  const laudos = ler(LS_LAUDOS);
+  const e = laudos.find(x => x.id === document.getElementById('selEntrada').value);
+  const s = laudos.find(x => x.id === document.getElementById('selSaida').value);
+  const box = document.getElementById('resultadoComparacao');
+  if (!e || !s){ box.innerHTML = '<div class="vazio">Selecione dois laudos.</div>'; return; }
+  if (e.codigo !== s.codigo){
+    box.innerHTML = `<div class="aviso red">Os laudos são de imóveis diferentes
+      (${esc(e.codigo)} e ${esc(s.codigo)}). Compare laudos do mesmo imóvel.</div>`;
+    return;
+  }
+  const itens = todosItens(e.tipo);
+  const divs = [];
+  itens.forEach(i => {
+    const a = e.notas[i.id], b = s.notas[i.id];
+    if (a === undefined || b === undefined || a === 'na' || b === 'na') return;
+    if (Number(b) < Number(a)) divs.push({ i, a: Number(a), b: Number(b) });
+  });
+  const delta = (s.media || 0) - (e.media || 0);
+  box.innerHTML = `
+    <div class="grid g3" style="margin-bottom:14px">
+      <div class="kpi"><span>Nota na entrada</span><b>${e.media===null?'—':money0(e.media)}</b></div>
+      <div class="kpi"><span>Nota na saída</span><b>${s.media===null?'—':money0(s.media)}</b></div>
+      <div class="kpi"><span>Variação</span><b style="color:${delta<0?'var(--red)':'var(--green)'}">
+        ${delta>0?'+':''}${money0(delta)}</b></div>
+    </div>
+    ${divs.length ? `<table><thead><tr><th>Item</th><th>Descrição</th><th>Entrada</th><th>Saída</th><th>Leitura</th></tr></thead>
+      <tbody>${divs.map(d => `<tr>
+        <td>${d.i.id}</td><td>${esc(d.i.t)}</td>
+        <td style="text-align:center">${d.a}</td><td style="text-align:center;color:var(--red)"><b>${d.b}</b></td>
+        <td>${d.b===0?'Dano — cobrar reparo':'Desgaste além do normal — avaliar'}</td>
+      </tr>`).join('')}</tbody></table>
+      <div class="aviso" style="margin-top:12px">
+        <b>${divs.length} item(ns) pioraram.</b> Cada linha precisa de decisão humana:
+        desgaste natural de uso é do proprietário, dano é do locatário. Use a tabela de
+        desgaste × dano do documento operacional.
+      </div>`
+    : '<div class="aviso blue">Nenhum item piorou entre os dois laudos.</div>'}`;
+};
+
+/* ============================================================
+   CRONOGRAMA
+   ============================================================ */
+const TEMPO = { R:50, C:25, G:75 };   // minutos de vistoria por tipo
+const KMH_URBANO = 22;                // velocidade média real em cidade (km/h)
+const LIMITE_MAPS = 10;               // paradas por link do Google Maps
+
+/* ---------- geolocalização ---------- */
+function extraiCoords(txt){
+  const s = String(txt || '');
+  const padroes = [
+    /@(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/,          // .../@-6.07,-49.87,15z
+    /[?&]q=(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/,     // ?q=-6.07,-49.87
+    /!3d(-?\d{1,2}\.\d+)!4d(-?\d{1,3}\.\d+)/,      // link de lugar
+    /^\s*(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)\s*$/  // colado à mão
+  ];
+  for (const p of padroes){
+    const m = s.match(p);
+    if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  }
+  return null;
+}
+
+function distanciaKm(a, b){
+  if (a.lat == null || b.lat == null) return null;
+  const R = 6371, rad = g => g * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat/2)**2 +
+            Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+/* ordena por vizinho mais próximo — só quando TODOS têm coordenada */
+function ordenarPorProximidade(lista){
+  const ok = lista.length > 2 && lista.every(i => i.lat != null);
+  if (!ok) return { lista, porProximidade: false };
+  const restante = [...lista], saida = [restante.shift()];
+  while (restante.length){
+    const atual = saida[saida.length - 1];
+    let melhor = 0, melhorD = Infinity;
+    restante.forEach((c, idx) => {
+      const d = distanciaKm(atual, c);
+      if (d < melhorD){ melhorD = d; melhor = idx; }
+    });
+    saida.push(restante.splice(melhor, 1)[0]);
+  }
+  return { lista: saida, porProximidade: true };
+}
+
+/* link do Google Maps para uma sequência de paradas */
+function linkMaps(stops){
+  const pontos = stops.map(i => (i.lat != null ? `${i.lat},${i.lng}` : (i.end || i.regiao || '')));
+  const bons = pontos.filter(Boolean);
+  if (bons.length < 2) return null;
+  const origem = bons[0];
+  const destino = bons[bons.length - 1];
+  const meio = bons.slice(1, -1).slice(0, LIMITE_MAPS - 2);
+  let url = 'https://www.google.com/maps/dir/?api=1'
+          + '&origin=' + encodeURIComponent(origem)
+          + '&destination=' + encodeURIComponent(destino)
+          + '&travelmode=driving';
+  if (meio.length) url += '&waypoints=' + meio.map(encodeURIComponent).join('|');
+  return url;
+}
+
+function linkWaze(im){
+  const q = im.lat != null ? `${im.lat},${im.lng}` : (im.end || im.codigo);
+  return 'https://waze.com/ul?q=' + encodeURIComponent(q) + '&navigate=yes';
+}
+
+function linkMapsImovel(im){
+  const q = im.lat != null ? `${im.lat},${im.lng}` : (im.end || im.codigo);
+  return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+}
+
+/* ---------- tabela de imóveis ---------- */
+function renderImoveis(){
+  const ims = ler(LS_IMOVEIS);
+  const box = document.getElementById('tabelaImoveis');
+  if (!ims.length){
+    box.innerHTML = `<div class="vazio">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      <span>Nenhum imóvel cadastrado.<br>Adicione acima ou use “Carregar exemplos”.</span></div>`;
+    return;
+  }
+  box.innerHTML = `<div class="tabela-rolagem"><table><thead><tr>
+    <th>Código</th><th>Região</th><th>Tipo</th><th>Situação</th>
+    <th>Endereço</th><th>Tempo</th><th></th></tr></thead><tbody>
+    ${ims.map((i,n) => `<tr>
+      <td><b>${esc(i.codigo)}</b></td><td>${esc(i.regiao)}</td>
+      <td>${esc(BASE.tipos[i.tipo].split(' ')[0])}</td>
+      <td>${i.status === 'vago' ? '<span class="pill warn">Vago</span>'
+         : i.status === 'obra' ? '<span class="pill bad">Em obra</span>'
+         : '<span class="pill ok">Ocupado</span>'}</td>
+      <td class="muted" style="max-width:230px">
+        ${i.lat != null
+          ? `<span style="color:var(--green)">✓ ${i.lat.toFixed(5)}, ${i.lng.toFixed(5)}</span>`
+          : (i.end ? esc(i.end.slice(0, 46)) : '<span style="color:var(--mut2)">sem endereço</span>')}
+      </td>
+      <td class="muted">${TEMPO[i.tipo]} min</td>
+      <td><div class="row" style="gap:5px">
+        <button class="btn ghost" data-end="${n}" title="Endereço ou link do Maps">Endereço</button>
+        ${i.lat != null || i.end
+          ? `<a class="btn ghost" href="${linkMapsImovel(i)}" target="_blank" rel="noopener">Maps</a>` : ''}
+        <button class="btn ghost" data-rm="${n}">Remover</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table></div>`;
+
+  box.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => {
+    const ims2 = ler(LS_IMOVEIS); ims2.splice(+b.dataset.rm, 1);
+    gravar(LS_IMOVEIS, ims2); renderImoveis();
+  });
+  box.querySelectorAll('[data-end]').forEach(b => b.onclick = () => {
+    const ims2 = ler(LS_IMOVEIS), im = ims2[+b.dataset.end];
+    const atual = im.end || (im.lat != null ? `${im.lat},${im.lng}` : '');
+    const novo = prompt(
+      `Endereço ou link do Google Maps de ${im.codigo}\n\n` +
+      'Aceita três formatos:\n' +
+      '  • link completo do Maps (colar da barra de endereço)\n' +
+      '  • coordenadas: -6.0673, -49.9023\n' +
+      '  • endereço escrito: Rua 77A, Qd-54 Lt-01, Nova Carajás', atual);
+    if (novo === null) return;
+    const t = novo.trim();
+    im.end = t;
+    const c = extraiCoords(t);
+    if (c){ im.lat = c.lat; im.lng = c.lng; }
+    else { delete im.lat; delete im.lng; }
+    gravar(LS_IMOVEIS, ims2); renderImoveis();
+    document.getElementById('msgImovel').textContent =
+      c ? `${im.codigo}: coordenadas lidas do link ✓` : `${im.codigo}: endereço salvo`;
+  });
+}
+
+document.getElementById('btAddImovel').onclick = () => {
+  const codigo = document.getElementById('iCodigo').value.trim();
+  const regiao = document.getElementById('iRegiao').value.trim();
+  const end = (document.getElementById('iEnd')?.value || '').trim();
+  if (!codigo || !regiao){ alert('Código e região são obrigatórios.'); return; }
+  const ims = ler(LS_IMOVEIS);
+  if (ims.some(x => x.codigo === codigo)){ alert('Já existe imóvel com esse código.'); return; }
+  const novo = { codigo, regiao, tipo: document.getElementById('iTipo').value,
+                 status: document.getElementById('iStatus').value, end };
+  const c = extraiCoords(end);
+  if (c){ novo.lat = c.lat; novo.lng = c.lng; }
+  ims.push(novo);
+  gravar(LS_IMOVEIS, ims);
+  document.getElementById('iCodigo').value = '';
+  if (document.getElementById('iEnd')) document.getElementById('iEnd').value = '';
+  document.getElementById('msgImovel').textContent = c
+    ? `${codigo} adicionado com coordenadas ✓`
+    : `${codigo} adicionado.`;
+  renderImoveis();
+};
+
+document.getElementById('btExemplo').onclick = () => {
+  if (ler(LS_IMOVEIS).length && !confirm('Adicionar exemplos aos imóveis já cadastrados?')) return;
+  // coordenadas aproximadas de Parauapebas-PA, só para demonstrar a rota no mapa
+  const ex = [
+    ['LD-0101','Nova Carajás','R','vago','-6.0620','-49.8550'],
+    ['LD-0102','Nova Carajás','R','vago','-6.0648','-49.8582'],
+    ['LD-0103','Nova Carajás','C','vago','-6.0675','-49.8610'],
+    ['LD-0201','Parque dos Carajás','R','vago','-6.0720','-49.8720'],
+    ['LD-0202','Parque dos Carajás','R','obra','-6.0741','-49.8735'],
+    ['LD-0301','Cidade Jardim','G','vago','-6.0810','-49.8900']
+  ].map(([codigo,regiao,tipo,status,lat,lng]) =>
+      ({codigo,regiao,tipo,status,lat:+lat,lng:+lng,end:`${lat}, ${lng}`}));
+  gravar(LS_IMOVEIS, [...ler(LS_IMOVEIS), ...ex]);
+  renderImoveis();
+};
+
+/* ---------- geração da rota ---------- */
+document.getElementById('btGerarRota').onclick = () => {
+  const diasSem = +document.getElementById('cDias').value || 3;
+  const horasDia = +document.getElementById('cHoras').value || 5;
+  const desl = +document.getElementById('cDesl').value || 15;
+  const fazRapida = document.getElementById('cRapida').value === 'sim';
+  const capDia = horasDia * 60;
+
+  const ims = ler(LS_IMOVEIS);
+  let vagos = ims.filter(i => i.status === 'vago');
+  const soVencidas = document.getElementById('cSoVencidas').checked;
+  let cortadosPeloFiltro = 0;
+  if (soVencidas){
+    const laudosR = ler(LS_LAUDOS);
+    const antes = vagos.length;
+    vagos = vagos.filter(i => {
+      const c = controleDoImovel(i, laudosR).status;
+      return c === 'vencida' || c === 'avencer' || c === 'sem';
+    });
+    cortadosPeloFiltro = antes - vagos.length;
+  }
+  const obras = ims.filter(i => i.status === 'obra');
+  const ocupados = ims.filter(i => i.status === 'ocupado');
+
+  if (!vagos.length){
+    document.getElementById('diagnostico').innerHTML = '';
+    document.getElementById('rota').innerHTML = `<div class="vazio">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/></svg>
+      <span>Nenhum imóvel vago.<br>A rota inclui apenas imóveis com situação “vago”.</span></div>`;
+    return;
+  }
+
+  const custo = i => TEMPO[i.tipo] + desl;
+  const regioes = [];
+  vagos.forEach(i => { if (!regioes.includes(i.regiao)) regioes.push(i.regiao); });
+
+  /* 1. agrupa por região e ordena por proximidade dentro de cada uma */
+  const dias = [];
+  let atual = { itens: [], regiao: '', min: 0 };
+  let semanaAtual = 1, diaNaSemana = 1;
+  // reinicia a contagem de dias a cada semana
+  const fecharDia = () => {
+    if (!atual.itens.length) return;
+    atual.semana = semanaAtual;
+    atual.dia = diaNaSemana;
+    dias.push(atual);
+    diaNaSemana++;
+    if (diaNaSemana > diasSem){ diaNaSemana = 1; semanaAtual++; }
+    atual = { itens: [], regiao: '', min: 0 };
+  };
+
+  let porProximidade = false;
+  regioes.forEach(r => {
+    const doGrupo = vagos.filter(i => i.regiao === r);
+    const ord = ordenarPorProximidade(doGrupo);
+    if (ord.porProximidade) porProximidade = true;
+    ord.lista.forEach(i => {
+      const c = custo(i);
+      if (atual.itens.length >= 6 || (atual.min + c > capDia && atual.itens.length)) fecharDia();
+      atual.itens.push({ ...i, minutos: c });
+      atual.min += c;
+      atual.regiao = (atual.regiao && atual.regiao !== r) ? 'Várias regiões' : r;
+    });
+    fecharDia();
+  });
+  fecharDia();
+
+  /* 2. distância real e tempo de viagem por dia (quando há coordenadas) */
+  let kmMes = 0, diasComMapa = 0;
+  dias.forEach(d => {
+    const coords = d.itens.every(i => i.lat != null);
+    if (!coords){ d.km = null; return; }
+    let km = 0;
+    for (let k = 1; k < d.itens.length; k++) km += distanciaKm(d.itens[k-1], d.itens[k]);
+    d.kmLinhaReta = km;
+    d.km = d.itens.length > 1 ? km * 1.35 : 0;   // 1 parada = sem percurso
+    kmMes += d.km;
+    diasComMapa++;
+  });
+
+  /* 3. minutos por dia: vistoria + viagem (real se houver mapa) */
+  let minTotal = 0;
+  dias.forEach(d => {
+    const tVistoria = d.itens.reduce((s,i) => s + TEMPO[i.tipo], 0);
+    const tViagem = d.km != null
+      ? Math.max(desl, Math.round(d.km / KMH_URBANO * 60)) + 4 * d.itens.length
+      : desl * d.itens.length;
+    d.min = tVistoria + tViagem;
+    d.tVistoria = tVistoria;
+    d.tViagem = tViagem;
+    minTotal += d.min;
+  });
+
+  const visitasRapidas = fazRapida ? vagos.length * 2 : 0;
+  minTotal += visitasRapidas * (10 + desl);
+
+  const minutosMes = diasSem * 4 * capDia;
+  const pct = Math.round((minTotal / minutosMes) * 100);
+  const sobra = minutosMes - minTotal;
+
+  /* ---------- diagnóstico ---------- */
+  document.getElementById('diagnostico').innerHTML = `
+    ${soVencidas ? `<div class="aviso ${cortadosPeloFiltro ? 'blue' : ''}">
+      <b>Filtro ligado: só vistorias vencidas ou vencendo em 7 dias.</b>
+      ${cortadosPeloFiltro} imóvel(is) vago(s) ficaram fora da rota porque estão em dia.
+      Desligue o filtro para ver o mês completo.</div>` : ''}
+    <div class="grid g4" style="margin-bottom:12px">
+      <div class="kpi"><span>Imóveis vagos</span><b>${vagos.length}</b></div>
+      <div class="kpi"><span>Dias de rota</span><b>${dias.length}</b></div>
+      <div class="kpi"><span>Horas necessárias/mês</span><b>${money0(minTotal/60)}h</b></div>
+      <div class="kpi"><span>Uso da capacidade</span>
+        <b style="color:${pct>100?'var(--red)':pct>85?'var(--gold)':'var(--green)'}">${pct}%</b></div>
+    </div>
+    ${kmMes > 0 ? `<div class="kpi" style="margin-bottom:12px">
+      <span>Distância estimada no mês</span>
+      <b>${money0(kmMes)} km</b>
+      <div class="muted" style="margin-top:5px">
+        Soma dos trechos com fator de ruas de 1,35 sobre a linha reta ·
+        velocidade média considerada ${KMH_URBANO} km/h
+      </div></div>` : ''}
+    ${pct > 100 ? `<div class="aviso red"><b>Não cabe no mês.</b>
+      Faltam ${money0((minTotal-minutosMes)/60)} horas. Reduza a frequência, aumente os dias/horas
+      de campo ou contrate apoio.</div>`
+      : sobra < 60 ? `<div class="aviso"><b>No limite.</b> Sobram ${money0(sobra)} minutos no mês.
+      Qualquer chuva, feriado ou emergência estoura a rota.</div>`
+      : `<div class="aviso blue"><b>Cabe no mês</b>, com ${money0(sobra/60)}h de folga.</div>`}
+    <div class="muted" style="margin-bottom:14px;line-height:1.65">
+      <b>Cálculo:</b> ${vagos.length} imóveis × tempo do tipo
+      (R 50 min · C 25 min · G 75 min)${porProximidade
+        ? ' + viagem calculada pela distância real entre as paradas'
+        : ` + ${desl} min fixos de deslocamento por visita`}.
+      ${fazRapida ? `Inclui ${visitasRapidas} visitas rápidas de 10 min. ` : ''}
+      Ocupados (${ocupados.length}) ficam em inspeção semestral, fora da rota.
+      ${obras.length ? `Em obra (${obras.length}) fora da rota.` : ''}
+      ${porProximidade
+        ? `<br><span style="color:var(--green)">✓ Ordem das paradas otimizada por vizinho mais próximo.</span>`
+        : `<br><span style="color:var(--gold)">⚠ Sem coordenadas em todos os imóveis a ordem é a do
+           cadastro. Use o botão “Endereço” para colar o link do Maps e a rota passar a ser otimizada.</span>`}
+    </div>`;
+
+  /* ---------- rota, por semana ---------- */
+  const semanas = {};
+  dias.forEach(d => { (semanas[d.semana] = semanas[d.semana] || []).push(d); });
+
+  document.getElementById('rota').innerHTML = Object.keys(semanas).map(sn => {
+    const ds = semanas[sn];
+    return `<h3 style="font-size:12px;margin:18px 0 9px;color:var(--red-claro);
+              text-transform:uppercase;letter-spacing:.1em">Semana ${sn}</h3>`
+      + ds.map(d => {
+          const stops = d.itens;
+          const url = linkMaps(stops);
+          const url2 = stops.length > LIMITE_MAPS ? linkMaps(stops.slice(LIMITE_MAPS - 1)) : null;
+          return `
+          <div class="card" style="background:#111;margin-bottom:10px;padding:13px">
+            <div class="row" style="justify-content:space-between;margin-bottom:10px">
+              <div>
+                <b style="font-size:13px">Dia ${d.dia} · ${esc(d.regiao)}</b>
+                <div class="muted" style="margin-top:3px">
+                  ${stops.length} parada${stops.length>1?'s':''} ·
+                  ${money0(d.tVistoria)} min de vistoria + ${money0(d.tViagem)} min de viagem
+                  = <b style="color:var(--txt)">${money0(d.min)} min</b>
+                  ${d.km ? ` · <b style="color:var(--green)">${money0(d.km)} km</b>` : ''}
+                </div>
+              </div>
+              <div class="row" style="gap:6px">
+                ${url ? `<a class="btn red" href="${url}" target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Abrir no Maps</a>` : ''}
+                ${url2 ? `<a class="btn ghost" href="${url2}" target="_blank" rel="noopener">Trecho 2</a>` : ''}
+              </div>
+            </div>
+            <div class="tabela-rolagem"><table><thead><tr>
+              <th style="width:34px">#</th><th>Código</th><th>Tipo</th>
+              <th>Endereço</th><th style="width:64px">Vistoria</th><th style="width:74px"></th>
+            </tr></thead><tbody>
+              ${stops.map((i,k) => `<tr>
+                <td class="muted">${k+1}</td>
+                <td><b>${esc(i.codigo)}</b></td>
+                <td class="muted">${esc(BASE.tipos[i.tipo].split(' ')[0])}</td>
+                <td class="muted" style="max-width:260px">${esc((i.end || i.regiao || '').slice(0,52))}</td>
+                <td class="muted">${TEMPO[i.tipo]} min</td>
+                <td><div class="row" style="gap:4px">
+                  <a class="btn ghost" style="padding:6px 9px;font-size:11.5px"
+                     href="${linkWaze(i)}" target="_blank" rel="noopener">Waze</a>
+                  <a class="btn ghost" style="padding:6px 9px;font-size:11.5px"
+                     href="${linkMapsImovel(i)}" target="_blank" rel="noopener">Maps</a>
+                </div></td>
+              </tr>`).join('')}
+            </tbody></table></div>
+          </div>`;
+        }).join('');
+  }).join('');
+
+  window._rotaHTML = document.getElementById('diagnostico').innerHTML
+                   + document.getElementById('rota').innerHTML;
+  window._rotaDias = dias;
+};
+
+document.getElementById('btImprimirRota').onclick = () => {
+  if (!window._rotaHTML){ alert('Gere a rota primeiro.'); return; }
+  const dias = window._rotaDias || [];
+  const linhas = dias.map(d => `
+    <h3 style="font-size:12px;margin:12px 0 5px">Semana ${d.semana} · Dia ${d.dia} — ${esc(d.regiao)}
+      ${d.km != null ? `(${money0(d.km)} km)` : ''}</h3>
+    <table><thead><tr><th style="width:6%">#</th><th style="width:16%">Código</th>
+      <th>Endereço</th><th style="width:12%">Vistoria</th></tr></thead><tbody>
+      ${d.itens.map((i,k) => `<tr><td>${k+1}</td><td><b>${esc(i.codigo)}</b></td>
+        <td>${esc(i.end || i.regiao || '')}</td><td>${TEMPO[i.tipo]} min</td></tr>`).join('')}
+    </tbody></table>`).join('');
+
+  document.getElementById('printArea').innerHTML =
+    `<div class="prt-head"><h1>Cronograma de inspeções — mês</h1>
+     <div>LD Imóveis · gerado em ${new Date().toLocaleDateString('pt-BR')} ·
+     imóveis identificados por código, sem nome de morador</div></div>`
+    + linhas
+    + `<p style="font-size:10px;margin-top:14px">
+       Abra a rota no Google Maps pelo botão do módulo. Este papel é a conferência de campo.</p>`;
+  window.print();
+};
+
+/* ============================================================
+   PAINEL
+   ============================================================ */
+function renderPainel(){
+  const laudos = ler(LS_LAUDOS);
+  const bloq = laudos.filter(l => l.bloqueado);
+  const pends = [];
+  laudos.forEach(l => (l.pendencias||[]).forEach(p => pends.push({ ...p, codigo: l.codigo })));
+  const p1 = pends.filter(p => p.prioridade === 'P1');
+
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><span>Laudos</span><b>${laudos.length}</b></div>
+    <div class="kpi"><span>Bloqueados</span><b style="color:${bloq.length?'var(--red)':'var(--green)'}">${bloq.length}</b></div>
+    <div class="kpi"><span>Pendências abertas</span><b>${pends.filter(p=>p.situacao!=='resolvido').length}</b></div>
+    <div class="kpi"><span>P1 (7 dias)</span><b style="color:${p1.length?'var(--red)':'var(--green)'}">${p1.length}</b></div>`;
+
+  document.getElementById('listaBloqueados').innerHTML = bloq.length
+    ? `<table><thead><tr><th>Código</th><th>Data</th><th>Nota</th><th>Motivo</th></tr></thead><tbody>
+       ${bloq.map(l => `<tr><td><b>${esc(l.codigo)}</b></td><td>${esc(l.data)}</td>
+         <td>${l.media===null?'—':money0(l.media)}</td>
+         <td>${(l.pendencias||[]).filter(p=>p.nota===0&&p.critico).map(p=>p.id).join(', ') || 'item crítico com nota 0'}</td>
+       </tr>`).join('')}</tbody></table>`
+    : `<div class="vazio">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span>Nenhum imóvel bloqueado.<br>Nenhum item crítico com nota 0.</span></div>`;
+
+  /* ---- controle de vistorias dentro do painel ---- */
+  const { linhas, fora } = controleGeral();
+  const rc = resumoControle(linhas);
+  const pend = linhas.filter(l => l.status === 'vencida' || l.status === 'avencer' || l.status === 'sem');
+  document.getElementById('painelControle').innerHTML = `
+    <div class="grid g4" style="margin-bottom:14px">
+      <div class="kpi"><span>Vistorias vencidas</span>
+        <b style="color:${rc.vencida ? 'var(--red)' : 'var(--green)'}">${rc.vencida}</b></div>
+      <div class="kpi"><span>Vencem em 7 dias</span>
+        <b style="color:${rc.avencer ? 'var(--gold)' : 'var(--green)'}">${rc.avencer}</b></div>
+      <div class="kpi"><span>Sem laudo</span><b>${rc.sem}</b></div>
+      <div class="kpi"><span>Em dia</span><b style="color:var(--green)">${rc.emdia}</b></div>
+    </div>
+    ${pend.length ? `<div class="tabela-rolagem"><table><thead><tr>
+        <th>Código</th><th>Situação</th><th>Última</th><th>Próxima</th><th>Status</th>
+      </tr></thead><tbody>
+      ${pend.slice(0, 8).map(l => {
+        const [rot, cls] = ROTULO_STATUS[l.status];
+        return `<tr><td><b>${esc(l.im.codigo)}</b></td>
+          <td class="muted">${esc(l.im.regiao)}</td>
+          <td class="muted">${brData(l.ultimo && l.ultimo.data)}</td>
+          <td><b class="${l.status === 'vencida' ? 'venc' : ''}">${brData(l.proxima)}</b></td>
+          <td><span class="pill ${cls}">${rot}</span></td></tr>`;
+      }).join('')}</tbody></table></div>
+      ${pend.length > 8 ? `<div class="mini" style="margin-top:8px">+ ${pend.length - 8} outros</div>` : ''}`
+      : `<div class="muted" style="line-height:1.6">Nenhuma vistoria pendente —
+         a carteira está em dia com a frequência do documento.</div>`}
+    ${fora.length ? `<div class="mini" style="margin-top:10px">
+        ${fora.length} código(s) com laudo fora do cadastro.</div>` : ''}
+    <div class="row" style="margin-top:12px">
+      <button class="btn red" id="btIrControle">Abrir controle de vistorias</button>
+    </div>`;
+  const bic = document.getElementById('btIrControle');
+  if (bic) bic.onclick = () => irPara('controle');
+
+  const porPrio = ['P1','P2','P3'].map(cod => {
+    const lista = pends.filter(p => p.prioridade === cod && p.situacao !== 'resolvido');
+    return `<tr><td><b>${cod}</b></td>
+      <td>${BASE.prioridades.find(x=>x.cod===cod).rotulo}</td>
+      <td>${BASE.prioridades.find(x=>x.cod===cod).prazo} dias</td>
+      <td>${lista.length}</td>
+      <td class="muted">${lista.slice(0,4).map(p => esc(p.codigo)+' '+p.id).join(' · ') || '—'}</td></tr>`;
+  }).join('');
+  document.getElementById('listaPendencias').innerHTML =
+    `<table><thead><tr><th>Prior.</th><th>Nível</th><th>Prazo</th><th>Abertas</th><th>Onde</th></tr></thead>
+     <tbody>${porPrio}</tbody></table>`;
+}
+
+/* ============================================================
+   FAIXA DE IDENTIDADE — números vivos
+   ============================================================ */
+function atualizarHero(){
+  const laudos = ler(LS_LAUDOS);
+  const bloq = laudos.filter(l => l.bloqueado).length;
+  const el = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  el('hLaudos', laudos.length);
+  el('hBloq', bloq);
+  const tot = BASE.grupos.reduce((s,g) => s + g.itens.length, 0);
+  el('hItens', tot);
+  el('hCrit', BASE.grupos.reduce((s,g) => s + g.itens.filter(i => i.critico).length, 0));
+  const hb = document.getElementById('hBloq');
+  if (hb && bloq > 0) hb.parentElement.classList.add('alerta');
+  else if (hb) hb.parentElement.classList.remove('alerta');
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+document.getElementById('tabelaFaixas').innerHTML = BASE.faixas.map(f =>
+  `<tr><td>${f.min}–${f.max === 100 ? '100' : Math.round(f.max)}%</td>
+   <td><b>${f.rotulo}</b></td><td class="muted">${esc(f.conduta)}</td></tr>`).join('');
+
+document.getElementById('fTipo').onchange = () => { renderChecklist(); };
+document.getElementById('fData').value = new Date().toISOString().slice(0,10);
+document.getElementById('btImprimirRota').classList.add('hide');
+renderChecklist();
+renderLaudos();
+renderControle();
+atualizarHero();
+</script>
+
+<div id="nuvemStatus" class="nuvem-status">Conectando à nuvem…</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+const cfg={apiKey:"AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",authDomain:"ld-imoveis.firebaseapp.com",projectId:"ld-imoveis",storageBucket:"ld-imoveis.firebasestorage.app",messagingSenderId:"871416060994",appId:"1:871416060994:web:bf3b2ad3e07b18b80ca1db"};
+const app=initializeApp(cfg,'inspecao'); const auth=getAuth(app), db=getFirestore(app);
+const ADMIN='matheusslvdsz@gmail.com', status=document.getElementById('nuvemStatus');
+let perfil=null, pronto=false, ocupados={laudos:new Set(),imoveis:new Set()};
+const mapa={ld_inspecoes_v2:'inspecoes',ld_imoveis_v2:'inspecaoImoveis'};
+const idSeguro=x=>String(x.id||x.codigo||crypto.randomUUID()).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,180);
+async function sincronizar(chave,lista){
+ if(!pronto||window.LD_INSPECAO_SOMENTE_LEITURA)return;
+ const nome=mapa[chave]; if(!nome)return;
+ try{const batch=writeBatch(db), atuais=new Set(); for(const item of lista){const id=idSeguro(item),dados={...item,id,atualizadoEm:new Date().toISOString(),atualizadoPor:auth.currentUser?.email||''};atuais.add(id);batch.set(doc(db,nome,id),dados,{merge:true})} for(const id of ocupados[chave===LS_LAUDOS?'laudos':'imoveis'])if(!atuais.has(id))batch.delete(doc(db,nome,id));await batch.commit();ocupados[chave===LS_LAUDOS?'laudos':'imoveis']=atuais;status.textContent='Nuvem sincronizada';status.className='nuvem-status ok'}catch(e){console.error(e);status.textContent='Falha ao sincronizar';status.className='nuvem-status erro';alert('Não foi possível sincronizar a inspeção: '+e.message)}}
+window.LD_INSPECAO_NUVEM={sincronizar};
+function atualizarTelas(){try{renderLaudos();renderImoveis();renderControle();atualizarHero();if(document.querySelector('#nav button[data-tab="painel"]')?.classList.contains('on'))renderPainel()}catch(e){console.warn(e)}}
+function ouvir(nome,chave,slot){onSnapshot(collection(db,nome),s=>{const a=s.docs.map(d=>({id:d.id,...d.data()}));MEM[chave]=a;ocupados[slot]=new Set(s.docs.map(d=>d.id));if(TEM_LS)localStorage.setItem(chave,JSON.stringify(a));atualizarTelas();status.textContent='Nuvem sincronizada';status.className='nuvem-status ok'},e=>{console.error(e);status.textContent='Acesso à nuvem negado';status.className='nuvem-status erro'})}
+function ouvirImoveisReais(){onSnapshot(collection(db,'imoveis'),s=>{const dl=document.getElementById('listaImoveisReais');const reais=s.docs.map(d=>({id:d.id,...d.data()}));dl.innerHTML=reais.map(i=>`<option value="${esc(i.codigo||i.id)}">${esc(i.endereco||'')} · ${esc(i.tipo||'')}</option>`).join('');window.LD_IMOVEIS_REAIS=reais;document.getElementById('fCodigo').addEventListener('change',e=>{const i=reais.find(x=>String(x.codigo||x.id)===e.target.value);if(!i)return;document.getElementById('fEndereco').value=i.endereco||'';document.getElementById('fProprietario').value=i.proprietarioNome||i.proprietario||'';const t=String(i.tipo||'').toLowerCase();document.getElementById('fTipo').value=t.includes('comerc')?'C':t.includes('galp')?'G':'R';renderChecklist()})})}
+onAuthStateChanged(auth,async user=>{if(!user){status.textContent='Entre pelo Painel Gerencial';status.className='nuvem-status erro';document.body.classList.add('somente-leitura');return}const email=(user.email||'').toLowerCase();if(email===ADMIN)perfil={perfil:'admin',ativo:true};else{const p=await getDoc(doc(db,'usuariosSistema',email));perfil=p.exists()?p.data():null}if(!perfil||perfil.ativo!==true||!['admin','financeiro','corretor','manutencao','consulta'].includes(perfil.perfil)){status.textContent='Acesso não autorizado';status.className='nuvem-status erro';document.body.innerHTML='<div style="padding:40px;color:white;font-family:Arial">Acesso não autorizado ao módulo de inspeção.</div>';return}window.LD_INSPECAO_SOMENTE_LEITURA=perfil.perfil==='consulta';document.body.classList.toggle('somente-leitura',window.LD_INSPECAO_SOMENTE_LEITURA);pronto=true;ouvir('inspecoes',LS_LAUDOS,'laudos');ouvir('inspecaoImoveis',LS_IMOVEIS,'imoveis');ouvirImoveisReais()});
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a52a58bdaff016e0',t:'MTc5MzM2MjUzOQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a52a58bdaff016e0',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
