@@ -1,0 +1,4 @@
+LD Imoveis v1.2.0 - Fase 5A
+
+Adiciona camada de servico testavel da Inspecao, com autenticacao injetada, estados operacionais, bloqueio de concorrencia e propagacao segura de erros. Inclui fixtures ficticias e 14 testes. Ainda nao integra o servico ao HTML e nao altera interface, Firebase ou dados.
+Após aplicar: npm run validate
