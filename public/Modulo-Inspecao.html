@@ -2171,6 +2171,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { criarRepositorioInspecao } from "./assets/js/inspecao-repository.js";
+import { criarServicoInspecao } from "./assets/js/inspecao-service.js";
 const cfg={apiKey:"AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",authDomain:"ld-imoveis.firebaseapp.com",projectId:"ld-imoveis",storageBucket:"ld-imoveis.firebasestorage.app",messagingSenderId:"871416060994",appId:"1:871416060994:web:bf3b2ad3e07b18b80ca1db"};
 // Usa o aplicativo Firebase padrao para compartilhar a sessao autenticada do Painel Gerencial.
 const app=initializeApp(cfg); const auth=getAuth(app), db=getFirestore(app);
@@ -2180,16 +2181,21 @@ const repositorio=criarRepositorioInspecao({
  db, criarReferencia:doc, criarLote:writeBatch,
  emailAtual:()=>auth.currentUser?.email||''
 });
+const servico=criarServicoInspecao({
+ repositorio, usuarioAtual:()=>auth.currentUser,
+ aoMudarEstado:({estado})=>{
+   if(estado==='sincronizando'||estado==='excluindo'){status.textContent='Sincronizando…';status.className='nuvem-status'}
+   if(estado==='sincronizado'){status.textContent='Nuvem sincronizada';status.className='nuvem-status ok'}
+   if(estado==='erro'){status.textContent='Falha ao sincronizar';status.className='nuvem-status erro'}
+ }
+});
 async function sincronizar(chave,lista){
  if(!pronto||window.LD_INSPECAO_SOMENTE_LEITURA)return false;
- try{
-   const slot=chave===LS_LAUDOS?'laudos':'imoveis';
-   await repositorio.sincronizar(chave,lista,ocupados[slot]);
-   status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true
- }catch(e){console.error(e);status.textContent='Falha ao sincronizar';status.className='nuvem-status erro';alert('Não foi possível sincronizar a inspeção: '+e.message);return false}}
+ try{const slot=chave===LS_LAUDOS?'laudos':'imoveis';await servico.sincronizar(chave,lista,ocupados[slot]);return true}
+ catch(e){console.error(e);alert('Não foi possível sincronizar a inspeção: '+e.message);return false}}
 async function excluir(chave,id){
  if(!pronto||!window.LD_INSPECAO_PODE_EXCLUIR){alert('Somente o administrador pode apagar registros definitivamente.');return false}
- try{await repositorio.excluir(chave,id);status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true}catch(e){console.error(e);alert('Não foi possível apagar: '+e.message);return false}
+ try{await servico.excluir(chave,id);return true}catch(e){console.error(e);alert('Não foi possível apagar: '+e.message);return false}
 }
 window.LD_INSPECAO_NUVEM={sincronizar,excluir};
 function atualizarTelas(){try{renderLaudos();renderImoveis();renderControle();atualizarHero();if(document.querySelector('#nav button[data-tab="painel"]')?.classList.contains('on'))renderPainel()}catch(e){console.warn(e)}}
