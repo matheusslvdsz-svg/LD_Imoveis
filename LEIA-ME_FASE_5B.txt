@@ -1,0 +1,4 @@
+LD Imoveis v1.2.0 - Fase 5B
+
+Integra a camada de servico testada ao runtime da Inspecao e gera bundle ESM dedicado. Preserva permissoes, interface e contratos da API LD_INSPECAO_NUVEM.
+Após aplicar: npm run validate; teste visual local sem gravar ou excluir dados.
