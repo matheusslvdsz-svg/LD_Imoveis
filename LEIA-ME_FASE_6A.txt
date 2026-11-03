@@ -1,0 +1,5 @@
+LD Imoveis v1.2.0 - Fase 6A
+
+Adiciona Playwright, servidor E2E local isolado, harness sem Firebase e 3 testes de navegador com fixtures ficticias para abertura, calculo/classificacao e bloqueio critico.
+Instalacao: npm install; npm run test:e2e:install
+Validacao: npm run validate; npm run test:e2e

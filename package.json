@@ -16,14 +16,18 @@
     "build:inspecao-core": "esbuild src/modulos/inspecao/calculos.js --bundle --format=iife --global-name=LDInspecaoCore --minify --outfile=public/assets/js/inspecao-core.js",
     "build:inspecao-repository": "esbuild src/modulos/inspecao/inspecao-repository.js --bundle --format=esm --minify --outfile=public/assets/js/inspecao-repository.js",
     "hygiene:check": "node scripts/hygiene-check.mjs",
-    "build:inspecao-service": "esbuild src/modulos/inspecao/inspecao-service.js --bundle --format=esm --minify --outfile=public/assets/js/inspecao-service.js"
+    "build:inspecao-service": "esbuild src/modulos/inspecao/inspecao-service.js --bundle --format=esm --minify --outfile=public/assets/js/inspecao-service.js",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
+    "validate:e2e": "npm run build:inspecao && npm run test:e2e"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "5.0.2",
     "firebase": "^12.9.0",
     "firebase-tools": "^15.0.0",
     "vitest": "4.1.12",
-    "esbuild": "^0.28.0"
+    "esbuild": "^0.28.0",
+    "@playwright/test": "1.56.1"
   },
   "engines": {
     "node": ">=20.0.0"

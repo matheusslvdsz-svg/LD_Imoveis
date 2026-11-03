@@ -1,0 +1,5 @@
+import { test, expect } from '@playwright/test';
+test.beforeEach(async({page})=>page.goto('/tests/e2e/fixtures/inspecao-harness.html'));
+test('abre isolado sem Firebase e sem erros',async({page})=>{const erros=[];page.on('pageerror',e=>erros.push(e.message));await expect(page.getByRole('heading',{name:'Inspeção fictícia'})).toBeVisible();await expect(page.locator('.faixa')).toHaveText('SEM NOTAS');expect(erros).toEqual([])});
+test('calcula nota e classificação com fixture fictícia',async({page})=>{await page.evaluate(()=>window.avaliar({'1.1':'3','1.2':'2','1.3':'1'}));await expect(page.locator('.nota')).toHaveText('67');await expect(page.locator('.faixa')).toHaveText('REGULAR');await expect(page.locator('.estado')).toHaveText('LIBERADO')});
+test('bloqueia quando item crítico recebe zero',async({page})=>{await page.evaluate(()=>window.avaliar({'1.1':'3','1.2':'0','1.3':'3'}));await expect(page.locator('.estado')).toHaveText('BLOQUEADO');await expect(page.locator('.estado')).toHaveClass(/bloqueado/)});
