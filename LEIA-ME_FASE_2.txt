@@ -1,0 +1,7 @@
+LD Imoveis v1.2.0 - Fase 2
+
+- Núcleo de cálculos compilado para public/assets/js/inspecao-core.js.
+- Inspeção delega nota, classificação, bloqueio, prioridade, datas e frequência ao núcleo testado.
+- Interface, Firebase, regras e dados permanecem inalterados.
+- Execute npm ci e npm run validate após aplicar.
+- Não publicar nem mesclar na main nesta fase.

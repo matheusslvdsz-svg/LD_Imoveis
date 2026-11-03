@@ -728,6 +728,8 @@ body.somente-leitura #btSalvar, body.somente-leitura #btAddImovel, body.somente-
 
 <div id="printArea"></div>
 
+<script src="assets/js/inspecao-core.js"></script>
+
 <script>
 /* ============================================================
    DADOS
@@ -878,16 +880,10 @@ function calcular(){
     const v = atual.notas[i.id];
     return v !== undefined && v !== 'na';
   });
-  const soma = avaliados.reduce((s,i) => s + Number(atual.notas[i.id]), 0);
-  const media = avaliados.length ? (soma / (3 * avaliados.length)) * 100 : null;
-
-  const zeradosCriticos = itens.filter(i => i.critico && atual.notas[i.id] === '0');
+  const media = LDInspecaoCore.calcularNota(itens, atual.notas);
+  const zeradosCriticos = LDInspecaoCore.itensCriticosZerados(itens, atual.notas);
   const bloqueado = zeradosCriticos.length > 0;
-
-  let classe = null;
-  if (media !== null){
-    classe = BASE.faixas.find(f => media >= f.min && media <= f.max) || BASE.faixas[4];
-  }
+  const classe = LDInspecaoCore.classificarNota(media, BASE.faixas);
 
   // placar
   const s = document.getElementById('pScore');
@@ -911,9 +907,7 @@ function calcular(){
 }
 
 function classificaPrioridade(item, nota){
-  if (nota === 0) return item.critico ? 'P1' : 'P2';
-  if (nota === 1) return item.critico ? 'P2' : 'P3';
-  return null;
+  return LDInspecaoCore.classificarPrioridade(item, nota);
 }
 
 function montarPendencias(){
@@ -1133,21 +1127,17 @@ const FREQ = {};
 (BASE.frequencia || []).forEach(f => { FREQ[f.situacao] = f; });
 
 const hojeISO = () => new Date().toISOString().slice(0, 10);
-const somaDias = (iso, n) => {
-  const d = new Date(iso + 'T12:00:00');
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
-};
-const diasEntre = (deISO, ateISO) =>
-  Math.round((new Date(ateISO + 'T12:00:00') - new Date(deISO + 'T12:00:00')) / 86400000);
+const somaDias = (iso, n) => LDInspecaoCore.somarDias(iso, n);
+const diasEntre = (deISO, ateISO) => LDInspecaoCore.diasEntre(deISO, ateISO);
 const brData = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '—';
 
 /* frequência em dias para um imóvel (null = fora do controle) */
 function frequenciaDoImovel(im){
-  if (im.status === 'obra') return null;
-  if (im.status === 'ocupado') return FREQ.ocupado ? FREQ.ocupado.dias : 180;
-  if (im.altoValor) return FREQ.alto_valor ? FREQ.alto_valor.dias : 15;
-  return FREQ.vago ? FREQ.vago.dias : 30;
+  return LDInspecaoCore.frequenciaDoImovel(im, {
+    ocupado: FREQ.ocupado ? FREQ.ocupado.dias : 180,
+    altoValor: FREQ.alto_valor ? FREQ.alto_valor.dias : 15,
+    vago: FREQ.vago ? FREQ.vago.dias : 30
+  });
 }
 
 /* situação de um imóvel: emdia | avencer | vencida | sem | obra */
