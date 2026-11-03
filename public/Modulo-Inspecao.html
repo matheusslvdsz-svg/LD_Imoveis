@@ -2170,27 +2170,26 @@ atualizarHero();
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { criarRepositorioInspecao } from "./assets/js/inspecao-repository.js";
 const cfg={apiKey:"AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",authDomain:"ld-imoveis.firebaseapp.com",projectId:"ld-imoveis",storageBucket:"ld-imoveis.firebasestorage.app",messagingSenderId:"871416060994",appId:"1:871416060994:web:bf3b2ad3e07b18b80ca1db"};
 // Usa o aplicativo Firebase padrao para compartilhar a sessao autenticada do Painel Gerencial.
 const app=initializeApp(cfg); const auth=getAuth(app), db=getFirestore(app);
 const ADMIN='matheusslvdsz@gmail.com', status=document.getElementById('nuvemStatus');
 let perfil=null, pronto=false, ocupados={laudos:new Set(),imoveis:new Set()};
-const mapa={ld_inspecoes_v2:'inspecoes',ld_imoveis_v2:'inspecaoImoveis'};
-const idSeguro=x=>String(x.id||x.codigo||crypto.randomUUID()).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,180);
+const repositorio=criarRepositorioInspecao({
+ db, criarReferencia:doc, criarLote:writeBatch,
+ emailAtual:()=>auth.currentUser?.email||''
+});
 async function sincronizar(chave,lista){
  if(!pronto||window.LD_INSPECAO_SOMENTE_LEITURA)return false;
- const nome=mapa[chave]; if(!nome)return false;
  try{
-   const slot=chave===LS_LAUDOS?'laudos':'imoveis', conhecidos=ocupados[slot], novos=lista.filter(item=>!conhecidos.has(idSeguro(item)) || item.__alteradoLocal===true);
-   if(!novos.length){status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true}
-   /* Batch limitado e sem exclusões implícitas: nenhum estado desatualizado apaga dados de outro usuário. */
-   for(let inicio=0;inicio<novos.length;inicio+=400){const batch=writeBatch(db);for(const item of novos.slice(inicio,inicio+400)){const id=idSeguro(item),dados={...item,id,atualizadoEm:new Date().toISOString(),atualizadoPor:auth.currentUser?.email||''};delete dados.__alteradoLocal;batch.set(doc(db,nome,id),dados,{merge:true});conhecidos.add(id)}await batch.commit()}
+   const slot=chave===LS_LAUDOS?'laudos':'imoveis';
+   await repositorio.sincronizar(chave,lista,ocupados[slot]);
    status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true
  }catch(e){console.error(e);status.textContent='Falha ao sincronizar';status.className='nuvem-status erro';alert('Não foi possível sincronizar a inspeção: '+e.message);return false}}
 async function excluir(chave,id){
  if(!pronto||!window.LD_INSPECAO_PODE_EXCLUIR){alert('Somente o administrador pode apagar registros definitivamente.');return false}
- const nome=mapa[chave];if(!nome)return false;
- try{const batch=writeBatch(db);batch.delete(doc(db,nome,id));await batch.commit();status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true}catch(e){console.error(e);alert('Não foi possível apagar: '+e.message);return false}
+ try{await repositorio.excluir(chave,id);status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true}catch(e){console.error(e);alert('Não foi possível apagar: '+e.message);return false}
 }
 window.LD_INSPECAO_NUVEM={sincronizar,excluir};
 function atualizarTelas(){try{renderLaudos();renderImoveis();renderControle();atualizarHero();if(document.querySelector('#nav button[data-tab="painel"]')?.classList.contains('on'))renderPainel()}catch(e){console.warn(e)}}
@@ -2198,6 +2197,5 @@ function ouvir(nome,chave,slot){onSnapshot(collection(db,nome),s=>{const a=s.doc
 function ouvirImoveisReais(){onSnapshot(collection(db,'imoveis'),s=>{const dl=document.getElementById('listaImoveisReais');const reais=s.docs.map(d=>({id:d.id,...d.data()}));dl.innerHTML=reais.map(i=>`<option value="${esc(i.codigo||i.id)}">${esc(i.endereco||'')} · ${esc(i.tipo||'')}</option>`).join('');window.LD_IMOVEIS_REAIS=reais;document.getElementById('fCodigo').addEventListener('change',e=>{const i=reais.find(x=>String(x.codigo||x.id)===e.target.value);if(!i)return;document.getElementById('fEndereco').value=i.endereco||'';document.getElementById('fProprietario').value=i.proprietarioNome||i.proprietario||'';const t=String(i.tipo||'').toLowerCase();document.getElementById('fTipo').value=t.includes('comerc')?'C':t.includes('galp')?'G':'R';renderChecklist()})})}
 onAuthStateChanged(auth,async user=>{if(!user){MEM[LS_LAUDOS]=[];MEM[LS_IMOVEIS]=[];try{localStorage.removeItem(LS_LAUDOS);localStorage.removeItem(LS_IMOVEIS)}catch(e){}atualizarTelas();status.textContent='Entre pelo Painel Gerencial';status.className='nuvem-status erro';document.body.classList.add('somente-leitura');return}const email=(user.email||'').toLowerCase();if(email===ADMIN)perfil={perfil:'admin',ativo:true};else{const p=await getDoc(doc(db,'usuariosSistema',email));perfil=p.exists()?p.data():null}if(!perfil||perfil.ativo!==true||!['admin','financeiro','corretor','manutencao','consulta'].includes(perfil.perfil)){status.textContent='Acesso não autorizado';status.className='nuvem-status erro';document.body.innerHTML='<div style="padding:40px;color:white;font-family:Arial">Acesso não autorizado ao módulo de inspeção.</div>';return}window.LD_INSPECAO_SOMENTE_LEITURA=perfil.perfil==='consulta';window.LD_INSPECAO_PODE_EXCLUIR=perfil.perfil==='admin';document.body.classList.toggle('somente-leitura',window.LD_INSPECAO_SOMENTE_LEITURA);pronto=true;ouvir('inspecoes',LS_LAUDOS,'laudos');ouvir('inspecaoImoveis',LS_IMOVEIS,'imoveis');ouvirImoveisReais()});
 </script>
-
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a52a6c244c7d6922',t:'MTc5MzM2MzMzMw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a52a6c244c7d6922',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

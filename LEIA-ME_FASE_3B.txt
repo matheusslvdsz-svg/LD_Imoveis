@@ -1,0 +1,7 @@
+LD Imoveis v1.2.0 - Fase 3B
+
+Conecta o repositorio testado ao modulo Firebase da Inspecao.
+Build passa a gerar inspecao-core.js e inspecao-repository.js.
+Remove artefato externo /cdn-cgi que nao pertence ao sistema LD.
+Após aplicar: npm install; npm run validate; teste visual local.
+Nao publicar e nao mesclar na main.
