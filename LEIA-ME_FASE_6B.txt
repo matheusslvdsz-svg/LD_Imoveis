@@ -1,0 +1,4 @@
+LD Imoveis v1.2.0 - Fase 6B
+
+Amplia Playwright para 5 testes, integrando no navegador o núcleo, o serviço e o repositório com dependências Firebase simuladas e fixtures fictícias. Confirma sincronização com merge/metadados e exclusão explícita sem acessar Firebase real.
+Validação: npm run validate; npm run test:e2e
