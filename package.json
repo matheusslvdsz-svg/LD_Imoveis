@@ -1,0 +1,25 @@
+{
+  "name": "ld-imoveis",
+  "version": "1.2.0-dev.1",
+  "private": true,
+  "type": "module",
+  "description": "Fundacao de arquitetura e testes automatizados do Sistema LD Imoveis",
+  "scripts": {
+    "test": "vitest run tests/unit",
+    "test:watch": "vitest tests/unit",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-ld-imoveis-tests \"vitest run tests/rules\"",
+    "check:html": "node scripts/check-html-scripts.mjs",
+    "security:check": "node scripts/security-check.mjs",
+    "validate:fast": "npm run check:html && npm run security:check && npm test",
+    "validate": "npm run validate:fast && npm run test:rules"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "5.0.2",
+    "firebase": "^12.9.0",
+    "firebase-tools": "^15.0.0",
+    "vitest": "4.1.12"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,5 @@
+import {readdir,readFile,stat} from 'node:fs/promises';import {join,relative,extname} from 'node:path';
+const raiz=process.cwd(),ignoradas=new Set(['.git','node_modules','.firebase','coverage']);const proibidas=new Set(['.pem','.p12','.pfx','.key','.sqlite','.db','.xlsx','.xls','.csv','.zip','.bak','.env']);
+const padroes=[/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,/"type"\s*:\s*"service_account"/,/"private_key"\s*:/,/gh[pousr]_[A-Za-z0-9]{30,}/];const falhas=[];
+async function andar(dir){for(const n of await readdir(dir)){if(ignoradas.has(n))continue;const p=join(dir,n),s=await stat(p),rel=relative(raiz,p);if(s.isDirectory())await andar(p);else{if(proibidas.has(extname(n).toLowerCase())||n==='.env')falhas.push(`${rel}: extensão sensível`);if(s.size<5_000_000&&/\.(?:html?|js|mjs|json|txt|md|rules)$/i.test(n)){const t=await readFile(p,'utf8');for(const rx of padroes)if(rx.test(t))falhas.push(`${rel}: padrão sensível ${rx}`)}}}}
+await andar(raiz);if(falhas.length){console.error('Arquivos/padrões sensíveis encontrados:\n'+falhas.join('\n'));process.exit(1)}console.log('OK: nenhum arquivo ou padrão sensível detectado.');

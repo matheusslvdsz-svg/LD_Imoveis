@@ -1,0 +1,4 @@
+import {readdir,readFile,writeFile,unlink} from 'node:fs/promises';import {spawnSync} from 'node:child_process';import {tmpdir} from 'node:os';import {join} from 'node:path';
+let total=0;const erros=[];
+for(const nome of (await readdir('public')).filter(n=>n.endsWith('.html'))){const html=await readFile(`public/${nome}`,'utf8');const rx=/<script([^>]*)>([\s\S]*?)<\/script>/gi;let m,i=0;while((m=rx.exec(html))){if(/\bsrc\s*=/.test(m[1])||!m[2].trim())continue;i++;total++;const ext=/type\s*=\s*["']module["']|^\s*import\s/m.test(m[1]+m[2])?'.mjs':'.js';const arq=join(tmpdir(),`ld-${process.pid}-${total}${ext}`);await writeFile(arq,m[2]);const r=spawnSync(process.execPath,['--check',arq],{encoding:'utf8'});await unlink(arq);if(r.status!==0)erros.push(`${nome} bloco ${i}: ${r.stderr}`)}}
+if(erros.length){console.error(erros.join('\n'));process.exit(1)}console.log(`OK: ${total} blocos JavaScript em arquivos HTML.`);
