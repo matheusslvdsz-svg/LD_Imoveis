@@ -1,0 +1,3 @@
+Hotfix v1.2.1 Mobile - Parte C
+
+Adiciona seletor nativo de imovel para Safari/iPhone e transforma a tabela de laudos em cartoes em telas estreitas, mantendo codigo e endereco visiveis. Preserva desktop, Firebase e dados.
