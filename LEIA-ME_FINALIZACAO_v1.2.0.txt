@@ -1,0 +1,4 @@
+Finalização da versão 1.2.0
+
+Atualiza a versão dos pacotes de 1.2.0-dev.1 para 1.2.0 e adiciona notas finais. Não altera runtime, Firebase, dados ou interface.
+Após aplicar: npm run validate; npm run test:e2e

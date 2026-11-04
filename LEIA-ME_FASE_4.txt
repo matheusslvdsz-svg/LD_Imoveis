@@ -1,0 +1,5 @@
+LD Imoveis v1.2.0 - Fase 4
+
+Remove o artefato /cdn-cgi do Painel Gerencial, adiciona favicon local e cria verificacao automatica de higiene dos HTMLs.
+Nao altera regras de negocio, Firebase, dados ou permissoes.
+Após aplicar: npm install; npm run validate; teste local do Painel e Inspecao.

@@ -1,0 +1,6 @@
+LD Imoveis v1.2.0 - Fase 3A
+
+Cria inspecao-repository.js com dependencias injetadas e 12 testes unitarios.
+Ainda nao conecta o repositorio ao HTML ou ao Firebase real.
+Aplicar na branch desenvolvimento/v1.2.0-fase3 e executar npm run validate.
+Nenhum deploy nesta etapa.

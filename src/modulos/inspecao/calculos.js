@@ -1,0 +1,10 @@
+export const FAIXAS_PADRAO=[{min:90,max:100,rotulo:'ÓTIMO'},{min:75,max:89.99,rotulo:'BOM'},{min:60,max:74.99,rotulo:'REGULAR'},{min:40,max:59.99,rotulo:'RUIM'},{min:0,max:39.99,rotulo:'CRÍTICO'}];
+export function calcularNota(itens,notas){const a=itens.filter(i=>notas[i.id]!==undefined&&notas[i.id]!=='na');if(!a.length)return null;return a.reduce((s,i)=>s+Number(notas[i.id]),0)/(3*a.length)*100}
+export function classificarNota(media,faixas=FAIXAS_PADRAO){if(media===null||media===undefined||Number.isNaN(media))return null;return faixas.find(f=>media>=f.min&&media<=f.max)||faixas.at(-1)}
+export function itensCriticosZerados(itens,notas){return itens.filter(i=>i.critico&&String(notas[i.id])==='0')}
+export function estaBloqueado(itens,notas){return itensCriticosZerados(itens,notas).length>0}
+export function classificarPrioridade(item,nota){if(Number(nota)===0)return item.critico?'P1':'P2';if(Number(nota)===1)return item.critico?'P2':'P3';return null}
+export function somarDias(iso,dias){const d=new Date(`${iso}T12:00:00`);d.setDate(d.getDate()+dias);return d.toISOString().slice(0,10)}
+export function diasEntre(inicio,fim){return Math.round((new Date(`${fim}T12:00:00`)-new Date(`${inicio}T12:00:00`))/86400000)}
+export function frequenciaDoImovel(imovel,frequencias={}){if(imovel.status==='obra')return null;if(imovel.status==='ocupado')return frequencias.ocupado??180;if(imovel.altoValor)return frequencias.altoValor??15;return frequencias.vago??30}
+export function controleDoImovel(imovel,laudos,hoje,frequencias={}){const ultimo=laudos.filter(l=>l.codigo===imovel.codigo&&l.data).sort((a,b)=>String(b.data).localeCompare(String(a.data)))[0]||null;const dias=frequenciaDoImovel(imovel,frequencias);if(dias===null)return{status:'obra',ultimo,dias:null,proxima:null,restam:null,passa:null};if(!ultimo)return{status:'sem',ultimo:null,dias,proxima:null,restam:null,passa:null};const proxima=somarDias(ultimo.data,dias),restam=diasEntre(hoje,proxima),status=restam<0?'vencida':restam<=7?'avencer':'emdia';return{status,ultimo,dias,proxima,restam,passa:restam<0?-restam:0}}

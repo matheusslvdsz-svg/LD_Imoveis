@@ -728,6 +728,8 @@ body.somente-leitura #btSalvar, body.somente-leitura #btAddImovel, body.somente-
 
 <div id="printArea"></div>
 
+<script src="assets/js/inspecao-core.js"></script>
+
 <script>
 /* ============================================================
    DADOS
@@ -878,16 +880,10 @@ function calcular(){
     const v = atual.notas[i.id];
     return v !== undefined && v !== 'na';
   });
-  const soma = avaliados.reduce((s,i) => s + Number(atual.notas[i.id]), 0);
-  const media = avaliados.length ? (soma / (3 * avaliados.length)) * 100 : null;
-
-  const zeradosCriticos = itens.filter(i => i.critico && atual.notas[i.id] === '0');
+  const media = LDInspecaoCore.calcularNota(itens, atual.notas);
+  const zeradosCriticos = LDInspecaoCore.itensCriticosZerados(itens, atual.notas);
   const bloqueado = zeradosCriticos.length > 0;
-
-  let classe = null;
-  if (media !== null){
-    classe = BASE.faixas.find(f => media >= f.min && media <= f.max) || BASE.faixas[4];
-  }
+  const classe = LDInspecaoCore.classificarNota(media, BASE.faixas);
 
   // placar
   const s = document.getElementById('pScore');
@@ -911,9 +907,7 @@ function calcular(){
 }
 
 function classificaPrioridade(item, nota){
-  if (nota === 0) return item.critico ? 'P1' : 'P2';
-  if (nota === 1) return item.critico ? 'P2' : 'P3';
-  return null;
+  return LDInspecaoCore.classificarPrioridade(item, nota);
 }
 
 function montarPendencias(){
@@ -1133,21 +1127,17 @@ const FREQ = {};
 (BASE.frequencia || []).forEach(f => { FREQ[f.situacao] = f; });
 
 const hojeISO = () => new Date().toISOString().slice(0, 10);
-const somaDias = (iso, n) => {
-  const d = new Date(iso + 'T12:00:00');
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
-};
-const diasEntre = (deISO, ateISO) =>
-  Math.round((new Date(ateISO + 'T12:00:00') - new Date(deISO + 'T12:00:00')) / 86400000);
+const somaDias = (iso, n) => LDInspecaoCore.somarDias(iso, n);
+const diasEntre = (deISO, ateISO) => LDInspecaoCore.diasEntre(deISO, ateISO);
 const brData = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '—';
 
 /* frequência em dias para um imóvel (null = fora do controle) */
 function frequenciaDoImovel(im){
-  if (im.status === 'obra') return null;
-  if (im.status === 'ocupado') return FREQ.ocupado ? FREQ.ocupado.dias : 180;
-  if (im.altoValor) return FREQ.alto_valor ? FREQ.alto_valor.dias : 15;
-  return FREQ.vago ? FREQ.vago.dias : 30;
+  return LDInspecaoCore.frequenciaDoImovel(im, {
+    ocupado: FREQ.ocupado ? FREQ.ocupado.dias : 180,
+    altoValor: FREQ.alto_valor ? FREQ.alto_valor.dias : 15,
+    vago: FREQ.vago ? FREQ.vago.dias : 30
+  });
 }
 
 /* situação de um imóvel: emdia | avencer | vencida | sem | obra */
@@ -2180,27 +2170,32 @@ atualizarHero();
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { criarRepositorioInspecao } from "./assets/js/inspecao-repository.js";
+import { criarServicoInspecao } from "./assets/js/inspecao-service.js";
 const cfg={apiKey:"AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",authDomain:"ld-imoveis.firebaseapp.com",projectId:"ld-imoveis",storageBucket:"ld-imoveis.firebasestorage.app",messagingSenderId:"871416060994",appId:"1:871416060994:web:bf3b2ad3e07b18b80ca1db"};
 // Usa o aplicativo Firebase padrao para compartilhar a sessao autenticada do Painel Gerencial.
 const app=initializeApp(cfg); const auth=getAuth(app), db=getFirestore(app);
 const ADMIN='matheusslvdsz@gmail.com', status=document.getElementById('nuvemStatus');
 let perfil=null, pronto=false, ocupados={laudos:new Set(),imoveis:new Set()};
-const mapa={ld_inspecoes_v2:'inspecoes',ld_imoveis_v2:'inspecaoImoveis'};
-const idSeguro=x=>String(x.id||x.codigo||crypto.randomUUID()).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,180);
+const repositorio=criarRepositorioInspecao({
+ db, criarReferencia:doc, criarLote:writeBatch,
+ emailAtual:()=>auth.currentUser?.email||''
+});
+const servico=criarServicoInspecao({
+ repositorio, usuarioAtual:()=>auth.currentUser,
+ aoMudarEstado:({estado})=>{
+   if(estado==='sincronizando'||estado==='excluindo'){status.textContent='Sincronizando…';status.className='nuvem-status'}
+   if(estado==='sincronizado'){status.textContent='Nuvem sincronizada';status.className='nuvem-status ok'}
+   if(estado==='erro'){status.textContent='Falha ao sincronizar';status.className='nuvem-status erro'}
+ }
+});
 async function sincronizar(chave,lista){
  if(!pronto||window.LD_INSPECAO_SOMENTE_LEITURA)return false;
- const nome=mapa[chave]; if(!nome)return false;
- try{
-   const slot=chave===LS_LAUDOS?'laudos':'imoveis', conhecidos=ocupados[slot], novos=lista.filter(item=>!conhecidos.has(idSeguro(item)) || item.__alteradoLocal===true);
-   if(!novos.length){status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true}
-   /* Batch limitado e sem exclusões implícitas: nenhum estado desatualizado apaga dados de outro usuário. */
-   for(let inicio=0;inicio<novos.length;inicio+=400){const batch=writeBatch(db);for(const item of novos.slice(inicio,inicio+400)){const id=idSeguro(item),dados={...item,id,atualizadoEm:new Date().toISOString(),atualizadoPor:auth.currentUser?.email||''};delete dados.__alteradoLocal;batch.set(doc(db,nome,id),dados,{merge:true});conhecidos.add(id)}await batch.commit()}
-   status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true
- }catch(e){console.error(e);status.textContent='Falha ao sincronizar';status.className='nuvem-status erro';alert('Não foi possível sincronizar a inspeção: '+e.message);return false}}
+ try{const slot=chave===LS_LAUDOS?'laudos':'imoveis';await servico.sincronizar(chave,lista,ocupados[slot]);return true}
+ catch(e){console.error(e);alert('Não foi possível sincronizar a inspeção: '+e.message);return false}}
 async function excluir(chave,id){
  if(!pronto||!window.LD_INSPECAO_PODE_EXCLUIR){alert('Somente o administrador pode apagar registros definitivamente.');return false}
- const nome=mapa[chave];if(!nome)return false;
- try{const batch=writeBatch(db);batch.delete(doc(db,nome,id));await batch.commit();status.textContent='Nuvem sincronizada';status.className='nuvem-status ok';return true}catch(e){console.error(e);alert('Não foi possível apagar: '+e.message);return false}
+ try{await servico.excluir(chave,id);return true}catch(e){console.error(e);alert('Não foi possível apagar: '+e.message);return false}
 }
 window.LD_INSPECAO_NUVEM={sincronizar,excluir};
 function atualizarTelas(){try{renderLaudos();renderImoveis();renderControle();atualizarHero();if(document.querySelector('#nav button[data-tab="painel"]')?.classList.contains('on'))renderPainel()}catch(e){console.warn(e)}}
@@ -2208,6 +2203,5 @@ function ouvir(nome,chave,slot){onSnapshot(collection(db,nome),s=>{const a=s.doc
 function ouvirImoveisReais(){onSnapshot(collection(db,'imoveis'),s=>{const dl=document.getElementById('listaImoveisReais');const reais=s.docs.map(d=>({id:d.id,...d.data()}));dl.innerHTML=reais.map(i=>`<option value="${esc(i.codigo||i.id)}">${esc(i.endereco||'')} · ${esc(i.tipo||'')}</option>`).join('');window.LD_IMOVEIS_REAIS=reais;document.getElementById('fCodigo').addEventListener('change',e=>{const i=reais.find(x=>String(x.codigo||x.id)===e.target.value);if(!i)return;document.getElementById('fEndereco').value=i.endereco||'';document.getElementById('fProprietario').value=i.proprietarioNome||i.proprietario||'';const t=String(i.tipo||'').toLowerCase();document.getElementById('fTipo').value=t.includes('comerc')?'C':t.includes('galp')?'G':'R';renderChecklist()})})}
 onAuthStateChanged(auth,async user=>{if(!user){MEM[LS_LAUDOS]=[];MEM[LS_IMOVEIS]=[];try{localStorage.removeItem(LS_LAUDOS);localStorage.removeItem(LS_IMOVEIS)}catch(e){}atualizarTelas();status.textContent='Entre pelo Painel Gerencial';status.className='nuvem-status erro';document.body.classList.add('somente-leitura');return}const email=(user.email||'').toLowerCase();if(email===ADMIN)perfil={perfil:'admin',ativo:true};else{const p=await getDoc(doc(db,'usuariosSistema',email));perfil=p.exists()?p.data():null}if(!perfil||perfil.ativo!==true||!['admin','financeiro','corretor','manutencao','consulta'].includes(perfil.perfil)){status.textContent='Acesso não autorizado';status.className='nuvem-status erro';document.body.innerHTML='<div style="padding:40px;color:white;font-family:Arial">Acesso não autorizado ao módulo de inspeção.</div>';return}window.LD_INSPECAO_SOMENTE_LEITURA=perfil.perfil==='consulta';window.LD_INSPECAO_PODE_EXCLUIR=perfil.perfil==='admin';document.body.classList.toggle('somente-leitura',window.LD_INSPECAO_SOMENTE_LEITURA);pronto=true;ouvir('inspecoes',LS_LAUDOS,'laudos');ouvir('inspecaoImoveis',LS_IMOVEIS,'imoveis');ouvirImoveisReais()});
 </script>
-
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a52a6c244c7d6922',t:'MTc5MzM2MzMzMw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a52a6c244c7d6922',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

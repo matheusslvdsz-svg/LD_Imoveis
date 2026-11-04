@@ -43,3 +43,16 @@ Desktop.ini
 *.mp4
 *.wav
 *.mov
+
+# v1.2.0 - ferramentas de teste
+node_modules/
+coverage/
+.firebase/
+firebase-debug.log
+*-debug.log
+audit.json
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
