@@ -1,0 +1,4 @@
+Hotfix v1.2.1 Mobile - Parte A
+
+Corrige estabilidade do cabecalho, botao de menu, iframe, navegacao horizontal e zoom automatico de campos em telas moveis. Adiciona 2 testes Playwright em viewport de celular. Nao altera Firebase, dados ou PDFs nesta parte.
+Validacao: npm run validate; npm run test:e2e

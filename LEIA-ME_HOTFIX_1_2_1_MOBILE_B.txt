@@ -1,0 +1,4 @@
+Hotfix v1.2.1 Mobile - Parte B
+
+No celular, o recibo passa a abrir o PDF gerado em nova aba para compartilhar/salvar. A Inspecao abre um documento de impressao fora do iframe, com botao manual e tentativa automatica. Exibe aviso quando pop-ups estiverem bloqueados. No computador, o download direto do recibo e preservado.
+Validacao: npm run validate; npm run test:e2e; teste real em iPhone e Android sem salvar dados.
