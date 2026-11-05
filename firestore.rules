@@ -42,6 +42,37 @@ service cloud.firestore {
       allow create, update, delete: if admin();
     }
 
+
+    // Vitrine v2: somente a projeção sanitizada e explicitamente publicada é pública.
+    match /vitrinePublica/{imovelId} {
+      allow read: if resource.data.publicado == true;
+      allow create, update: if admin()
+        && request.resource.data.keys().hasOnly([
+          'codigo','titulo','tipo','finalidade','valor','condominio','iptu',
+          'bairro','cidade','enderecoPublico','exibirEnderecoCompleto',
+          'area','quartos','suites','banheiros','vagas','andar','mobilia',
+          'descricaoPublica','destaque','ordemVitrine','fotoCapaMini','numFotos',
+          'publicado','atualizadoEm'
+        ])
+        && request.resource.data.codigo is string
+        && request.resource.data.codigo.size() > 0
+        && request.resource.data.codigo.size() <= 80
+        && request.resource.data.publicado is bool
+        && request.resource.data.exibirEnderecoCompleto is bool
+        && request.resource.data.bairro is string
+        && request.resource.data.bairro.size() <= 120
+        && request.resource.data.cidade is string
+        && request.resource.data.cidade.size() <= 120
+        && request.resource.data.enderecoPublico is string
+        && request.resource.data.enderecoPublico.size() <= 220;
+      allow delete: if admin();
+
+      match /fotos/{fotoId} {
+        allow read: if get(/databases/$(database)/documents/vitrinePublica/$(imovelId)).data.publicado == true;
+        allow create, update, delete: if admin();
+      }
+    }
+
     match /vitrineImoveis/{imovelId} {
       allow read: if true;
       allow create, update, delete: if admin();
@@ -55,13 +86,32 @@ service cloud.firestore {
       allow create, update, delete: if admin();
     }
     match /vitrineContatos/{contatoId} {
-      allow create: if request.resource.data.keys().hasAll(['nome', 'telefone'])
+      allow create: if request.resource.data.keys().hasOnly([
+                      'nome','telefone','mensagem','imovelId','imovelCodigo',
+                      'imovelTipo','criadoEm','lido'
+                    ])
+                    && request.resource.data.keys().hasAll(['nome','telefone','criadoEm','lido'])
                     && request.resource.data.nome is string
                     && request.resource.data.nome.size() >= 2
                     && request.resource.data.nome.size() <= 120
                     && request.resource.data.telefone is string
                     && request.resource.data.telefone.size() >= 8
-                    && request.resource.data.telefone.size() <= 30;
+                    && request.resource.data.telefone.size() <= 30
+                    && (!('mensagem' in request.resource.data)
+                        || (request.resource.data.mensagem is string
+                            && request.resource.data.mensagem.size() <= 1200))
+                    && (!('imovelId' in request.resource.data)
+                        || (request.resource.data.imovelId is string
+                            && request.resource.data.imovelId.size() <= 160))
+                    && (!('imovelCodigo' in request.resource.data)
+                        || (request.resource.data.imovelCodigo is string
+                            && request.resource.data.imovelCodigo.size() <= 80))
+                    && (!('imovelTipo' in request.resource.data)
+                        || (request.resource.data.imovelTipo is string
+                            && request.resource.data.imovelTipo.size() <= 80))
+                    && request.resource.data.criadoEm is string
+                    && request.resource.data.criadoEm.size() <= 40
+                    && request.resource.data.lido == false;
       allow read, update, delete: if admin();
     }
 

@@ -7,7 +7,7 @@
   "scripts": {
     "test": "vitest run tests/unit",
     "test:watch": "vitest tests/unit",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-ld-imoveis-tests \"vitest run tests/rules\"",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-ld-imoveis-tests \"vitest run tests/rules --no-file-parallelism\"",
     "check:html": "node scripts/check-html-scripts.mjs",
     "security:check": "node scripts/security-check.mjs",
     "validate:fast": "npm run build:inspecao && npm run check:html && npm run hygiene:check && npm run security:check && npm test",
