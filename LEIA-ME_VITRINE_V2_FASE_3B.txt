@@ -1,0 +1,9 @@
+Vitrine v2 — correções pós-homologação móvel
+
+- Corrige botão X do modal no iPhone: posição absoluta sobre a imagem, sem faixa branca.
+- Adiciona caixa administrativa de contatos recebidos.
+- Permite abrir o WhatsApp do interessado e marcar contato como lido.
+- Usa a configuração Firebase oficial e o administrador principal real.
+- Mantém migração sanitizada e coleção original intacta.
+
+Aplicar somente em desenvolvimento/vitrine-v2-segura. Validar e publicar apenas no canal temporário.
