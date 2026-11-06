@@ -1,0 +1,5 @@
+Hotfix de fotos da Vitrine v1.3.0
+
+Corrige a origem das fotos: o cadastro interno usa imoveis/{id}/fotos, enquanto a Vitrine v2 usa a coleção pública sanitizada. A administração ganha o botão “3. Sincronizar fotos”, que vincula imóveis pelo código, copia mini capa e galeria para vitrinePublica/{id}/fotos sem alterar ou excluir os originais. A vitrine passa a abrir a galeria pública.
+
+Aplicar em branch de hotfix, validar, publicar em canal temporário, executar sincronização uma vez e homologar antes de produção.
