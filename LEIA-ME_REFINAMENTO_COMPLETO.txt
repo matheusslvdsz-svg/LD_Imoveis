@@ -1,0 +1,5 @@
+LD Imóveis — Vitrine v2 — pacote único de refinamento
+
+Inclui a interface pública moderna, coleção sanitizada, administração separada, contatos, WhatsApp, favoritos, comparação, filtros, modal móvel corrigido, capas institucionais para imóveis sem foto, privacidade e testes.
+
+Aplicar somente na branch desenvolvimento/vitrine-v2-segura. Validar integralmente e publicar primeiro no canal vitrine-v2. Não substituir produção sem homologação.
