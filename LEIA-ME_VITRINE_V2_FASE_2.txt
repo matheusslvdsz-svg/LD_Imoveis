@@ -1,0 +1,13 @@
+LD Imóveis — Vitrine v2 — Fase 2
+
+Nova interface pública com identidade LD, busca, filtros, favoritos, comparação, detalhes, WhatsApp e agendamento.
+
+Segurança:
+- lê somente vitrinePublica com publicado=true;
+- não contém código de autenticação administrativa;
+- mostra endereçoPublico sanitizado;
+- administração permanece na página separada;
+- não altera dados nem Rules nesta fase.
+
+Aplicar somente na branch desenvolvimento/vitrine-v2-segura.
+Não fazer deploy ou migração antes da validação completa.

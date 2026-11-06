@@ -1,0 +1,1 @@
+Correção móvel da Vitrine v2: diferencia visualmente grade e lista no iPhone, amplia áreas de toque e mostra o modo ativo. Aplicar apenas na branch de desenvolvimento e validar no canal temporário.

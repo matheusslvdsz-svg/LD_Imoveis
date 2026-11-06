@@ -1,0 +1,19 @@
+LD Imóveis — Vitrine v2 segura — Fase 1
+
+ESCOPO
+- Adiciona a coleção sanitizada vitrinePublica nas Firestore Rules.
+- Restringe contatos públicos a campos e tamanhos previstos.
+- Adiciona página administrativa separada para PRÉVIA e migração controlada.
+- Adiciona 9 testes de Rules específicos da vitrine.
+
+IMPORTANTE
+1. Este pacote é para a branch desenvolvimento/vitrine-v2-segura.
+2. Não executar deploy em produção.
+3. Não executar a migração ainda.
+4. A página de migração remove endereço completo por padrão e não apaga a coleção original.
+5. A nova vitrine visual será construída sobre essa base após os testes da Fase 1.
+
+ARQUIVOS
+- firestore.rules
+- public/LD_Imoveis_Vitrine_Admin.html
+- tests/rules/vitrine-v2.rules.test.js

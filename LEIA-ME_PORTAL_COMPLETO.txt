@@ -1,0 +1,5 @@
+LD Imóveis — Portal público completo
+
+Versão rica inspirada na estrutura de portais imobiliários, com identidade LD: hero arquitetônico institucional, indicadores, atalhos de finalidade e tipo, bairros, carteira real, serviços, captação de proprietários, encomenda de imóveis, privacidade, favoritos, comparação, contatos e administração separada.
+
+A imagem institucional não representa imóvel anunciado. Aplicar na branch desenvolvimento/vitrine-v2-segura e validar primeiro no canal vitrine-v2.
