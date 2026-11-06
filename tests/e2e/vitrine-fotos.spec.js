@@ -1,0 +1,3 @@
+import {test,expect} from '@playwright/test';
+test('admin oferece sincronização segura de fotos',async({page})=>{await page.goto('/public/LD_Imoveis_Vitrine_Admin.html',{waitUntil:'domcontentloaded'});await expect(page.locator('#sincronizarFotos')).toBeAttached();const h=await page.content();expect(h).toContain("collection(db,'imoveis',orig.id,'fotos')");expect(h).toContain("doc(db,'vitrinePublica',pub.id,'fotos',f.id)")});
+test('vitrine prepara galeria pública',async({page})=>{await page.goto('/public/LD_Imoveis_Vitrine_Publica.html');const h=await page.content();expect(h).toContain("collection(db,'vitrinePublica',i.id,'fotos')");expect(h).toContain('galeriaMini')});

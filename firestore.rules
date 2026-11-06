@@ -45,7 +45,7 @@ service cloud.firestore {
 
     // Vitrine v2: somente a projeção sanitizada e explicitamente publicada é pública.
     match /vitrinePublica/{imovelId} {
-      allow read: if resource.data.publicado == true;
+      allow read: if admin() || resource.data.publicado == true;
       allow create, update: if admin()
         && request.resource.data.keys().hasOnly([
           'codigo','titulo','tipo','finalidade','valor','condominio','iptu',
@@ -68,7 +68,7 @@ service cloud.firestore {
       allow delete: if admin();
 
       match /fotos/{fotoId} {
-        allow read: if get(/databases/$(database)/documents/vitrinePublica/$(imovelId)).data.publicado == true;
+        allow read: if admin() || get(/databases/$(database)/documents/vitrinePublica/$(imovelId)).data.publicado == true;
         allow create, update, delete: if admin();
       }
     }
