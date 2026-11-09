@@ -11,3 +11,6 @@ test('reserva código documental e prepara rodapé oficial',()=>{const fonte=rea
 
 import {readFileSync as lerFonteInspecao} from 'node:fs';
 test('checklist completo exige avaliação de todos os itens',()=>{const fonte=lerFonteInspecao('public/Modulo-Inspecao.html','utf8');expect(fonte).toContain('4.14');expect(fonte).toContain('10.8');expect(fonte).toContain('itensNaoAvaliados');expect(fonte).toContain('btProximoPendente');expect(fonte).toContain("if (!irParaPrimeiroNaoAvaliado()) return")});
+
+import {readFileSync as lerPdfOficial} from 'node:fs';
+test('PDF oficial pagina checklist e confere total',()=>{const f=lerPdfOficial('public/Modulo-Inspecao.html','utf8');expect(f).toContain('btPdfOficial');expect(f).toContain('rowPageBreak');expect(f).toContain('corpo.length!==itens.length');expect(f).toContain('Página '+"'"+'+n+'+"'"+' de '+"'"+'+total');expect(f).toContain("_Laudo_de_Inspecao.pdf")});
