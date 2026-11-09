@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#060606">
 <title>Inspeção de Imóveis · LD Imóveis</title>
 <meta name="description" content="Checklist de vistoria, laudo em PDF e cronograma de inspeções — LD Imóveis">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="vendor/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="vendor/jspdf.plugin.autotable.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 /* ==========================================================================
    LD IMÓVEIS · INSPEÇÃO DE IMÓVEIS · v2.1
@@ -1040,8 +1040,8 @@ function renderPendencias(pends){
    CONFERÊNCIA OBRIGATÓRIA
    ============================================================ */
 function itensNaoAvaliados(){return todosItens(document.getElementById('fTipo').value).filter(i=>atual.notas[i.id]===undefined)}
-function irParaPrimeiroNaoAvaliado(){const faltam=itensNaoAvaliados();if(!faltam.length){alert('Todos os itens aplicáveis foram avaliados ou marcados como não se aplica.');return true}const alvo=document.querySelector('.notas[data-item="'+faltam[0].id+'"]');if(alvo){alvo.closest('.grupo')?.classList.remove('col');alvo.closest('.item')?.scrollIntoView({behavior:'smooth',block:'center'});alvo.closest('.item')?.classList.add('avaliacao-pendente')}alert('Faltam '+faltam.length+' item(ns). Avalie o item '+faltam[0].id+' ou marque — quando não se aplicar.');return false}
-document.getElementById('btProximoPendente').onclick=irParaPrimeiroNaoAvaliado;
+function irParaPrimeiroNaoAvaliado(avisarConclusao=false){const faltam=itensNaoAvaliados();if(!faltam.length){if(avisarConclusao)alert('Todos os itens aplicáveis foram avaliados ou marcados como não se aplica.');return true}const alvo=document.querySelector('.notas[data-item="'+faltam[0].id+'"]');if(alvo){alvo.closest('.grupo')?.classList.remove('col');alvo.closest('.item')?.scrollIntoView({behavior:'smooth',block:'center'});alvo.closest('.item')?.classList.add('avaliacao-pendente')}alert('Faltam '+faltam.length+' item(ns). Avalie o item '+faltam[0].id+' ou marque — quando não se aplicar.');return false}
+document.getElementById('btProximoPendente').onclick=()=>irParaPrimeiroNaoAvaliado(true);
 
 /* ============================================================
    SALVAR / IMPRIMIR

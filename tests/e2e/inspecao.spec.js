@@ -14,3 +14,15 @@ test('checklist completo exige avaliação de todos os itens',()=>{const fonte=l
 
 import {readFileSync as lerPdfOficial} from 'node:fs';
 test('PDF oficial pagina checklist e confere total',()=>{const f=lerPdfOficial('public/Modulo-Inspecao.html','utf8');expect(f).toContain('btPdfOficial');expect(f).toContain('rowPageBreak');expect(f).toContain('corpo.length!==itens.length');expect(f).toContain('Página '+"'"+'+n+'+"'"+' de '+"'"+'+total');expect(f).toContain("_Laudo_de_Inspecao.pdf")});
+
+test('carrega bibliotecas PDF locais', async ({ page }) => {
+  await page.goto('/public/Modulo-Inspecao.html?teste-isolado=1');
+
+  await expect.poll(() =>
+    page.evaluate(() => {
+      if (!window.jspdf?.jsPDF) return false;
+      const documento = new window.jspdf.jsPDF();
+      return typeof documento.autoTable === 'function';
+    })
+  ).toBe(true);
+});
