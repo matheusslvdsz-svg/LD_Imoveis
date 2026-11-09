@@ -156,14 +156,47 @@ service cloud.firestore {
     }
     match /documentosOficiais/{codigo} {
       allow read: if equipeOperacional();
+
+      // Reserva: qualquer editor documental ativo pode criar somente rascunho próprio.
       allow create: if editorDocumental()
                     && request.resource.data.codigo == codigo
                     && request.resource.data.criadoPor == email()
                     && request.resource.data.status == 'rascunho';
+
+      // Primeira emissão: preserva identidade e só permite rascunho -> emitido.
       allow update: if editorDocumental()
                     && request.resource.data.codigo == resource.data.codigo
                     && request.resource.data.criadoPor == resource.data.criadoPor
-                    && request.resource.data.status in ['rascunho','emitido','cancelado'];
+                    && resource.data.status == 'rascunho'
+                    && request.resource.data.status == 'emitido'
+                    && request.resource.data.emitidoPor == email()
+                    && request.resource.data.emitidoEm is string;
+
+      // Cancelamento de rascunho ou emitido: exclusivamente administrador e com motivo.
+      allow update: if admin()
+                    && request.resource.data.codigo == resource.data.codigo
+                    && request.resource.data.criadoPor == resource.data.criadoPor
+                    && resource.data.status in ['rascunho','emitido']
+                    && request.resource.data.status == 'cancelado'
+                    && request.resource.data.canceladoPor == email()
+                    && request.resource.data.canceladoEm is string
+                    && request.resource.data.motivoCancelamento is string
+                    && request.resource.data.motivoCancelamento.size() >= 5;
+
+      // Substituição: original fica terminal e aponta para um novo código.
+      allow update: if admin()
+                    && request.resource.data.codigo == resource.data.codigo
+                    && request.resource.data.criadoPor == resource.data.criadoPor
+                    && resource.data.status in ['rascunho','emitido']
+                    && request.resource.data.status == 'substituido'
+                    && request.resource.data.substituidoPorCodigo is string
+                    && request.resource.data.substituidoPorCodigo.size() > 0
+                    && request.resource.data.substituidoPor == email()
+                    && request.resource.data.substituidoEm is string
+                    && request.resource.data.motivoSubstituicao is string
+                    && request.resource.data.motivoSubstituicao.size() >= 5;
+
+      // Documento oficial nunca é apagado nem reativado após estado terminal.
       allow delete: if false;
     }
     match /auditoriaSistema/{id} {
@@ -255,7 +288,9 @@ service cloud.firestore {
     match /inspecoes/{id} {
       allow read: if equipeOperacional();
       allow create, update: if principal() || (ativo() && cadastro().perfil in ['admin', 'financeiro', 'corretor', 'manutencao']);
-      allow delete: if admin();
+      // Laudo com código oficial é histórico permanente; somente rascunho sem código pode ser removido.
+      allow delete: if admin()
+                    && (!('documentoCodigo' in resource.data) || resource.data.documentoCodigo == '');
     }
     match /inspecaoImoveis/{id} {
       allow read: if equipeOperacional();

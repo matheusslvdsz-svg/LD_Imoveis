@@ -37,3 +37,16 @@ it('principal sem perfil pode reservar código documental',()=>{
   atualizadoPor:'matheusslvdsz@gmail.com'
  }));
 });
+
+describe('ciclo documental administrativo v2',()=>{
+ const codigo='LD-LAI-2026-000099';
+ const base={codigo,tipo:'LAI',ano:2026,sequencial:99,status:'emitido',revisao:'01',criadoEm:'2026-11-09T00:00:00.000Z',criadoPor:'corretor@teste.local',emitidoEm:'2026-11-09T01:00:00.000Z',emitidoPor:'corretor@teste.local'};
+ const semRegras=dados=>env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'documentosOficiais',codigo),dados));
+ it('administrador cancela emitido com motivo',async()=>{await semRegras(base);return assertSucceeds(updateDoc(doc(dbComo('admin'),'documentosOficiais',codigo),{status:'cancelado',canceladoPor:'admin@teste.local',canceladoEm:'2026-11-09T02:00:00.000Z',motivoCancelamento:'Documento emitido com informação incorreta'}))});
+ it('não administrador não cancela documento',async()=>{await semRegras(base);return assertFails(updateDoc(doc(dbComo('corretor'),'documentosOficiais',codigo),{status:'cancelado',canceladoPor:'corretor@teste.local',canceladoEm:'2026-11-09T02:00:00.000Z',motivoCancelamento:'Documento emitido com informação incorreta'}))});
+ it('cancelamento sem motivo é negado',async()=>{await semRegras(base);return assertFails(updateDoc(doc(dbComo('admin'),'documentosOficiais',codigo),{status:'cancelado',canceladoPor:'admin@teste.local',canceladoEm:'2026-11-09T02:00:00.000Z',motivoCancelamento:''}))});
+ it('administrador marca documento como substituído',async()=>{await semRegras(base);return assertSucceeds(updateDoc(doc(dbComo('admin'),'documentosOficiais',codigo),{status:'substituido',substituidoPorCodigo:'LD-LAI-2026-000100',substituidoPor:'admin@teste.local',substituidoEm:'2026-11-09T02:00:00.000Z',motivoSubstituicao:'Correção formal do documento emitido'}))});
+ it('documento cancelado não volta a emitido',async()=>{await semRegras({...base,status:'cancelado',canceladoPor:'admin@teste.local',canceladoEm:'2026-11-09T02:00:00.000Z',motivoCancelamento:'Cancelamento administrativo'});return assertFails(updateDoc(doc(dbComo('admin'),'documentosOficiais',codigo),{status:'emitido',emitidoPor:'admin@teste.local',emitidoEm:'2026-11-09T03:00:00.000Z'}))});
+ it('laudo com código oficial não pode ser apagado',async()=>{await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'inspecoes','L-OFICIAL'),{id:'L-OFICIAL',documentoCodigo:codigo}));return assertFails(deleteDoc(doc(dbComo('admin'),'inspecoes','L-OFICIAL')))});
+ it('administrador ainda remove rascunho sem código oficial',async()=>{await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'inspecoes','L-RASCUNHO'),{id:'L-RASCUNHO',documentoCodigo:''}));return assertSucceeds(deleteDoc(doc(dbComo('admin'),'inspecoes','L-RASCUNHO')))});
+});
