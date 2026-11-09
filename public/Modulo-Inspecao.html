@@ -757,6 +757,13 @@ body.somente-leitura #btSalvar, body.somente-leitura #btAddImovel, body.somente-
 
 <div id="printArea"></div>
 
+<script>
+const modoTesteIsolado = new URLSearchParams(window.location.search).get('teste-isolado') === '1';
+if (window.top === window.self && !modoTesteIsolado) {
+  window.location.replace('LD_Imoveis_Sistema_Gerencial.html#inspecoes');
+}
+</script>
+
 <script src="assets/js/inspecao-core.js"></script>
 
 <script>
