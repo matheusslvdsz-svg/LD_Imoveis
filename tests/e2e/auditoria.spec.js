@@ -12,4 +12,5 @@ test('auditoria distingue emissão de reimpressão e exporta', () => {
   expect(f).toContain('aud-info');
   expect(f).toContain('audResultado');
   expect(f).toContain('Retenção permanente');
+  expect(f).toContain('v2.0.0');
 });
