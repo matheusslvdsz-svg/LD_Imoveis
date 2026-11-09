@@ -522,6 +522,7 @@ body.somente-leitura #btSalvar, body.somente-leitura #btAddImovel, body.somente-
   <div class="card">
     <h2>Observações e fechamento</h2>
     <textarea id="fObs" placeholder="O que não se encaixa no checklist: relato do inquilino, conduta do condomínio, acesso difícil, desgaste natural × dano na saída…"></textarea>
+    <div id="documentoOficial" style="margin-top:13px;padding:11px 13px;border:1px solid #3a3f4b;border-radius:9px;background:#11151d;color:#d9dde7"><b>Documento oficial:</b> <span id="documentoCodigo">Aguardando autenticação…</span> <small id="documentoStatus" style="margin-left:8px;color:#9da5b4">Rascunho</small></div>
     <div class="row" style="margin-top:13px">
       <button class="btn red" id="btSalvar">
         <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
@@ -794,6 +795,12 @@ const money0 = n => (Math.round(n*10)/10).toLocaleString('pt-BR');
 
 /* estado da inspeção em andamento */
 let atual = { notas:{}, pendencias:{} };
+let documentoAtual = null;
+function mostrarDocumentoAtual(){
+  const cod=document.getElementById('documentoCodigo'),st=document.getElementById('documentoStatus');
+  if(cod)cod.textContent=documentoAtual?.codigo||'Aguardando reserva…';
+  if(st)st.textContent=documentoAtual?.status==='emitido'?'Emitido':'Rascunho';
+}
 
 /* ============================================================
    NAVEGAÇÃO
@@ -1038,7 +1045,11 @@ function coletarLaudo(){
     pendencias: montarPendencias(),
     media: r.media, classe: r.classe ? r.classe.rotulo : null,
     bloqueado: r.bloqueado,
-    itensAvaliados: todosItens(tipo).filter(i => atual.notas[i.id] !== undefined && atual.notas[i.id] !== 'na').length
+    itensAvaliados: todosItens(tipo).filter(i => atual.notas[i.id] !== undefined && atual.notas[i.id] !== 'na').length,
+    documentoCodigo: documentoAtual?.codigo || '',
+    documentoStatus: documentoAtual?.status || 'rascunho',
+    documentoTipo: 'LAI',
+    documentoRevisao: '01'
   };
 }
 
@@ -1056,8 +1067,10 @@ document.getElementById('btSalvar').onclick = () => {
     + (l.bloqueado ? 'ATENÇÃO: imóvel BLOQUEADO por item crítico com nota 0.' : 'Sem bloqueio de segurança.'));
 };
 
-document.getElementById('btNovo').onclick = () => {
+document.getElementById('btNovo').onclick = async () => {
   if (!confirm('Limpar a tela para começar um novo laudo? O que não foi salvo será perdido.')) return;
+  if(!window.LD_DOCUMENTOS){alert('Aguarde a autenticação para reservar o código oficial.');return}
+  try{documentoAtual=await window.LD_DOCUMENTOS.reservar('LAI');mostrarDocumentoAtual()}catch(e){alert('Não foi possível reservar o código oficial: '+e.message);return}
   ['fCodigo','fEndereco','fProprietario','fResponsavel','fAgua','fLuz','fObs'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('fChaves').checked = false;
   atual = { notas:{}, pendencias:{} };
@@ -1083,7 +1096,9 @@ document.getElementById('btLimpar').onclick = () => {
 /* ============================================================
    IMPRESSÃO DO LAUDO
    ============================================================ */
-function imprimirLaudo(l){
+async function imprimirLaudo(l){
+  if(!l.documentoCodigo){alert('Aguarde a reserva do código oficial antes de emitir.');return}
+  if(window.LD_DOCUMENTOS){try{await window.LD_DOCUMENTOS.emitir(l.documentoCodigo,l.id);documentoAtual={...documentoAtual,status:'emitido'};l.documentoStatus='emitido';mostrarDocumentoAtual()}catch(e){alert('Não foi possível registrar a emissão: '+e.message);return}}
   const itens = todosItens(l.tipo);
   const pends = l.pendencias || [];
   const linhas = itens.map(i => {
@@ -1101,6 +1116,7 @@ function imprimirLaudo(l){
     <div class="prt-head">
       <h1>Laudo de Inspeção de Imóvel</h1>
       <div>LD Imóveis · documento operacional · ${esc(l.vistoria)}</div>
+      <div style="margin-top:4px;font-size:10px"><b>Documento:</b> ${esc(l.documentoCodigo||'RASCUNHO SEM CÓDIGO')} · <b>Revisão:</b> ${esc(l.documentoRevisao||'01')}</div>
     </div>
     <table style="margin-bottom:12px">
       <tr><th style="width:26%">Código do imóvel</th><td>${esc(l.codigo)}</td>
@@ -1135,6 +1151,7 @@ function imprimirLaudo(l){
       (elétrica, gás, estrutura, incêndio) bloqueia a locação independentemente da média.
       Documento gerado em ${new Date().toLocaleString('pt-BR')}.
     </p>
+    <div style="margin-top:14px;border-top:1px solid #999;padding-top:6px;font-size:9px;display:flex;justify-content:space-between;gap:10px"><span>LD Imóveis · Gerado pelo Sistema LD Imóveis · Confidencial</span><span>${esc(l.documentoCodigo||'RASCUNHO')} · Rev. ${esc(l.documentoRevisao||'01')}</span></div>
 
     <table style="margin-top:22px">
       <tr><th style="width:50%">Responsável pela vistoria</th><th>Locatário / proprietário</th></tr>
@@ -2221,7 +2238,7 @@ atualizarHero();
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, onSnapshot, writeBatch, runTransaction, setDoc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { criarRepositorioInspecao } from "./assets/js/inspecao-repository.js";
 import { criarServicoInspecao } from "./assets/js/inspecao-service.js";
 const cfg={apiKey:"AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",authDomain:"ld-imoveis.firebaseapp.com",projectId:"ld-imoveis",storageBucket:"ld-imoveis.firebasestorage.app",messagingSenderId:"871416060994",appId:"1:871416060994:web:bf3b2ad3e07b18b80ca1db"};
@@ -2249,11 +2266,25 @@ async function excluir(chave,id){
  if(!pronto||!window.LD_INSPECAO_PODE_EXCLUIR){alert('Somente o administrador pode apagar registros definitivamente.');return false}
  try{await servico.excluir(chave,id);return true}catch(e){console.error(e);alert('Não foi possível apagar: '+e.message);return false}
 }
+async function reservarDocumento(tipo='LAI'){
+ const ano=new Date().getFullYear(),contadorRef=doc(db,'documentosContadores',tipo+'-'+ano),agora=new Date().toISOString(),email=auth.currentUser?.email||'';
+ return runTransaction(db,async tx=>{const snap=await tx.get(contadorRef),ultimo=snap.exists()?Number(snap.data().ultimo||0)+1:1,codigo='LD-'+tipo+'-'+ano+'-'+String(ultimo).padStart(6,'0'),registroRef=doc(db,'documentosOficiais',codigo),auditRef=doc(collection(db,'auditoriaSistema'));
+ tx.set(contadorRef,{tipo,ano,ultimo,atualizadoEm:agora,atualizadoPor:email});
+ tx.set(registroRef,{codigo,tipo,ano,sequencial:ultimo,status:'rascunho',revisao:'01',criadoEm:agora,criadoPor:email,atualizadoEm:agora});
+ tx.set(auditRef,{colecao:'documentosOficiais',registroId:codigo,acao:'RESERVA_DE_CODIGO',antes:null,depois:{codigo,tipo,status:'rascunho'},motivo:'Início de novo documento',usuario:email,criadoEm:agora,reversivel:false,revertida:false});
+ return {codigo,status:'rascunho',revisao:'01'};});
+}
+async function emitirDocumento(codigo,origemId=''){
+ const agora=new Date().toISOString(),email=auth.currentUser?.email||'';
+ await updateDoc(doc(db,'documentosOficiais',codigo),{status:'emitido',emitidoEm:agora,emitidoPor:email,origemColecao:'inspecoes',origemId,atualizadoEm:agora});
+ await addDoc(collection(db,'auditoriaSistema'),{colecao:'documentosOficiais',registroId:codigo,acao:'EMISSÃO',antes:{status:'rascunho'},depois:{status:'emitido'},motivo:'Impressão/PDF do laudo',usuario:email,criadoEm:agora,reversivel:false,revertida:false});
+}
 window.LD_INSPECAO_NUVEM={sincronizar,excluir};
+window.LD_DOCUMENTOS={reservar:reservarDocumento,emitir:emitirDocumento};
 function atualizarTelas(){try{renderLaudos();renderImoveis();renderControle();atualizarHero();if(document.querySelector('#nav button[data-tab="painel"]')?.classList.contains('on'))renderPainel()}catch(e){console.warn(e)}}
 function ouvir(nome,chave,slot){onSnapshot(collection(db,nome),s=>{const a=s.docs.map(d=>({id:d.id,...d.data()}));MEM[chave]=a;ocupados[slot]=new Set(s.docs.map(d=>d.id));atualizarTelas();status.textContent='Nuvem sincronizada';status.className='nuvem-status ok'},e=>{console.error(e);status.textContent='Acesso à nuvem negado';status.className='nuvem-status erro'})}
 function ouvirImoveisReais(){onSnapshot(collection(db,'imoveis'),s=>{const dl=document.getElementById('listaImoveisReais'),sm=document.getElementById('fCodigoMobile');const reais=s.docs.map(d=>({id:d.id,...d.data()}));const aplicar=i=>{if(!i)return;document.getElementById('fCodigo').value=i.codigo||i.id;sm.value=String(i.codigo||i.id);document.getElementById('fEndereco').value=i.endereco||'';document.getElementById('fProprietario').value=i.proprietarioNome||i.proprietario||'';const t=String(i.tipo||'').toLowerCase();document.getElementById('fTipo').value=t.includes('comerc')?'C':t.includes('galp')?'G':'R';renderChecklist()};dl.innerHTML=reais.map(i=>`<option value="${esc(i.codigo||i.id)}">${esc(i.endereco||'')} · ${esc(i.tipo||'')}</option>`).join('');sm.innerHTML='<option value="">Selecione um imóvel</option>'+reais.map(i=>`<option value="${esc(i.codigo||i.id)}">${esc(i.codigo||i.id)} · ${esc(i.endereco||'')}</option>`).join('');window.LD_IMOVEIS_REAIS=reais;document.getElementById('fCodigo').addEventListener('change',e=>aplicar(reais.find(x=>String(x.codigo||x.id)===e.target.value)));sm.addEventListener('change',e=>aplicar(reais.find(x=>String(x.codigo||x.id)===e.target.value)))})}
-onAuthStateChanged(auth,async user=>{if(!user){MEM[LS_LAUDOS]=[];MEM[LS_IMOVEIS]=[];try{localStorage.removeItem(LS_LAUDOS);localStorage.removeItem(LS_IMOVEIS)}catch(e){}atualizarTelas();status.textContent='Entre pelo Painel Gerencial';status.className='nuvem-status erro';document.body.classList.add('somente-leitura');return}const email=(user.email||'').toLowerCase();if(email===ADMIN)perfil={perfil:'admin',ativo:true};else{const p=await getDoc(doc(db,'usuariosSistema',email));perfil=p.exists()?p.data():null}if(!perfil||perfil.ativo!==true||!['admin','financeiro','corretor','manutencao','consulta'].includes(perfil.perfil)){status.textContent='Acesso não autorizado';status.className='nuvem-status erro';document.body.innerHTML='<div style="padding:40px;color:white;font-family:Arial">Acesso não autorizado ao módulo de inspeção.</div>';return}window.LD_INSPECAO_SOMENTE_LEITURA=perfil.perfil==='consulta';window.LD_INSPECAO_PODE_EXCLUIR=perfil.perfil==='admin';document.body.classList.toggle('somente-leitura',window.LD_INSPECAO_SOMENTE_LEITURA);pronto=true;ouvir('inspecoes',LS_LAUDOS,'laudos');ouvir('inspecaoImoveis',LS_IMOVEIS,'imoveis');ouvirImoveisReais()});
+onAuthStateChanged(auth,async user=>{if(!user){MEM[LS_LAUDOS]=[];MEM[LS_IMOVEIS]=[];try{localStorage.removeItem(LS_LAUDOS);localStorage.removeItem(LS_IMOVEIS)}catch(e){}atualizarTelas();status.textContent='Entre pelo Painel Gerencial';status.className='nuvem-status erro';document.body.classList.add('somente-leitura');return}const email=(user.email||'').toLowerCase();if(email===ADMIN)perfil={perfil:'admin',ativo:true};else{const p=await getDoc(doc(db,'usuariosSistema',email));perfil=p.exists()?p.data():null}if(!perfil||perfil.ativo!==true||!['admin','financeiro','corretor','manutencao','consulta'].includes(perfil.perfil)){status.textContent='Acesso não autorizado';status.className='nuvem-status erro';document.body.innerHTML='<div style="padding:40px;color:white;font-family:Arial">Acesso não autorizado ao módulo de inspeção.</div>';return}window.LD_INSPECAO_SOMENTE_LEITURA=perfil.perfil==='consulta';window.LD_INSPECAO_PODE_EXCLUIR=perfil.perfil==='admin';if(perfil.perfil!=='consulta'&&!documentoAtual){try{documentoAtual=await reservarDocumento('LAI');mostrarDocumentoAtual()}catch(e){console.error('Reserva documental',e);status.textContent='Falha ao reservar código documental';status.className='nuvem-status erro'}}document.body.classList.toggle('somente-leitura',window.LD_INSPECAO_SOMENTE_LEITURA);pronto=true;ouvir('inspecoes',LS_LAUDOS,'laudos');ouvir('inspecaoImoveis',LS_IMOVEIS,'imoveis');ouvirImoveisReais()});
 </script>
 </body>
 </html>

@@ -36,6 +36,9 @@ service cloud.firestore {
     function equipeOperacional() {
       return principal() || (ativo() && cadastro().perfil in ['admin', 'financeiro', 'corretor', 'manutencao', 'consulta']);
     }
+    function editorDocumental() {
+      return principal() || (ativo() && cadastro().perfil in ['admin', 'financeiro', 'corretor', 'manutencao']);
+    }
 
     match /usuariosSistema/{usuarioEmail} {
       allow read: if admin() || (logado() && email() == usuarioEmail);
@@ -141,8 +144,34 @@ service cloud.firestore {
       allow create, update: if admin() || financeiro();
       allow delete: if admin();
     }
+    match /documentosContadores/{id} {
+      allow read: if equipeOperacional();
+      allow create: if editorDocumental()
+                    && request.resource.data.ultimo == 1
+                    && request.resource.data.atualizadoPor == email();
+      allow update: if editorDocumental()
+                    && request.resource.data.ultimo == resource.data.ultimo + 1
+                    && request.resource.data.atualizadoPor == email();
+      allow delete: if false;
+    }
+    match /documentosOficiais/{codigo} {
+      allow read: if equipeOperacional();
+      allow create: if editorDocumental()
+                    && request.resource.data.codigo == codigo
+                    && request.resource.data.criadoPor == email()
+                    && request.resource.data.status == 'rascunho';
+      allow update: if editorDocumental()
+                    && request.resource.data.codigo == resource.data.codigo
+                    && request.resource.data.criadoPor == resource.data.criadoPor
+                    && request.resource.data.status in ['rascunho','emitido','cancelado'];
+      allow delete: if false;
+    }
     match /auditoriaSistema/{id} {
-      allow read, create, update: if admin();
+      allow read: if admin();
+      allow create: if ativo()
+                    && request.resource.data.usuario == email()
+                    && request.resource.data.criadoEm is string;
+      allow update: if admin();
       allow delete: if false;
     }
 
