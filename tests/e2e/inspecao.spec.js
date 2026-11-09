@@ -26,3 +26,5 @@ test('carrega bibliotecas PDF locais', async ({ page }) => {
     })
   ).toBe(true);
 });
+import {readFileSync as lerCicloDocumental} from 'node:fs';
+test('ciclo documental oferece reimpressão cancelamento e substituição',()=>{const f=lerCicloDocumental('public/Modulo-Inspecao.html','utf8');expect(f).toContain("acao:'REIMPRESSÃO'");expect(f).toContain("acao:'CANCELAMENTO'");expect(f).toContain("acao:'SUBSTITUIÇÃO'");expect(f).toContain('data-reimprimir');expect(f).toContain('data-cancelar');expect(f).toContain('data-substituir');expect(f).toContain("['cancelado','substituido'].includes")});

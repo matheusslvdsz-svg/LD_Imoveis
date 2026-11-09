@@ -1119,7 +1119,7 @@ document.getElementById('btLimpar').onclick = () => {
    ============================================================ */
 async function imprimirLaudo(l){
   if(!l.documentoCodigo){alert('Aguarde a reserva do código oficial antes de emitir.');return}
-  if(window.LD_DOCUMENTOS){try{await window.LD_DOCUMENTOS.emitir(l.documentoCodigo,l.id);documentoAtual={...documentoAtual,status:'emitido'};l.documentoStatus='emitido';mostrarDocumentoAtual()}catch(e){alert('Não foi possível registrar a emissão: '+e.message);return}}
+  if(window.LD_DOCUMENTOS){try{await window.LD_DOCUMENTOS.emitir(l.documentoCodigo,l.id,l);documentoAtual={...documentoAtual,status:'emitido'};l.documentoStatus='emitido';mostrarDocumentoAtual()}catch(e){alert('Não foi possível registrar a emissão: '+e.message);return}}
   const itens = todosItens(l.tipo);
   const pends = l.pendencias || [];
   const linhas = itens.map(i => {
@@ -1248,7 +1248,7 @@ async function baixarPDFOficial(){
  doc.autoTable({startY:doc.lastAutoTable.finalY+7,head:[['#','Item','Problema','Nota','Prior.','Responsável','Prazo']],body:pendBody,theme:'grid',showHead:'everyPage',rowPageBreak:'avoid',styles:{font:'helvetica',fontSize:6.5,cellPadding:1.2,overflow:'linebreak'},headStyles:{fillColor:[35,35,38],textColor:255},columnStyles:{0:{cellWidth:8},1:{cellWidth:12},2:{cellWidth:76},3:{cellWidth:12},4:{cellWidth:14},5:{cellWidth:38},6:{cellWidth:26}},margin:{top:24,left:12,right:12,bottom:18},didDrawPage:cabecalho});
  let y=doc.lastAutoTable.finalY+7;if(y>255){doc.addPage();cabecalho();y=25}doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('Observações gerais',12,y);doc.setFont('helvetica','normal');const obs=doc.splitTextToSize(l.obs||'Sem observações.',186);doc.setFontSize(8);doc.text(obs,12,y+5);y+=Math.max(16,obs.length*4+8);if(y>260){doc.addPage();cabecalho();y=30}doc.line(15,y+18,90,y+18);doc.line(112,y+18,187,y+18);doc.setFontSize(7);doc.text('Responsável pela vistoria',52,y+23,{align:'center'});doc.text('Locatário / proprietário',149,y+23,{align:'center'});
  const total=doc.getNumberOfPages();for(let n=1;n<=total;n++){doc.setPage(n);doc.setDrawColor(130);doc.setLineWidth(.2);doc.line(12,282,198,282);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(70);doc.text('LD Imóveis · Gerado pelo Sistema LD Imóveis · Confidencial',12,287);doc.text(l.documentoCodigo+' · Rev. '+ver+' · Página '+n+' de '+total,198,287,{align:'right'})}
- try{if(window.LD_DOCUMENTOS){await window.LD_DOCUMENTOS.emitir(l.documentoCodigo,l.id);documentoAtual={...documentoAtual,status:'emitido'};mostrarDocumentoAtual()}doc.save(l.documentoCodigo+'_Laudo_de_Inspecao.pdf')}catch(e){alert('Não foi possível concluir a emissão oficial: '+e.message)}
+ try{if(window.LD_DOCUMENTOS){await window.LD_DOCUMENTOS.emitir(l.documentoCodigo,l.id,l);documentoAtual={...documentoAtual,status:'emitido'};mostrarDocumentoAtual()}doc.save(l.documentoCodigo+'_Laudo_de_Inspecao.pdf')}catch(e){alert('Não foi possível concluir a emissão oficial: '+e.message)}
 }
 document.getElementById('btImprimir').onclick = () => {if(!irParaPrimeiroNaoAvaliado())return;imprimirLaudo(coletarLaudo())};
 document.getElementById('btPdfOficial').onclick=baixarPDFOficial;
@@ -1530,10 +1530,26 @@ function renderLaudos(){
               : `<span class="pill ${l.media>=75?'ok':l.media>=60?'warn':'bad'}">${esc(l.classe||'—')}</span>`}</td>
         <td>${(l.pendencias||[]).length}</td>
         <td>${esc(l.responsavel || '—')}</td>
-        <td><button class="btn ghost" data-ver="${l.id}">Abrir</button>
-            ${window.LD_INSPECAO_PODE_EXCLUIR ? `<button class="btn ghost" data-del="${l.id}">Apagar</button>` : ''}</td>
+        <td><small class="muted">${esc(l.documentoCodigo||'Sem código oficial')}</small><br>
+            <button class="btn ghost" data-ver="${l.id}">Abrir</button>
+            ${l.documentoCodigo ? `<button class="btn ghost" data-reimprimir="${l.id}">Reimprimir</button>` : ''}
+            ${window.LD_INSPECAO_ADMIN && l.documentoCodigo && !['cancelado','substituido'].includes(l.documentoStatus) ? `<button class="btn ghost" data-cancelar="${l.id}">Cancelar</button><button class="btn ghost" data-substituir="${l.id}">Substituir</button>` : ''}
+            ${window.LD_INSPECAO_PODE_EXCLUIR && !l.documentoCodigo ? `<button class="btn ghost" data-del="${l.id}">Apagar rascunho</button>` : ''}</td>
       </tr>`).join('')}</tbody></table></div>`;
     box.querySelectorAll('[data-ver]').forEach(b => b.onclick = () => carregarLaudo(b.dataset.ver));
+    box.querySelectorAll('[data-reimprimir]').forEach(b=>b.onclick=async()=>{carregarLaudo(b.dataset.reimprimir);await baixarPDFOficial()});
+    box.querySelectorAll('[data-cancelar]').forEach(b=>b.onclick=async()=>{
+      const l=ler(LS_LAUDOS).find(x=>x.id===b.dataset.cancelar);if(!l||!window.LD_DOCUMENTOS)return;
+      const motivo=prompt('Informe o motivo obrigatório do cancelamento:','');if(!motivo||motivo.trim().length<5)return alert('Informe um motivo com pelo menos 5 caracteres.');
+      if(!confirm('Cancelar '+l.documentoCodigo+'? O número permanecerá no histórico e não poderá ser reutilizado.'))return;
+      try{await window.LD_DOCUMENTOS.cancelar(l.documentoCodigo,motivo.trim());l.documentoStatus='cancelado';l.motivoCancelamento=motivo.trim();await window.LD_INSPECAO_NUVEM.sincronizar(LS_LAUDOS,ler(LS_LAUDOS));renderLaudos()}catch(e){alert('Não foi possível cancelar: '+e.message)}
+    });
+    box.querySelectorAll('[data-substituir]').forEach(b=>b.onclick=async()=>{
+      const l=ler(LS_LAUDOS).find(x=>x.id===b.dataset.substituir);if(!l||!window.LD_DOCUMENTOS)return;
+      const motivo=prompt('Informe o motivo obrigatório da substituição:','');if(!motivo||motivo.trim().length<5)return alert('Informe um motivo com pelo menos 5 caracteres.');
+      if(!confirm('Substituir '+l.documentoCodigo+' por um novo código oficial?'))return;
+      try{const novo=await window.LD_DOCUMENTOS.substituir(l.documentoCodigo,motivo.trim());l.documentoStatus='substituido';l.substituidoPorCodigo=novo.codigo;await window.LD_INSPECAO_NUVEM.sincronizar(LS_LAUDOS,ler(LS_LAUDOS));carregarLaudo(l.id);documentoAtual=novo;mostrarDocumentoAtual();alert('Novo documento reservado: '+novo.codigo+'. Revise e salve o novo laudo antes de emitir.')}catch(e){alert('Não foi possível substituir: '+e.message)}
+    });
     box.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
       if (!window.LD_INSPECAO_PODE_EXCLUIR) return alert('Somente o administrador pode apagar laudos.');
       if (!confirm('Apagar este laudo? Não tem como desfazer.')) return;
@@ -1561,6 +1577,8 @@ function carregarLaudo(id){
   const l = ler(LS_LAUDOS).find(x => x.id === id);
   if (!l) return;
   document.querySelector('#nav button[data-tab="nova"]').click();
+  documentoAtual=l.documentoCodigo?{codigo:l.documentoCodigo,status:l.documentoStatus||'emitido',revisao:l.documentoRevisao||'01'}:null;
+  mostrarDocumentoAtual();
   document.getElementById('fCodigo').value = l.codigo || '';
   document.getElementById('fTipo').value = l.tipo || 'R';
   document.getElementById('fEndereco').value = l.endereco || '';
@@ -2341,17 +2359,20 @@ async function reservarDocumento(tipo='LAI'){
  tx.set(auditRef,{colecao:'documentosOficiais',registroId:codigo,acao:'RESERVA_DE_CODIGO',antes:null,depois:{codigo,tipo,status:'rascunho'},motivo:'Início de novo documento',usuario:email,criadoEm:agora,reversivel:false,revertida:false});
  return {codigo,status:'rascunho',revisao:'01'};});
 }
-async function emitirDocumento(codigo,origemId=''){
- const agora=new Date().toISOString(),email=auth.currentUser?.email||'';
- await updateDoc(doc(db,'documentosOficiais',codigo),{status:'emitido',emitidoEm:agora,emitidoPor:email,origemColecao:'inspecoes',origemId,atualizadoEm:agora});
- await addDoc(collection(db,'auditoriaSistema'),{colecao:'documentosOficiais',registroId:codigo,acao:'EMISSÃO',antes:{status:'rascunho'},depois:{status:'emitido'},motivo:'Impressão/PDF do laudo',usuario:email,criadoEm:agora,reversivel:false,revertida:false});
+async function emitirDocumento(codigo,origemId='',dadosEmitidos=null){
+ const agora=new Date().toISOString(),email=auth.currentUser?.email||'',ref=doc(db,'documentosOficiais',codigo);
+ return runTransaction(db,async tx=>{const snap=await tx.get(ref);if(!snap.exists())throw new Error('Documento oficial não encontrado.');const atual=snap.data();if(['cancelado','substituido'].includes(atual.status))throw new Error('Documento '+atual.status+' não pode ser emitido ou reimpresso.');const auditRef=doc(collection(db,'auditoriaSistema'));
+ if(atual.status==='emitido'){tx.set(auditRef,{colecao:'documentosOficiais',registroId:codigo,acao:'REIMPRESSÃO',antes:{status:'emitido'},depois:{status:'emitido'},motivo:'Reimpressão do mesmo documento',usuario:email,criadoEm:agora,reversivel:false,revertida:false});return {acao:'reimpressao'}}
+ tx.update(ref,{status:'emitido',emitidoEm:agora,emitidoPor:email,origemColecao:'inspecoes',origemId,dadosEmitidos:dadosEmitidos||null,atualizadoEm:agora});tx.set(auditRef,{colecao:'documentosOficiais',registroId:codigo,acao:'EMISSÃO',antes:{status:atual.status},depois:{status:'emitido'},motivo:'Primeira emissão do laudo',usuario:email,criadoEm:agora,reversivel:false,revertida:false});return {acao:'emissao'}});
 }
+async function cancelarDocumento(codigo,motivo){if(perfil?.perfil!=='admin')throw new Error('Somente administrador pode cancelar.');const agora=new Date().toISOString(),email=auth.currentUser?.email||'',ref=doc(db,'documentosOficiais',codigo);return runTransaction(db,async tx=>{const snap=await tx.get(ref);if(!snap.exists())throw new Error('Documento não encontrado.');const antes=snap.data();if(['cancelado','substituido'].includes(antes.status))throw new Error('Documento já está em estado terminal.');tx.update(ref,{status:'cancelado',canceladoPor:email,canceladoEm:agora,motivoCancelamento:motivo,atualizadoEm:agora});tx.set(doc(collection(db,'auditoriaSistema')),{colecao:'documentosOficiais',registroId:codigo,acao:'CANCELAMENTO',antes:{status:antes.status},depois:{status:'cancelado'},motivo,usuario:email,criadoEm:agora,reversivel:false,revertida:false})})}
+async function substituirDocumento(codigo,motivo){if(perfil?.perfil!=='admin')throw new Error('Somente administrador pode substituir.');const ano=new Date().getFullYear(),email=auth.currentUser?.email||'',agora=new Date().toISOString(),contadorRef=doc(db,'documentosContadores','LAI-'+ano),antigoRef=doc(db,'documentosOficiais',codigo);return runTransaction(db,async tx=>{const [antigo,contador]=await Promise.all([tx.get(antigoRef),tx.get(contadorRef)]);if(!antigo.exists())throw new Error('Documento original não encontrado.');if(['cancelado','substituido'].includes(antigo.data().status))throw new Error('Documento já está em estado terminal.');const seq=contador.exists()?Number(contador.data().ultimo||0)+1:1,novoCodigo='LD-LAI-'+ano+'-'+String(seq).padStart(6,'0'),novoRef=doc(db,'documentosOficiais',novoCodigo);tx.set(contadorRef,{tipo:'LAI',ano,ultimo:seq,atualizadoEm:agora,atualizadoPor:email});tx.set(novoRef,{codigo:novoCodigo,tipo:'LAI',ano,sequencial:seq,status:'rascunho',revisao:'01',criadoEm:agora,criadoPor:email,atualizadoEm:agora,substituiCodigo:codigo,motivoSubstituicao:motivo});tx.update(antigoRef,{status:'substituido',substituidoPorCodigo:novoCodigo,substituidoPor:email,substituidoEm:agora,motivoSubstituicao:motivo,atualizadoEm:agora});tx.set(doc(collection(db,'auditoriaSistema')),{colecao:'documentosOficiais',registroId:codigo,acao:'SUBSTITUIÇÃO',antes:{status:antigo.data().status},depois:{status:'substituido',substituidoPorCodigo:novoCodigo},motivo,usuario:email,criadoEm:agora,reversivel:false,revertida:false});return {codigo:novoCodigo,status:'rascunho',revisao:'01',substituiCodigo:codigo}})}
 window.LD_INSPECAO_NUVEM={sincronizar,excluir};
-window.LD_DOCUMENTOS={reservar:reservarDocumento,emitir:emitirDocumento};
+window.LD_DOCUMENTOS={reservar:reservarDocumento,emitir:emitirDocumento,cancelar:cancelarDocumento,substituir:substituirDocumento};
 function atualizarTelas(){try{renderLaudos();renderImoveis();renderControle();atualizarHero();if(document.querySelector('#nav button[data-tab="painel"]')?.classList.contains('on'))renderPainel()}catch(e){console.warn(e)}}
 function ouvir(nome,chave,slot){onSnapshot(collection(db,nome),s=>{const a=s.docs.map(d=>({id:d.id,...d.data()}));MEM[chave]=a;ocupados[slot]=new Set(s.docs.map(d=>d.id));atualizarTelas();status.textContent='Nuvem sincronizada';status.className='nuvem-status ok'},e=>{console.error(e);status.textContent='Acesso à nuvem negado';status.className='nuvem-status erro'})}
 function ouvirImoveisReais(){onSnapshot(collection(db,'imoveis'),s=>{const dl=document.getElementById('listaImoveisReais'),sm=document.getElementById('fCodigoMobile');const reais=s.docs.map(d=>({id:d.id,...d.data()}));const aplicar=i=>{if(!i)return;document.getElementById('fCodigo').value=i.codigo||i.id;sm.value=String(i.codigo||i.id);document.getElementById('fEndereco').value=i.endereco||'';document.getElementById('fProprietario').value=i.proprietarioNome||i.proprietario||'';const t=String(i.tipo||'').toLowerCase();document.getElementById('fTipo').value=t.includes('comerc')?'C':t.includes('galp')?'G':'R';renderChecklist()};dl.innerHTML=reais.map(i=>`<option value="${esc(i.codigo||i.id)}">${esc(i.endereco||'')} · ${esc(i.tipo||'')}</option>`).join('');sm.innerHTML='<option value="">Selecione um imóvel</option>'+reais.map(i=>`<option value="${esc(i.codigo||i.id)}">${esc(i.codigo||i.id)} · ${esc(i.endereco||'')}</option>`).join('');window.LD_IMOVEIS_REAIS=reais;document.getElementById('fCodigo').addEventListener('change',e=>aplicar(reais.find(x=>String(x.codigo||x.id)===e.target.value)));sm.addEventListener('change',e=>aplicar(reais.find(x=>String(x.codigo||x.id)===e.target.value)))})}
-onAuthStateChanged(auth,async user=>{if(!user){MEM[LS_LAUDOS]=[];MEM[LS_IMOVEIS]=[];try{localStorage.removeItem(LS_LAUDOS);localStorage.removeItem(LS_IMOVEIS)}catch(e){}atualizarTelas();status.textContent='Entre pelo Painel Gerencial';status.className='nuvem-status erro';document.body.classList.add('somente-leitura');return}const email=(user.email||'').toLowerCase();if(email===ADMIN)perfil={perfil:'admin',ativo:true};else{const p=await getDoc(doc(db,'usuariosSistema',email));perfil=p.exists()?p.data():null}if(!perfil||perfil.ativo!==true||!['admin','financeiro','corretor','manutencao','consulta'].includes(perfil.perfil)){status.textContent='Acesso não autorizado';status.className='nuvem-status erro';document.body.innerHTML='<div style="padding:40px;color:white;font-family:Arial">Acesso não autorizado ao módulo de inspeção.</div>';return}window.LD_INSPECAO_SOMENTE_LEITURA=perfil.perfil==='consulta';window.LD_INSPECAO_PODE_EXCLUIR=perfil.perfil==='admin';mostrarDocumentoAtual();document.body.classList.toggle('somente-leitura',window.LD_INSPECAO_SOMENTE_LEITURA);pronto=true;ouvir('inspecoes',LS_LAUDOS,'laudos');ouvir('inspecaoImoveis',LS_IMOVEIS,'imoveis');ouvirImoveisReais()});
+onAuthStateChanged(auth,async user=>{if(!user){MEM[LS_LAUDOS]=[];MEM[LS_IMOVEIS]=[];try{localStorage.removeItem(LS_LAUDOS);localStorage.removeItem(LS_IMOVEIS)}catch(e){}atualizarTelas();status.textContent='Entre pelo Painel Gerencial';status.className='nuvem-status erro';document.body.classList.add('somente-leitura');return}const email=(user.email||'').toLowerCase();if(email===ADMIN)perfil={perfil:'admin',ativo:true};else{const p=await getDoc(doc(db,'usuariosSistema',email));perfil=p.exists()?p.data():null}if(!perfil||perfil.ativo!==true||!['admin','financeiro','corretor','manutencao','consulta'].includes(perfil.perfil)){status.textContent='Acesso não autorizado';status.className='nuvem-status erro';document.body.innerHTML='<div style="padding:40px;color:white;font-family:Arial">Acesso não autorizado ao módulo de inspeção.</div>';return}window.LD_INSPECAO_SOMENTE_LEITURA=perfil.perfil==='consulta';window.LD_INSPECAO_ADMIN=perfil.perfil==='admin';window.LD_INSPECAO_PODE_EXCLUIR=perfil.perfil==='admin';mostrarDocumentoAtual();document.body.classList.toggle('somente-leitura',window.LD_INSPECAO_SOMENTE_LEITURA);pronto=true;ouvir('inspecoes',LS_LAUDOS,'laudos');ouvir('inspecaoImoveis',LS_IMOVEIS,'imoveis');ouvirImoveisReais()});
 </script>
 </body>
 </html>
