@@ -704,7 +704,21 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
 .manut-vinculo-box{display:flex;gap:10px;align-items:center;padding:11px;border:1px dashed #444;border-radius:9px;background:#111;color:#999;font-size:.74rem}.manut-vinculo-box.ok{border-style:solid;border-color:#285d3a;background:#102319;color:#bce8ca}.manut-vinculo-box small{display:block;margin-top:4px;color:#8fae98}.doc-manut-resumo{background:#111;border:1px solid #333;border-left:4px solid #d6b36a;padding:13px;border-radius:9px;margin-bottom:13px}.doc-manut-resumo b,.doc-manut-resumo span,.doc-manut-resumo small{display:block}.doc-manut-resumo span{margin-top:5px}.doc-manut-resumo small{color:#999;margin-top:5px}.doc-manut-opcoes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.doc-manut-opcoes button{text-align:left;background:#171717;color:#fff;border:1px solid #333;border-radius:10px;padding:15px;cursor:pointer}.doc-manut-opcoes button:hover{border-color:#d6b36a;transform:translateY(-2px)}.doc-manut-opcoes i{display:block;color:#d6b36a;font-size:20px;margin-bottom:10px}.doc-manut-opcoes b,.doc-manut-opcoes span{display:block}.doc-manut-opcoes span{color:#999;font-size:.68rem;line-height:1.45;margin-top:5px}.doc-manut-aviso{color:#c9b88f;background:#211b10;border:1px solid #4c3c20;border-radius:8px;padding:10px;font-size:.69rem;margin:13px 0 0}@media(max-width:650px){.doc-manut-opcoes{grid-template-columns:1fr}}
 </style><style>
 .consulta-toolbar{display:flex;gap:8px;align-items:center;margin:0 0 12px}.consulta-toolbar label{position:relative;flex:1}.consulta-toolbar label i{position:absolute;left:12px;top:13px;color:#777}.consulta-toolbar input,.consulta-toolbar select{height:41px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-main);padding:0 11px}.consulta-toolbar input{width:100%;padding-left:36px}.consulta-toolbar>span{font-size:.7rem;color:var(--text-muted);white-space:nowrap}.consulta-mini{display:block;color:var(--text-muted);font-size:.68rem;margin-top:4px}.consulta-acoes{display:flex;gap:5px}.contrato-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}.contrato-kpis div{background:var(--bg-card);border:1px solid var(--border);border-left:4px solid var(--red-main);border-radius:9px;padding:12px}.contrato-kpis span,.contrato-kpis b{display:block}.contrato-kpis span{color:var(--text-muted);font-size:.65rem;text-transform:uppercase;font-weight:800}.contrato-kpis b{font-size:1.2rem;margin-top:4px}.contrato-status{display:inline-flex;border-radius:20px;font-size:.65rem;font-weight:900;text-transform:uppercase}.contrato-status.vigente{background:#123822;color:#89eaae}.contrato-status.futuro{background:#102d48;color:#8dccff}.contrato-status.encerrado{background:#351519;color:#ff969d}.espelho-top{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.espelho-top>div{background:#111;border:1px solid #333;border-radius:9px;padding:12px}.espelho-top span,.espelho-top b{display:block}.espelho-top span{font-size:.65rem;color:#888;text-transform:uppercase}.espelho-top b{margin-top:5px}.espelho-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.espelho-grid section,.espelho-lista{background:#111;border:1px solid #333;border-radius:9px;padding:13px}.espelho-grid h3,.espelho-lista h3{font-size:.72rem;color:#e50914;text-transform:uppercase;letter-spacing:.08em;margin:0 0 9px}.espelho-linha{display:grid;grid-template-columns:120px 1fr;border-bottom:1px solid #292929;padding:6px 0;font-size:.74rem}.espelho-linha span{color:#888}.espelho-lista{margin-top:10px}.espelho-lista div{border-bottom:1px solid #292929;padding:7px 0}.espelho-lista span{display:block;color:#888;font-size:.7rem;margin-top:3px}@media(max-width:750px){.consulta-toolbar{flex-wrap:wrap}.consulta-toolbar label{flex-basis:100%}.contrato-kpis{grid-template-columns:1fr 1fr}.espelho-top,.espelho-grid{grid-template-columns:1fr}.consulta-toolbar.contratos select{flex:1}}
-</style></head>
+
+        /* Auditoria e Controle Geral — v2.0.0 */
+        .aud-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0}
+        .aud-kpis>div{background:var(--bg-card,#141821);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px}
+        .aud-kpis span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted,#9aa3b2)}
+        .aud-kpis b{font-size:22px;line-height:1.3}
+        .aud-selo{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.04em;border:1px solid transparent;white-space:nowrap}
+        .aud-ok{background:rgba(46,204,113,.14);border-color:rgba(46,204,113,.4);color:#7ce8a1}
+        .aud-info{background:rgba(90,160,255,.14);border-color:rgba(90,160,255,.4);color:#8fc0ff}
+        .aud-warn{background:rgba(230,170,60,.14);border-color:rgba(230,170,60,.4);color:#e8c07c}
+        .aud-bad{background:rgba(214,48,49,.16);border-color:rgba(214,48,49,.45);color:#ff8b8b}
+        .aud-muted{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#b9c0cb}
+        .aud-nota{margin:12px 0 0;font-size:12px;color:var(--text-muted,#9aa3b2)}
+        @media(max-width:640px){.aud-kpis{grid-template-columns:repeat(2,1fr)}.aud-kpis b{font-size:18px}}
+    </style></head>
 <body>
 
     <!-- OVERLAY MOBILE -->
@@ -757,7 +771,7 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
         <div class="nav">
             <div class="nav-title">Geral</div>
             <a class="nav-link active" data-aba="dashboard" onclick="navegar('dashboard', this)"><i class="fas fa-chart-pie"></i> Dashboard</a>
-            <a class="nav-link" data-aba="auditoria" data-admin-only="1" onclick="navegar('auditoria', this)"><i class="fas fa-rotate-left"></i><span>Auditoria e Reversão</span><b>ADMIN</b></a>
+            <a class="nav-link" data-aba="auditoria" data-admin-only="1" onclick="navegar('auditoria', this)"><i class="fas fa-rotate-left"></i><span>Auditoria e Controle Geral</span><b>ADMIN</b></a>
             <a class="nav-link nav-autorizacoes" data-aba="usuarios" data-admin-only="1" onclick="navegar('usuarios', this)"><i class="fas fa-user-shield"></i><span>Autorizações</span><b>ADMIN</b></a>
             <a class="nav-link" data-aba="imoveis" onclick="navegar('imoveis', this)"><i class="fas fa-building"></i> Imóveis</a>
             <a class="nav-link" data-aba="fotos" onclick="navegar('fotos', this)"><i class="fas fa-images"></i> Fotos dos Imóveis</a>
@@ -1234,7 +1248,38 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
             </section>
 
             <!-- TAB: AUDITORIA -->
-            <section class="tab" id="tab-auditoria"><div class="header"><div><h1>Auditoria e <span>Reversão</span></h1><p style="color:var(--text-muted)">Ações críticas, responsáveis, motivos e restauração segura.</p></div></div><div class="consulta-toolbar"><label><i class="fas fa-search"></i><input id="audBusca" placeholder="Pesquisar usuário, módulo, ação ou motivo" oninput="renderizarAuditoria()"></label><select id="audColecao" onchange="renderizarAuditoria()"><option value="">Todos os módulos</option><option>imoveis</option><option>contratos</option><option>financeiro</option><option>inquilinos</option><option>proprietarios</option><option>manutencoes</option></select><span id="audResumo">0 ações</span></div><div class="table-container"><table><thead><tr><th>Data / Usuário</th><th>Módulo / Registro</th><th>Ação</th><th>Motivo</th><th>Reversão</th></tr></thead><tbody id="tbAuditoria"></tbody></table></div></section>
+            <section class="tab" id="tab-auditoria">
+                <div class="header">
+                    <div><h1>Auditoria e <span>Controle Geral</span></h1>
+                    <p style="color:var(--text-muted)">Emissões, reimpressões, cancelamentos, substituições e reversões — com responsável, motivo, antes e depois.</p></div>
+                </div>
+                <div class="aud-kpis">
+                    <div><span>Total de ações</span><b id="audKpiTotal">0</b></div>
+                    <div><span>Emissões</span><b id="audKpiEmissao">0</b></div>
+                    <div><span>Reimpressões</span><b id="audKpiReimpressao">0</b></div>
+                    <div><span>Cancelamentos</span><b id="audKpiCancelamento">0</b></div>
+                    <div><span>Substituições</span><b id="audKpiSubstituicao">0</b></div>
+                    <div><span>Reversões</span><b id="audKpiReversao">0</b></div>
+                </div>
+                <div class="consulta-toolbar">
+                    <label><i class="fas fa-search"></i><input id="audBusca" placeholder="Pesquisar usuário, módulo, registro, ação ou motivo" oninput="renderizarAuditoria()"></label>
+                    <select id="audColecao" onchange="renderizarAuditoria()"><option value="">Todos os módulos</option><option>imoveis</option><option>contratos</option><option>financeiro</option><option>inquilinos</option><option>proprietarios</option><option>manutencoes</option><option>documentosOficiais</option><option>leadsCorretores</option><option>fechamentos</option></select>
+                    <select id="audAcao" onchange="renderizarAuditoria()"><option value="">Todas as ações</option><option value="EMISSÃO">Emissões</option><option value="REIMPRESSÃO">Reimpressões</option><option value="RESERVA_DE_CÓDIGO">Reservas de código</option><option value="CANCELAMENTO">Cancelamentos</option><option value="SUBSTITUIÇÃO">Substituições</option><option value="REVERSÃO">Reversões</option><option value="EXCLUSÃO">Exclusões</option><option value="CRIAÇÃO">Criações</option></select>
+                    <input type="date" id="audDe" onchange="renderizarAuditoria()" title="Data inicial" aria-label="Data inicial">
+                    <input type="date" id="audAte" onchange="renderizarAuditoria()" title="Data final" aria-label="Data final">
+                    <button class="btn btn-outline btn-sm" onclick="exportarAuditoriaCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+                    <button class="btn btn-outline btn-sm" onclick="exportarAuditoriaPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-outline btn-sm" onclick="limparFiltrosAuditoria()"><i class="fas fa-rotate-left"></i> Limpar</button>
+                    <span id="audResumo">0 ações</span>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Data / Usuário</th><th>Módulo / Registro</th><th>Ação</th><th>Resultado</th><th>Motivo</th><th>Reversão</th></tr></thead>
+                        <tbody id="tbAuditoria"></tbody>
+                    </table>
+                </div>
+                <p class="aud-nota">Retenção permanente: registros de auditoria não podem ser excluídos, nem pelo administrador. Cada reversão gera um novo registro com antes, depois, responsável e motivo.</p>
+            </section>
 
             <!-- TAB: CONTRATOS -->
             <section class="tab" id="tab-contratos">
@@ -2083,22 +2128,129 @@ window.addEventListener('hashchange', () => window.abrirAbaDoLink());
 
 async function registrarAuditoria({colecao,registroId,acao,antes=null,depois=null,motivo='',reversivel=true}){return addDoc(collection(db,'auditoriaSistema'),{colecao,registroId,acao,antes,depois,motivo,usuario:auth.currentUser?.email||'',criadoEm:new Date().toISOString(),reversivel,revertida:false})}
 function motivoObrigatorio(texto){const m=prompt(texto+'\n\nInforme o motivo da alteração:');return m&&m.trim()?m.trim():null}
-window.renderizarAuditoria=()=>{const tb=$('tbAuditoria');if(!tb)return;
-const q=normalizarVinculo($('audBusca')?.value||''),col=$('audColecao')?.value||'';
-const lista=state.auditoriaSistema.filter(a=>!col||a.colecao===col)
-.filter(a=>!q||normalizarVinculo([a.usuario,a.colecao,a.registroId,a.acao,a.motivo].join(' ')).includes(q))
-.sort((a,b)=>String(b.criadoEm).localeCompare(String(a.criadoEm)));
-$('audResumo').textContent=lista.length+' ação(ões)';
-tb.innerHTML=lista.length?lista.map(a=>{
-const temCopia=!!(a.antes&&typeof a.antes==='object'&&Object.keys(a.antes).length);
-const semReversao=a.acao==='EXCLUSÃO'&&!temCopia;
-const botao=semReversao
-?'<small class="consulta-mini" style="color:#e0a86b">Sem cópia para restaurar</small>'
-:(a.reversivel&&!a.revertida
-?`<button class="btn btn-outline btn-sm" onclick="reverterAuditoria(\''+a.id+'\')"><i class="fas fa-rotate-left"></i> Reverter</button>`
-:'—');
-return `<tr><td>${esc(a.criadoEm?new Date(a.criadoEm).toLocaleString('pt-BR'):'')}<small class="consulta-mini">${esc(a.usuario||'')}</small></td><td><b>${esc(a.colecao)}</b><small class="consulta-mini">${esc(a.registroId)}</small></td><td>${esc(a.acao)}${a.revertida?'<small class="consulta-mini" style="color:#7ce8a1">REVERTIDA</small>':''}</td><td>${esc(a.motivo||'')}</td><td>${botao}</td></tr>`;
-}).join(''):linhaVazia(5,'Nenhuma ação auditada.')};
+function audResultado(a){
+  if(a.acao==='EXCLUSÃO')return 'Registro excluído do banco';
+  if(a.acao==='REVERSÃO')return 'Estado anterior restaurado';
+  if(a.acao==='CRIAÇÃO')return 'Registro criado';
+  const st=v=>(v&&typeof v==='object')?(v.status?String(v.status):(v.codigo?String(v.codigo):'')):'';
+  const antes=st(a.antes),depois=st(a.depois);
+  const extra=(a.depois&&typeof a.depois==='object'&&a.depois.substituidoPorCodigo)?(' → '+a.depois.substituidoPorCodigo):'';
+  if(antes&&depois&&antes!==depois)return antes+' → '+depois+extra;
+  if(depois)return depois+extra;
+  if(antes)return antes+extra;
+  return '—';
+}
+function audSelo(acao){
+  const mapa={'EMISSÃO':'ok','REIMPRESSÃO':'info','RESERVA_DE_CÓDIGO':'muted','CANCELAMENTO':'bad','SUBSTITUIÇÃO':'warn','REVERSÃO':'ok','EXCLUSÃO':'bad','CRIAÇÃO':'ok'};
+  return '<span class="aud-selo aud-'+(mapa[acao]||'muted')+'">'+esc(acao||'—')+'</span>';
+}
+function listaAuditoriaFiltrada(){
+  const q=normalizarVinculo($('audBusca')?.value||''),
+        col=$('audColecao')?.value||'',
+        acao=$('audAcao')?.value||'',
+        de=$('audDe')?.value||'',
+        ate=$('audAte')?.value||'';
+  return (state.auditoriaSistema||[])
+    .filter(a=>!col||a.colecao===col)
+    .filter(a=>!acao||String(a.acao||'')===acao)
+    .filter(a=>{const d=String(a.criadoEm||'').slice(0,10);return (!de||d>=de)&&(!ate||d<=ate)})
+    .filter(a=>!q||normalizarVinculo([a.usuario,a.colecao,a.registroId,a.acao,a.motivo].join(' ')).includes(q))
+    .sort((a,b)=>String(b.criadoEm).localeCompare(String(a.criadoEm)));
+}
+window.limparFiltrosAuditoria=()=>{
+  if($('audBusca'))$('audBusca').value='';
+  if($('audColecao'))$('audColecao').value='';
+  if($('audAcao'))$('audAcao').value='';
+  if($('audDe'))$('audDe').value='';
+  if($('audAte'))$('audAte').value='';
+  window.renderizarAuditoria();
+};
+window.renderizarAuditoria=()=>{
+  const todas=state.auditoriaSistema||[];
+  const lista=listaAuditoriaFiltrada();
+  const contar=acao=>todas.filter(a=>String(a.acao||'')===acao).length;
+  const kpis={audKpiTotal:todas.length,audKpiEmissao:contar('EMISSÃO'),audKpiReimpressao:contar('REIMPRESSÃO'),audKpiCancelamento:contar('CANCELAMENTO'),audKpiSubstituicao:contar('SUBSTITUIÇÃO'),audKpiReversao:contar('REVERSÃO')};
+  Object.keys(kpis).forEach(id=>{if($(id))$(id).textContent=kpis[id]});
+  if($('audResumo'))$('audResumo').textContent=lista.length+' ação(ões)';
+  const tb=$('tbAuditoria');
+  if(!tb)return;
+  if(!lista.length){tb.innerHTML=linhaVazia(6,'Nenhuma ação auditada com os filtros atuais.');return}
+  tb.innerHTML=lista.map(a=>{
+    const botao=(a.reversivel&&!a.revertida)
+      ?('<button class="btn btn-outline btn-sm" onclick="reverterAuditoria('+a.id+')"><i class="fas fa-rotate-left"></i> Reverter</button>')
+      :'—';
+    return '<tr>'
+      +'<td>'+esc(a.criadoEm?new Date(a.criadoEm).toLocaleString('pt-BR'):'')+'<small class="consulta-mini">'+esc(a.usuario||'')+'</small></td>'
+      +'<td><b>'+esc(a.colecao||'')+'</b><small class="consulta-mini">'+esc(a.registroId||'')+'</small></td>'
+      +'<td>'+audSelo(a.acao)+(a.revertida?'<small class="consulta-mini" style="color:#7ce8a1">REVERTIDA</small>':'')+'</td>'
+      +'<td>'+esc(audResultado(a))+'</td>'
+      +'<td>'+esc(a.motivo||'')+'</td>'
+      +'<td>'+botao+'</td>'
+      +'</tr>';
+  }).join('');
+};
+window.exportarAuditoriaCSV=()=>{
+  const lista=listaAuditoriaFiltrada();
+  if(!lista.length)return mostrarAlerta('Nenhuma ação para exportar com os filtros atuais.','erro');
+  const linhas=['Data;Usuario;Modulo;Registro;Acao;Resultado;Motivo;Revertida'];
+  lista.forEach(a=>{
+    linhas.push([
+      a.criadoEm?new Date(a.criadoEm).toLocaleString('pt-BR'):'',
+      a.usuario||'',a.colecao||'',a.registroId||'',a.acao||'',
+      audResultado(a),a.motivo||'',a.revertida?'Sim':'Nao'
+    ].map(celulaCSV).join(';'));
+  });
+  const blob=new Blob(['\uFEFF'+linhas.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='LD_Auditoria_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  window.mostrarAlerta('Auditoria exportada em CSV!');
+};
+window.exportarAuditoriaPDF=()=>{
+  const lista=listaAuditoriaFiltrada();
+  if(!lista.length)return mostrarAlerta('Nenhuma ação para exportar com os filtros atuais.','erro');
+  const br=data=>data?data.split('-').reverse().join('/'):'';
+  const filtros=[];
+  if($('audColecao')?.value)filtros.push('Módulo: '+$('audColecao').value);
+  if($('audAcao')?.value)filtros.push('Ação: '+$('audAcao').value);
+  if($('audDe')?.value)filtros.push('De: '+br($('audDe').value));
+  if($('audAte')?.value)filtros.push('Até: '+br($('audAte').value));
+  const corpo=lista.map(a=>'<tr>'
+    +'<td>'+esc(a.criadoEm?new Date(a.criadoEm).toLocaleString('pt-BR'):'')+'<br><span class="u">'+esc(a.usuario||'')+'</span></td>'
+    +'<td><b>'+esc(a.colecao||'')+'</b><br><span class="u">'+esc(a.registroId||'')+'</span></td>'
+    +'<td>'+esc(a.acao||'')+'</td>'
+    +'<td>'+esc(audResultado(a))+'</td>'
+    +'<td>'+esc(a.motivo||'')+'</td>'
+    +'</tr>').join('');
+  const w=window.open('','_blank');
+  if(!w)return mostrarAlerta('Permita janelas pop-up para gerar o PDF da auditoria.','erro');
+  w.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">'
+    +'<title>LD Imóveis — Auditoria e Controle Geral</title><style>'
+    +'*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:24px;color:#1b1b1b}'
+    +'header{border-bottom:3px solid #d63031;padding-bottom:10px;margin-bottom:14px}'
+    +'h1{font-size:18px;margin:0 0 4px;letter-spacing:.04em}'
+    +'h1 i{color:#d63031;font-style:normal}'
+    +'p.meta{margin:0;font-size:11px;color:#555}'
+    +'.filtros{font-size:11px;color:#444;margin:10px 0}'
+    +'table{width:100%;border-collapse:collapse;font-size:10px}'
+    +'th{background:#111;color:#fff;text-align:left;padding:6px;font-size:9px;letter-spacing:.06em;text-transform:uppercase}'
+    +'td{border-bottom:1px solid #ddd;padding:6px;vertical-align:top}'
+    +'span.u{color:#777;font-size:9px}'
+    +'footer{margin-top:14px;font-size:9px;color:#666;border-top:1px solid #ddd;padding-top:8px;display:flex;justify-content:space-between}'
+    +'@media print{body{padding:12mm}thead{display:table-header-group}tr{page-break-inside:avoid}}'
+    +'</style></head><body>'
+    +'<header><h1>LD <i>IMÓVEIS</i> — Auditoria e Controle Geral</h1>'
+    +'<p class="meta">Emitido em '+new Date().toLocaleString('pt-BR')+' por '+esc(auth.currentUser?.email||'')+'</p></header>'
+    +'<div class="filtros">'+(filtros.length?esc(filtros.join(' · ')):'Sem filtros — todas as ações')+' · '+lista.length+' registro(s)</div>'
+    +'<table><thead><tr><th>Data / Usuário</th><th>Módulo / Registro</th><th>Ação</th><th>Resultado</th><th>Motivo</th></tr></thead><tbody>'
+    +corpo+'</tbody></table>'
+    +'<footer><span>Retenção permanente · documentos oficiais não são excluídos</span><span>Gerado pelo Sistema LD Imóveis</span></footer>'
+    +'<script>window.onload=function(){window.print()}<\/script>'
+    +'</body></html>');
+  w.document.close();
+};
 window.reverterAuditoria=async id=>{
   if(perfilLogado?.perfil!=='admin')return mostrarAlerta('Apenas administradores podem reverter.','erro');
   const a=state.auditoriaSistema.find(x=>x.id===id);
