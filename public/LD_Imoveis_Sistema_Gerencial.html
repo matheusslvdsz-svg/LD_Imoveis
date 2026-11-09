@@ -2083,8 +2083,51 @@ window.addEventListener('hashchange', () => window.abrirAbaDoLink());
 
 async function registrarAuditoria({colecao,registroId,acao,antes=null,depois=null,motivo='',reversivel=true}){return addDoc(collection(db,'auditoriaSistema'),{colecao,registroId,acao,antes,depois,motivo,usuario:auth.currentUser?.email||'',criadoEm:new Date().toISOString(),reversivel,revertida:false})}
 function motivoObrigatorio(texto){const m=prompt(texto+'\n\nInforme o motivo da alteração:');return m&&m.trim()?m.trim():null}
-window.renderizarAuditoria=()=>{const tb=$('tbAuditoria');if(!tb)return;const q=normalizarVinculo($('audBusca')?.value||''),col=$('audColecao')?.value||'';const lista=state.auditoriaSistema.filter(a=>!col||a.colecao===col).filter(a=>!q||normalizarVinculo([a.usuario,a.colecao,a.registroId,a.acao,a.motivo].join(' ')).includes(q)).sort((a,b)=>String(b.criadoEm).localeCompare(String(a.criadoEm)));$('audResumo').textContent=lista.length+' ação(ões)';tb.innerHTML=lista.length?lista.map(a=>`<tr><td>${esc(a.criadoEm?new Date(a.criadoEm).toLocaleString('pt-BR'):'')}<small class="consulta-mini">${esc(a.usuario||'')}</small></td><td><b>${esc(a.colecao)}</b><small class="consulta-mini">${esc(a.registroId)}</small></td><td>${esc(a.acao)}${a.revertida?'<small class="consulta-mini" style="color:#7ce8a1">REVERTIDA</small>':''}</td><td>${esc(a.motivo||'')}</td><td>${a.reversivel&&!a.revertida?`<button class="btn btn-outline btn-sm" onclick="reverterAuditoria('${a.id}')"><i class="fas fa-rotate-left"></i> Reverter</button>`:'—'}</td></tr>`).join(''):linhaVazia(5,'Nenhuma ação auditada.')};
-window.reverterAuditoria=async id=>{if(perfilLogado?.perfil!=='admin')return mostrarAlerta('Apenas administradores podem reverter.','erro');const a=state.auditoriaSistema.find(x=>x.id===id);if(!a||a.revertida)return;const motivo=motivoObrigatorio('Reverter a ação '+a.acao+' em '+a.colecao+'?');if(!motivo)return mostrarAlerta('A reversão exige um motivo.','erro');if(!confirm('Confirma a restauração do estado anterior?'))return;await executarAcao(async()=>{const ref=doc(db,a.colecao,a.registroId);if(a.acao==='EXCLUSÃO')await setDoc(ref,a.antes||{});else if(a.acao==='CRIAÇÃO')await deleteDoc(ref);else await setDoc(ref,a.antes||{}, {merge:false});await updateDoc(doc(db,'auditoriaSistema',id),{revertida:true,revertidaEm:new Date().toISOString(),revertidaPor:auth.currentUser?.email||'',motivoReversao:motivo});await registrarAuditoria({colecao:a.colecao,registroId:a.registroId,acao:'REVERSÃO',antes:a.depois,depois:a.antes,motivo,reversivel:false})},'Ação revertida com sucesso!')};
+window.renderizarAuditoria=()=>{const tb=$('tbAuditoria');if(!tb)return;
+const q=normalizarVinculo($('audBusca')?.value||''),col=$('audColecao')?.value||'';
+const lista=state.auditoriaSistema.filter(a=>!col||a.colecao===col)
+.filter(a=>!q||normalizarVinculo([a.usuario,a.colecao,a.registroId,a.acao,a.motivo].join(' ')).includes(q))
+.sort((a,b)=>String(b.criadoEm).localeCompare(String(a.criadoEm)));
+$('audResumo').textContent=lista.length+' ação(ões)';
+tb.innerHTML=lista.length?lista.map(a=>{
+const temCopia=!!(a.antes&&typeof a.antes==='object'&&Object.keys(a.antes).length);
+const semReversao=a.acao==='EXCLUSÃO'&&!temCopia;
+const botao=semReversao
+?'<small class="consulta-mini" style="color:#e0a86b">Sem cópia para restaurar</small>'
+:(a.reversivel&&!a.revertida
+?`<button class="btn btn-outline btn-sm" onclick="reverterAuditoria(\''+a.id+'\')"><i class="fas fa-rotate-left"></i> Reverter</button>`
+:'—');
+return `<tr><td>${esc(a.criadoEm?new Date(a.criadoEm).toLocaleString('pt-BR'):'')}<small class="consulta-mini">${esc(a.usuario||'')}</small></td><td><b>${esc(a.colecao)}</b><small class="consulta-mini">${esc(a.registroId)}</small></td><td>${esc(a.acao)}${a.revertida?'<small class="consulta-mini" style="color:#7ce8a1">REVERTIDA</small>':''}</td><td>${esc(a.motivo||'')}</td><td>${botao}</td></tr>`;
+}).join(''):linhaVazia(5,'Nenhuma ação auditada.')};
+window.reverterAuditoria=async id=>{
+  if(perfilLogado?.perfil!=='admin')return mostrarAlerta('Apenas administradores podem reverter.','erro');
+  const a=state.auditoriaSistema.find(x=>x.id===id);
+  if(!a)return mostrarAlerta('Registro de auditoria não encontrado. Atualize a página (Ctrl+F5) e tente novamente.','erro');
+  if(a.revertida)return mostrarAlerta('Esta ação já foi revertida.','erro');
+  const temCopia=!!(a.antes&&typeof a.antes==='object'&&Object.keys(a.antes).length);
+  if(a.acao==='EXCLUSÃO'&&!temCopia)return mostrarAlerta('Esta exclusão foi registrada sem cópia do documento original (auditoria antiga). Não é possível restaurar automaticamente; cadastre o registro novamente.','erro');
+  if(a.acao!=='CRIAÇÃO'&&!temCopia)return mostrarAlerta('Esta ação não guardou o estado anterior e não pode ser revertida.','erro');
+  const motivo=motivoObrigatorio('Reverter a ação '+a.acao+' em '+a.colecao+'?');
+  if(!motivo)return mostrarAlerta('A reversão exige um motivo.','erro');
+  if(!confirm('Confirma a restauração do estado anterior?'))return;
+  const ref=doc(db,a.colecao,a.registroId);
+  try{
+    if(a.acao==='CRIAÇÃO'){
+      await deleteDoc(ref);
+    }else{
+      await setDoc(ref,a.antes,{merge:true});
+      const conferencia=await getDoc(ref);
+      if(!conferencia.exists())throw new Error('O documento não foi gravado em '+a.colecao+'/'+a.registroId);
+    }
+    await updateDoc(doc(db,'auditoriaSistema',id),{revertida:true,revertidaEm:new Date().toISOString(),revertidaPor:auth.currentUser?.email||'',motivoReversao:motivo});
+    await registrarAuditoria({colecao:a.colecao,registroId:a.registroId,acao:'REVERSÃO',antes:a.depois??null,depois:a.antes??null,motivo,reversivel:false});
+    mostrarAlerta('Ação revertida com sucesso!','sucesso');
+  }catch(erro){
+    console.error('[LD Imóveis] Falha ao reverter auditoria',a,erro);
+    const detalhe=[erro?.code,erro?.message].filter(Boolean).join(' · ')||'erro desconhecido';
+    mostrarAlerta('Não foi possível reverter: '+detalhe,'erro');
+  }
+};
 
 /* ========================= 7. CRUD (salvar / excluir / status) ========================= */
 window.excluirItem = async (colecao, id) => {

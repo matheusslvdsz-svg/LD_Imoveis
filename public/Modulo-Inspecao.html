@@ -1075,6 +1075,10 @@ function coletarLaudo(){
 }
 
 document.getElementById('btSalvar').onclick = () => {
+  if (documentoAtual && ['cancelado','substituido'].includes(documentoAtual.status)) {
+    alert('Este documento está em estado terminal (' + documentoAtual.status + ') e não pode receber novo conteúdo.\n\nUse Novo laudo para reservar um novo código oficial.');
+    return;
+  }
   const l = coletarLaudo();
   if (!l.codigo){ alert('Preencha o código do imóvel antes de salvar.'); return; }
   if (!irParaPrimeiroNaoAvaliado()) return;
@@ -1522,7 +1526,7 @@ function renderLaudos(){
         <th>Código</th><th>Data</th><th>Vistoria</th><th>Nota</th><th>Situação</th>
         <th>Pend.</th><th>Responsável</th><th></th></tr></thead><tbody>
       ${fil.map(l => `<tr>
-        <td><b>${esc(l.codigo)}</b><br><span class="muted">${esc(l.endereco || '')}</span></td>
+        <td><b>${esc(l.codigo)}</b>${l.documentoStatus === 'cancelado' ? ' <span class="pill bad">CANCELADO</span>' : l.documentoStatus === 'substituido' ? ' <span class="pill warn">SUBSTITUÍDO</span>' : ''}<br><span class="muted">${esc(l.endereco || '')}</span></td>
         <td>${esc(l.data || '—')}</td>
         <td>${esc(l.vistoria)}</td>
         <td><b>${l.media === null ? '—' : money0(l.media)}</b></td>
@@ -1530,9 +1534,9 @@ function renderLaudos(){
               : `<span class="pill ${l.media>=75?'ok':l.media>=60?'warn':'bad'}">${esc(l.classe||'—')}</span>`}</td>
         <td>${(l.pendencias||[]).length}</td>
         <td>${esc(l.responsavel || '—')}</td>
-        <td><small class="muted">${esc(l.documentoCodigo||'Sem código oficial')}</small><br>
+        <td><small class="muted">${esc(l.documentoCodigo||'Sem código oficial')}</small>${l.substituidoPorCodigo ? `<br><small class="muted">→ ${esc(l.substituidoPorCodigo)}</small>` : ''}<br>
             <button class="btn ghost" data-ver="${l.id}">Abrir</button>
-            ${l.documentoCodigo ? `<button class="btn ghost" data-reimprimir="${l.id}">Reimprimir</button>` : ''}
+            ${l.documentoCodigo && !['cancelado','substituido'].includes(l.documentoStatus) ? `<button class="btn ghost" data-reimprimir="${l.id}">Reimprimir</button>` : ''}
             ${window.LD_INSPECAO_ADMIN && l.documentoCodigo && !['cancelado','substituido'].includes(l.documentoStatus) ? `<button class="btn ghost" data-cancelar="${l.id}">Cancelar</button><button class="btn ghost" data-substituir="${l.id}">Substituir</button>` : ''}
             ${window.LD_INSPECAO_PODE_EXCLUIR && !l.documentoCodigo ? `<button class="btn ghost" data-del="${l.id}">Apagar rascunho</button>` : ''}</td>
       </tr>`).join('')}</tbody></table></div>`;
@@ -1542,13 +1546,13 @@ function renderLaudos(){
       const l=ler(LS_LAUDOS).find(x=>x.id===b.dataset.cancelar);if(!l||!window.LD_DOCUMENTOS)return;
       const motivo=prompt('Informe o motivo obrigatório do cancelamento:','');if(!motivo||motivo.trim().length<5)return alert('Informe um motivo com pelo menos 5 caracteres.');
       if(!confirm('Cancelar '+l.documentoCodigo+'? O número permanecerá no histórico e não poderá ser reutilizado.'))return;
-      try{await window.LD_DOCUMENTOS.cancelar(l.documentoCodigo,motivo.trim());l.documentoStatus='cancelado';l.motivoCancelamento=motivo.trim();await window.LD_INSPECAO_NUVEM.sincronizar(LS_LAUDOS,ler(LS_LAUDOS));renderLaudos()}catch(e){alert('Não foi possível cancelar: '+e.message)}
+      try{await window.LD_DOCUMENTOS.cancelar(l.documentoCodigo,motivo.trim());l.documentoStatus='cancelado';l.motivoCancelamento=motivo.trim();l.canceladoEm=new Date().toISOString();l.__alteradoLocal=true;await window.LD_INSPECAO_NUVEM.sincronizar(LS_LAUDOS,ler(LS_LAUDOS));renderLaudos()}catch(e){alert('Não foi possível cancelar: '+e.message)}
     });
     box.querySelectorAll('[data-substituir]').forEach(b=>b.onclick=async()=>{
       const l=ler(LS_LAUDOS).find(x=>x.id===b.dataset.substituir);if(!l||!window.LD_DOCUMENTOS)return;
       const motivo=prompt('Informe o motivo obrigatório da substituição:','');if(!motivo||motivo.trim().length<5)return alert('Informe um motivo com pelo menos 5 caracteres.');
       if(!confirm('Substituir '+l.documentoCodigo+' por um novo código oficial?'))return;
-      try{const novo=await window.LD_DOCUMENTOS.substituir(l.documentoCodigo,motivo.trim());l.documentoStatus='substituido';l.substituidoPorCodigo=novo.codigo;await window.LD_INSPECAO_NUVEM.sincronizar(LS_LAUDOS,ler(LS_LAUDOS));carregarLaudo(l.id);documentoAtual=novo;mostrarDocumentoAtual();alert('Novo documento reservado: '+novo.codigo+'. Revise e salve o novo laudo antes de emitir.')}catch(e){alert('Não foi possível substituir: '+e.message)}
+      try{const novo=await window.LD_DOCUMENTOS.substituir(l.documentoCodigo,motivo.trim());l.documentoStatus='substituido';l.substituidoPorCodigo=novo.codigo;l.substituidoEm=new Date().toISOString();l.__alteradoLocal=true;await window.LD_INSPECAO_NUVEM.sincronizar(LS_LAUDOS,ler(LS_LAUDOS));carregarLaudo(l.id);documentoAtual=novo;mostrarDocumentoAtual();alert('Novo documento reservado: '+novo.codigo+'. Revise e salve o novo laudo antes de emitir.')}catch(e){alert('Não foi possível substituir: '+e.message)}
     });
     box.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
       if (!window.LD_INSPECAO_PODE_EXCLUIR) return alert('Somente o administrador pode apagar laudos.');

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync as readFileSync2C } from 'node:fs';
 test.beforeEach(async({page})=>{await page.goto('/tests/e2e/fixtures/inspecao-harness.html');await page.waitForFunction(()=>window.__INTEGRACAO_PRONTA===true)});
 test('abre isolado sem Firebase e sem erros',async({page})=>{const erros=[];page.on('pageerror',e=>erros.push(e.message));await expect(page.getByRole('heading',{name:'Inspeção fictícia'})).toBeVisible();await expect(page.locator('.faixa')).toHaveText('SEM NOTAS');expect(erros).toEqual([])});
 test('calcula nota e classificação com fixture fictícia',async({page})=>{await page.evaluate(()=>window.avaliar({'1.1':'3','1.2':'2','1.3':'1'}));await expect(page.locator('.nota')).toHaveText('67');await expect(page.locator('.faixa')).toHaveText('REGULAR');await expect(page.locator('#resultado .estado')).toHaveText('LIBERADO')});
@@ -28,3 +29,12 @@ test('carrega bibliotecas PDF locais', async ({ page }) => {
 });
 import {readFileSync as lerCicloDocumental} from 'node:fs';
 test('ciclo documental oferece reimpressão cancelamento e substituição',()=>{const f=lerCicloDocumental('public/Modulo-Inspecao.html','utf8');expect(f).toContain("acao:'REIMPRESSÃO'");expect(f).toContain("acao:'CANCELAMENTO'");expect(f).toContain("acao:'SUBSTITUIÇÃO'");expect(f).toContain('data-reimprimir');expect(f).toContain('data-cancelar');expect(f).toContain('data-substituir');expect(f).toContain("['cancelado','substituido'].includes")});
+
+test('ciclo documental persiste estado terminal e trava reimpressão',()=>{
+const f=readFileSync2C('public/Modulo-Inspecao.html','utf8');
+expect(f).toMatch(/documentoStatus='cancelado';l\.motivoCancelamento=motivo\.trim\(\);l\.canceladoEm=[^;]+;l\.__alteradoLocal=true;/);
+expect(f).toMatch(/documentoStatus='substituido';l\.substituidoPorCodigo=novo\.codigo;l\.substituidoEm=[^;]+;l\.__alteradoLocal=true;/);
+expect(f).toMatch(/!\['cancelado','substituido'\]\.includes\(l\.documentoStatus\) \? `<button class="btn ghost" data-reimprimir=/);
+expect(f).toContain('pill bad">CANCELADO');
+expect(f).toContain('estado terminal');
+});
