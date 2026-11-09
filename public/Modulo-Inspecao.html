@@ -1147,10 +1147,24 @@ function imprimirLaudo(l){
     return;
   }
   janela.document.open();
-  janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Laudo de Inspeção</title><style>@page{size:A4;margin:10mm}*{box-sizing:border-box}body{font:11px Arial;color:#111;margin:0;padding:10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #999;padding:5px;text-align:left}.prt-head{border-bottom:4px solid #e50914;margin-bottom:12px;padding-bottom:8px}.prt-head h1{margin:0 0 4px;font-size:20px}.prt-b{font-weight:700}.acao{position:sticky;top:0;display:block;width:100%;padding:13px;border:0;background:#e50914;color:white;font-weight:700;font-size:16px;margin-bottom:12px}@media print{.acao{display:none}body{padding:0}}</style></head><body><button class="acao" onclick="window.print()">Imprimir / Salvar em PDF</button>${area.innerHTML}</body></html>`);
+  janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Laudo de Inspeção</title><style>@page{size:A4;margin:10mm}*{box-sizing:border-box}body{font:11px Arial;color:#111;margin:0;padding:10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #999;padding:5px;text-align:left}.prt-head{border-bottom:4px solid #e50914;margin-bottom:12px;padding-bottom:8px}.prt-head h1{margin:0 0 4px;font-size:20px}.prt-b{font-weight:700}.acao{position:sticky;top:0;display:block;width:100%;padding:13px;border:0;background:#e50914;color:white;font-weight:700;font-size:16px;margin-bottom:12px}@media print{.acao{display:none}body{padding:0}}</style></head><body><button type="button" id="imprimirLaudo" class="acao">Imprimir / Salvar em PDF</button>${area.innerHTML}</body></html>`);
   janela.document.close();
+  const botaoImprimir = janela.document.getElementById('imprimirLaudo');
+  if (botaoImprimir) {
+    botaoImprimir.addEventListener('click', () => {
+      try {
+        janela.focus();
+        janela.print();
+      } catch (_) {
+        janela.alert('Não foi possível abrir a impressão. Use Compartilhar e escolha Imprimir.');
+      }
+    });
+  }
   janela.focus();
-  setTimeout(() => { try { janela.print(); } catch (_) {} }, 500);
+  const dispositivoIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (!dispositivoIOS) {
+    setTimeout(() => { try { janela.print(); } catch (_) {} }, 500);
+  }
 }
 
 document.getElementById('btImprimir').onclick = () => imprimirLaudo(coletarLaudo());
