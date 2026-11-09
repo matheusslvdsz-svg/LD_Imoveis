@@ -8,3 +8,6 @@ test('integra exclusão explícita sem Firebase real',async({page})=>{await page
 
 import {readFileSync} from 'node:fs';
 test('reserva código documental e prepara rodapé oficial',()=>{const fonte=readFileSync('public/Modulo-Inspecao.html','utf8');expect(fonte).toContain("documentosContadores");expect(fonte).toContain("LD-'+tipo+'-'+ano");expect(fonte).toContain('documentoCodigo');expect(fonte).toContain('Gerado pelo Sistema LD Imóveis');expect(fonte).toContain("status:'emitido'")});
+
+import {readFileSync as lerFonteInspecao} from 'node:fs';
+test('checklist completo exige avaliação de todos os itens',()=>{const fonte=lerFonteInspecao('public/Modulo-Inspecao.html','utf8');expect(fonte).toContain('4.14');expect(fonte).toContain('10.8');expect(fonte).toContain('itensNaoAvaliados');expect(fonte).toContain('btProximoPendente');expect(fonte).toContain("if (!irParaPrimeiroNaoAvaliado()) return")});
