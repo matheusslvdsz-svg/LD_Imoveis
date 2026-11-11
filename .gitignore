@@ -56,3 +56,11 @@ audit.json
 test-results/
 playwright-report/
 blob-report/
+
+# Adicionado na v2.0.0 — proteção de dados sensíveis
+*credenciais*.json
+LD_Backups/
+LD_Firestore_*/
+backup*.zip
+*cofre*preenchid*
+firestore-export*/

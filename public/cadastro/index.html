@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Cadastro de novo inquilino e ocupantes do Edifício Ilhas Gregas — LD Imóveis e Negócios Imobiliários, Parauapebas/PA.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cadastro de moradores — Ed. Ilhas Gregas">
+<meta property="og:description" content="Preencha os dados do locatário, ocupantes, veículos e animais. Leva cerca de 5 minutos.">
+<meta property="og:locale" content="pt_BR">
+<meta name="theme-color" content="#a5122c">
+<meta name="robots" content="noindex, nofollow">
+<title>Formulário de Cadastro de Novo Inquilino e Ocupantes — Edifício Ilhas Gregas</title>
+<style>
+  :root{
+    --red:#a5122c;
+    --red-dark:#7d0d21;
+    --ink:#1c1c1c;
+    --muted:#6b7280;
+    --line:#d5d8dd;
+    --bg:#eef0f3;
+    --paper:#ffffff;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:15px;
+    line-height:1.45;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:16px 14px 130px}
+
+  /* ---------- Cabeçalho ---------- */
+  .doc{
+    background:var(--paper);
+    border-radius:var(--radius);
+    box-shadow:0 2px 14px rgba(16,24,40,.08);
+    padding:22px 22px 8px;
+    overflow:hidden;
+  }
+  .brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;text-align:center}
+  .brand img{height:52px;width:auto;display:block}
+  .brand-txt{flex:1 1 260px;min-width:220px}
+  .brand-txt h1{
+    margin:0;font-size:17px;letter-spacing:.3px;color:var(--red);
+    text-transform:uppercase;line-height:1.25;font-weight:800;
+  }
+  .brand-txt h2{
+    margin:2px 0 0;font-size:14px;text-transform:uppercase;letter-spacing:.4px;font-weight:700;
+  }
+  .brand-txt p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+  .purpose{
+    margin:16px 0 0;font-size:13.5px;color:#374151;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:10px 0;
+  }
+  .purpose b{color:var(--red)}
+
+  /* ---------- Seções ---------- */
+  section{margin:20px 0 0;break-inside:auto}
+  .sec-title{
+    background:var(--red);color:#fff;font-weight:800;font-size:13px;
+    letter-spacing:.6px;text-transform:uppercase;text-align:center;
+    padding:9px 12px;border-radius:4px;margin:0 0 14px;
+  }
+  .sec-hint{font-size:12.5px;color:var(--muted);margin:-6px 0 12px;text-align:center}
+
+  /* ---------- Campos ---------- */
+  .grid{display:grid;gap:14px 18px;grid-template-columns:1fr 1fr}
+  .grid.one{grid-template-columns:1fr}
+  .full{grid-column:1/-1}
+  .fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .fld > label,.flabel{font-size:12.5px;font-weight:700;color:#374151;letter-spacing:.1px}
+  .req::after{content:" *";color:var(--red)}
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],select,textarea{
+    width:100%;font:inherit;font-size:15px;color:var(--ink);
+    background:#fff;border:1px solid var(--line);border-bottom:2px solid #b9bfc7;
+    border-radius:6px 6px 4px 4px;padding:9px 10px;outline:none;
+    transition:border-color .15s, box-shadow .15s;
+    min-height:42px;
+  }
+  textarea{min-height:90px;resize:vertical}
+  input:focus,select:focus,textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(165,18,44,.12)}
+  input.invalid,select.invalid,textarea.invalid{border-color:#dc2626;background:#fff5f5}
+  .err{font-size:11.5px;color:#dc2626;display:none}
+  .fld.show-err .err{display:block}
+
+  /* opções (radio / checkbox) */
+  .opts{display:flex;flex-wrap:wrap;gap:10px 22px}
+  .opt{display:flex;align-items:flex-start;gap:8px;font-size:14px;cursor:pointer;padding:6px 0}
+  .opt input{appearance:none;-webkit-appearance:none;width:20px;height:20px;min-width:20px;margin:1px 0 0;
+    border:2px solid #9aa1ab;border-radius:4px;background:#fff;cursor:pointer;position:relative;transition:.15s}
+  .opt input[type=radio]{border-radius:50%}
+  .opt input:checked{background:var(--red);border-color:var(--red)}
+  .opt input[type=checkbox]:checked::after{
+    content:"";position:absolute;left:5px;top:1px;width:6px;height:11px;
+    border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .opt input[type=radio]:checked::after{
+    content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}
+  .notes{font-size:12px;color:var(--muted);margin:2px 0 10px}
+
+  /* ---------- Tabelas dinâmicas ---------- */
+  .tbl{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .tbl .thead{display:none}
+  .tbl .tr{display:grid;gap:10px;padding:12px;border-top:1px solid var(--line);position:relative}
+  .tbl .tr:first-child{border-top:0}
+  .tbl .tr:nth-child(even){background:#fafbfc}
+  .td{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .td .th-m{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.3px}
+  .tbl.occ .tr{grid-template-columns:repeat(2,1fr)}
+  .tbl.vei .tr{grid-template-columns:repeat(2,1fr)}
+  .row-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
+  .row-head strong{font-size:13px;color:var(--red)}
+  .btn-del{
+    border:1px solid var(--line);background:#fff;color:#b91c1c;font-size:12px;font-weight:600;
+    border-radius:6px;padding:4px 9px;cursor:pointer
+  }
+  .btn-del:hover{background:#fef2f2;border-color:#fca5a5}
+  .btn-add{
+    display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+    border:1.5px dashed var(--red);color:var(--red);background:#fff;
+    font:inherit;font-size:13.5px;font-weight:700;border-radius:8px;padding:9px 14px;cursor:pointer
+  }
+  .btn-add:hover{background:#fdf2f4}
+
+  /* ---------- Assinaturas ---------- */
+  .sigs{display:grid;gap:18px;grid-template-columns:1fr 1fr}
+  .sig-box{border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px}
+  .sig-box .flabel{display:flex;justify-content:space-between;align-items:center}
+  .sig-box .clearsig{background:none;border:0;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer;padding:0}
+  canvas.sig{width:100%;height:110px;border:1px dashed #c3c8d0;border-radius:6px;background:#fff;touch-action:none;cursor:crosshair;display:block}
+  .sig-line{border-bottom:1px solid #333;height:52px;margin-top:4px}
+  .sig-cap{font-size:11.5px;color:var(--muted);text-align:center}
+
+  /* declaração */
+  .decl{font-size:13px;text-align:justify;color:#333;background:#f8f9fb;border-left:3px solid var(--red);
+        padding:12px 14px;border-radius:0 8px 8px 0;margin:0 0 14px}
+  .decl p{margin:0 0 10px}
+  .decl p:last-child{margin:0}
+
+  /* uso interno */
+  .internal{border:2px dashed #9aa1ab;border-radius:10px;padding:16px;margin-top:26px;background:#fbfbfc}
+  .internal .sec-title{background:#4b5563}
+  .internal-tag{font-size:11px;font-weight:800;letter-spacing:1px;color:#4b5563;text-transform:uppercase}
+
+  /* ---------- Barra de ações ---------- */
+  .toolbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:rgba(255,255,255,.97);border-top:1px solid var(--line);
+    box-shadow:0 -4px 18px rgba(16,24,40,.10);
+    padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+    display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;
+  }
+  .btn{
+    font:inherit;font-size:13.5px;font-weight:700;border-radius:9px;padding:10px 15px;
+    border:1px solid var(--line);background:#fff;color:#374151;cursor:pointer;
+    display:inline-flex;align-items:center;gap:7px;min-height:42px
+  }
+  .btn:hover{background:#f5f6f8}
+  .btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+  .btn.primary:hover{background:var(--red-dark)}
+  .btn.ghost{color:var(--muted)}
+  .btn svg{width:16px;height:16px;fill:currentColor;flex:0 0 auto}
+  .saveflag{font-size:11.5px;color:var(--muted)}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:82px;transform:translate(-50%,16px);z-index:60;
+    background:#111827;color:#fff;font-size:13.5px;font-weight:600;padding:11px 18px;border-radius:10px;
+    opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center
+  }
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+
+  /* ---------- Modal resumo ---------- */
+  .modal{position:fixed;inset:0;z-index:70;background:rgba(17,24,39,.55);display:none;padding:16px;
+         align-items:center;justify-content:center}
+  .modal.on{display:flex}
+  .modal-card{background:#fff;border-radius:14px;width:min(720px,100%);max-height:86vh;display:flex;flex-direction:column;overflow:hidden}
+  .modal-card header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .modal-card header h3{margin:0;font-size:15px}
+  .modal-card textarea{flex:1;border:0;border-radius:0;margin:0;min-height:320px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;padding:14px 16px;border-bottom:2px solid transparent}
+  .modal-card footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;flex-wrap:wrap}
+  .x{background:none;border:0;font-size:22px;line-height:1;color:var(--muted);cursor:pointer}
+
+  /* ---------- Responsivo ---------- */
+  @media (min-width:640px){
+    .tbl.occ .tr{grid-template-columns:repeat(4,1fr)}
+    .tbl.vei .tr{grid-template-columns:repeat(4,1fr)}
+  }
+  @media (min-width:820px){
+    .wrap{padding:26px 20px 130px}
+    .doc{padding:30px 34px 12px}
+    .brand img{height:62px}
+    .brand-txt h1{font-size:19px}
+    .tbl.occ .tr{grid-template-columns:1.6fr 1fr 1fr 1fr 1.1fr 1fr 1.1fr;gap:8px;padding:10px}
+    .tbl.vei .tr{grid-template-columns:1.3fr 1.2fr .7fr .6fr .9fr .8fr .8fr;gap:8px;padding:10px}
+    .tbl .thead{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1.1fr 1fr 1.1fr;gap:8px;
+      background:var(--red);color:#fff;padding:8px 10px;font-size:11px;font-weight:700;text-transform:uppercase}
+    .tbl.vei .thead{grid-template-columns:1.3fr 1.2fr .7fr .6fr .9fr .8fr .8fr}
+    .tbl .td .th-m{display:none}
+    .btn-del{position:absolute;right:6px;top:-9px;padding:2px 7px;font-size:11px;border-radius:5px;background:#fff}
+    .tr{position:relative}
+  }
+  @media (max-width:560px){
+    .brand{flex-direction:column;gap:8px}
+    .brand img{height:44px}
+    .brand-txt{flex:0 0 auto;min-width:0}
+    .grid{grid-template-columns:1fr}
+    .grid.one{grid-template-columns:1fr}
+    .sigs{grid-template-columns:1fr}
+    .toolbar .btn span.lbl{display:none}
+    .toolbar .btn{padding:10px 12px}
+    .toolbar .btn.primary span.lbl{display:inline}
+  }
+
+  /* ---------- Impressão ---------- */
+  @media print{
+    @page{size:A4;margin:12mm 12mm 14mm}
+    body{background:#fff;font-size:10.5pt}
+    .wrap{max-width:none;padding:0}
+    .doc{box-shadow:none;border-radius:0;padding:0}
+    .toolbar,.toast,.modal,.btn-add,.btn-del,.clearsig,.saveflag,.sec-hint,.no-print{display:none !important}
+    textarea{resize:none !important;overflow:hidden !important;border:0 !important;border-bottom:1px solid #666 !important;
+      border-radius:0 !important;background:transparent !important;box-shadow:none !important;min-height:3.4em !important}
+    input[type=date]::-webkit-calendar-picker-indicator,
+    input[type=date]::-webkit-inner-spin-button{display:none !important}
+    select.is-empty{appearance:none;-webkit-appearance:none}
+    .brand img{height:40px}
+    .brand-txt h1{font-size:12pt}
+    .brand-txt h2{font-size:10pt}
+    .sec-title{background:#e8eaee !important;color:#000 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+      border-left:4px solid var(--red);text-align:left;font-size:9.5pt;padding:5px 8px;margin-bottom:8px}
+    section{margin-top:10px;break-inside:avoid}
+    .grid{gap:6px 14px}
+    input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],select,textarea{
+      border:0;border-bottom:1px solid #666;border-radius:0;padding:2px 1px;min-height:0;font-size:10pt;background:transparent}
+    input,textarea,select{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    input::placeholder,textarea::placeholder{color:transparent !important;opacity:0 !important}
+    select.is-empty,input[type=date].is-empty{color:transparent !important}
+    .fld > label,.flabel{font-size:8.5pt;color:#444}
+    .tbl{border-color:#999}
+    .tbl .thead{display:grid !important;grid-template-columns:1.6fr 1fr 1fr 1fr 1.1fr 1fr 1.1fr !important;
+      gap:6px;padding:4px 6px;background:#e8eaee !important;color:#000 !important;
+      -webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:7.5pt;font-weight:700;text-transform:uppercase}
+    .tbl.vei .thead{grid-template-columns:1.3fr 1.2fr .7fr .6fr .9fr .8fr .8fr !important}
+    .row-head{margin:0 0 2px !important}
+    .row-head strong{font-size:8pt !important;color:#666 !important}
+    .tbl .tr{padding:4px 6px !important}
+    .tbl .tr{grid-template-columns:1.6fr 1fr 1fr 1fr 1.1fr 1fr 1.1fr !important;gap:6px;padding:4px 6px;break-inside:avoid}
+    .tbl.vei .tr{grid-template-columns:1.3fr 1.2fr .7fr .6fr .9fr .8fr .8fr !important}
+    .td .th-m{display:none}
+    canvas.sig{height:70px;border-color:#bbb}
+    .opts{gap:4px 16px}
+    .opt{font-size:9.5pt;padding:2px 0}
+    .opt input{width:12px;height:12px;min-width:12px;border-width:1.5px}
+    .opt input[type=checkbox]:checked::after{left:2px;top:-1px;width:5px;height:8px;border-width:0 2px 2px 0}
+    .decl{font-size:9pt;background:#f7f7f7 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .internal{border-color:#666;break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<form id="f" class="doc" novalidate autocomplete="on">
+<input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true"
+       style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none">
+
+  <!-- ================= CABEÇALHO ================= -->
+  <div class="brand">
+    <img src="data:image/png;base64,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" alt="LD Imóveis e Negócios Imobiliários">
+    <div class="brand-txt">
+      <h1>LD Imóveis e Negócios Imobiliários</h1>
+      <h2>Formulário de Cadastro de Novo Inquilino e Ocupantes</h2>
+      <h2 style="color:var(--red)">Edifício Ilhas Gregas</h2>
+      <p>Parauapebas – PA | WhatsApp: (94) 99179-2387 | @ld.negocios</p>
+    </div>
+  </div>
+
+  <p class="purpose"><b>Finalidade:</b> registrar o locatário responsável e todas as pessoas que ocuparão o apartamento, bem como veículos, animais, contatos de emergência e pessoas com acesso frequente ao condomínio.</p>
+
+  <!-- ================= 01 ================= -->
+  <section>
+    <h3 class="sec-title">01. Identificação do imóvel</h3>
+    <div class="grid">
+      <div class="fld">
+        <label class="req" for="apartamento">Apartamento</label>
+        <input type="text" id="apartamento" name="apartamento" placeholder="Ex.: 302 – Bloco A" required>
+        <span class="err">Informe o apartamento.</span>
+      </div>
+      <div class="fld">
+        <label for="vaga">Vaga de garagem</label>
+        <input type="text" id="vaga" name="vaga" placeholder="Ex.: 12">
+      </div>
+      <div class="fld full">
+        <span class="flabel">Forma de locação</span>
+        <div class="opts" data-group="forma_locacao">
+          <label class="opt"><input type="radio" name="forma_locacao" value="Locado por LD Imóveis"><span>Locado por LD Imóveis</span></label>
+          <label class="opt"><input type="radio" name="forma_locacao" value="Locado diretamente com o proprietário"><span>Locado diretamente com o proprietário</span></label>
+          <label class="opt"><input type="radio" name="forma_locacao" value="Cedido pelo proprietário"><span>Cedido pelo proprietário</span></label>
+          <label class="opt"><input type="radio" name="forma_locacao" value="Locado em parceria"><span>Locado em parceria</span></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 02 ================= -->
+  <section>
+    <h3 class="sec-title">02. Dados do locatário responsável</h3>
+    <div class="grid">
+      <div class="fld full">
+        <label class="req" for="loc_nome">Nome completo</label>
+        <input type="text" id="loc_nome" name="loc_nome" required>
+        <span class="err">Informe o nome completo do locatário.</span>
+      </div>
+      <div class="fld">
+        <label for="loc_nacionalidade">Nacionalidade</label>
+        <input type="text" id="loc_nacionalidade" name="loc_nacionalidade" placeholder="Brasileiro(a)">
+      </div>
+      <div class="fld">
+        <label for="loc_estadocivil">Estado civil</label>
+        <select id="loc_estadocivil" name="loc_estadocivil">
+          <option value="">Selecione…</option>
+          <option>Solteiro(a)</option><option>Casado(a)</option><option>União estável</option>
+          <option>Divorciado(a)</option><option>Viúvo(a)</option><option>Outro</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label for="loc_profissao">Profissão</label>
+        <input type="text" id="loc_profissao" name="loc_profissao">
+      </div>
+      <div class="fld">
+        <label for="loc_nascimento">Data de nascimento</label>
+        <input type="date" id="loc_nascimento" name="loc_nascimento">
+      </div>
+      <div class="fld">
+        <label class="req" for="loc_cpf">CPF</label>
+        <input type="text" id="loc_cpf" name="loc_cpf" inputmode="numeric" data-mask="cpf" placeholder="000.000.000-00" maxlength="14" required>
+        <span class="err">CPF inválido.</span>
+      </div>
+      <div class="fld">
+        <label for="loc_rg">RG e órgão expedidor</label>
+        <input type="text" id="loc_rg" name="loc_rg" placeholder="1234567 – SSP/PA">
+      </div>
+      <div class="fld">
+        <label class="req" for="loc_tel">Telefone/WhatsApp</label>
+        <input type="tel" id="loc_tel" name="loc_tel" inputmode="tel" data-mask="tel" placeholder="(94) 99999-9999" required>
+        <span class="err">Informe um telefone válido com DDD.</span>
+      </div>
+      <div class="fld">
+        <label for="loc_tel2">Telefone alternativo</label>
+        <input type="tel" id="loc_tel2" name="loc_tel2" inputmode="tel" data-mask="tel" placeholder="(94) 99999-9999">
+      </div>
+      <div class="fld">
+        <label class="req" for="loc_email">E-mail</label>
+        <input type="email" id="loc_email" name="loc_email" inputmode="email" placeholder="nome@email.com" required>
+        <span class="err">Informe um e-mail válido.</span>
+      </div>
+      <div class="fld">
+        <label for="loc_empresa">Empresa onde trabalha</label>
+        <input type="text" id="loc_empresa" name="loc_empresa">
+      </div>
+      <div class="fld">
+        <label for="loc_cargo">Cargo/Função</label>
+        <input type="text" id="loc_cargo" name="loc_cargo">
+      </div>
+      <div class="fld">
+        <label for="loc_tel_empresa">Telefone da empresa</label>
+        <input type="tel" id="loc_tel_empresa" name="loc_tel_empresa" inputmode="tel" data-mask="tel">
+      </div>
+      <div class="fld">
+        <label for="loc_end_anterior">Endereço residencial anterior</label>
+        <input type="text" id="loc_end_anterior" name="loc_end_anterior">
+      </div>
+      <div class="fld">
+        <label for="loc_cidade">Cidade/UF</label>
+        <input type="text" id="loc_cidade" name="loc_cidade" placeholder="Parauapebas/PA">
+      </div>
+      <div class="fld">
+        <label for="loc_motivo">Motivo da mudança</label>
+        <input type="text" id="loc_motivo" name="loc_motivo">
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section>
+    <h3 class="sec-title">03. Relação dos demais ocupantes do apartamento</h3>
+    <p class="sec-hint">Informar todos os moradores, inclusive crianças, adolescentes, parentes e empregados residentes.</p>
+    <div class="tbl occ" id="tblOcupantes">
+      <div class="thead">
+        <span>Nome completo</span><span>CPF</span><span>RG/Certidão</span><span>Nascimento</span>
+        <span>Parentesco/Vínculo</span><span>Telefone</span><span>Profissão/Escola</span>
+      </div>
+      <!-- linhas inseridas via JS -->
+    </div>
+    <button type="button" class="btn-add" data-add="ocupantes">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+      Adicionar ocupante
+    </button>
+  </section>
+
+  <!-- ================= 04 ================= -->
+  <section>
+    <h3 class="sec-title">04. Contatos para emergência</h3>
+    <div class="grid">
+      <div class="fld">
+        <label class="req" for="em1_nome">Contato 1 – Nome completo</label>
+        <input type="text" id="em1_nome" name="em1_nome" required>
+        <span class="err">Informe ao menos um contato de emergência.</span>
+      </div>
+      <div class="fld">
+        <label for="em1_parentesco">Parentesco/Vínculo</label>
+        <input type="text" id="em1_parentesco" name="em1_parentesco">
+      </div>
+      <div class="fld">
+        <label class="req" for="em1_tel">Telefone principal</label>
+        <input type="tel" id="em1_tel" name="em1_tel" inputmode="tel" data-mask="tel" required>
+        <span class="err">Informe o telefone do contato.</span>
+      </div>
+      <div class="fld">
+        <label for="em1_tel2">Telefone alternativo</label>
+        <input type="tel" id="em1_tel2" name="em1_tel2" inputmode="tel" data-mask="tel">
+      </div>
+    </div>
+    <div class="grid" style="margin-top:14px">
+      <div class="fld">
+        <label for="em2_nome">Contato 2 – Nome completo</label>
+        <input type="text" id="em2_nome" name="em2_nome">
+      </div>
+      <div class="fld">
+        <label for="em2_parentesco">Parentesco/Vínculo</label>
+        <input type="text" id="em2_parentesco" name="em2_parentesco">
+      </div>
+      <div class="fld">
+        <label for="em2_tel">Telefone principal</label>
+        <input type="tel" id="em2_tel" name="em2_tel" inputmode="tel" data-mask="tel">
+      </div>
+      <div class="fld">
+        <label for="em2_tel2">Telefone alternativo</label>
+        <input type="tel" id="em2_tel2" name="em2_tel2" inputmode="tel" data-mask="tel">
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 05 ================= -->
+  <section>
+    <h3 class="sec-title">05. Cadastro de veículos</h3>
+    <label class="opt" style="margin-bottom:8px">
+      <input type="checkbox" id="semVeiculo" name="semVeiculo">
+      <span>Não possuo veículo</span>
+    </label>
+    <div class="tbl vei" id="tblVeiculos">
+      <div class="thead">
+        <span>Proprietário/Condutor</span><span>Marca/Modelo</span><span>Cor</span><span>Ano</span>
+        <span>Placa</span><span>Tipo</span><span>Vaga</span>
+      </div>
+    </div>
+    <button type="button" class="btn-add" data-add="veiculos">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+      Adicionar veículo
+    </button>
+  </section>
+
+  <!-- ================= 06 ================= -->
+  <section>
+    <h3 class="sec-title">06. Animais domésticos</h3>
+    <div class="opts" style="margin-bottom:12px">
+      <label class="opt"><input type="radio" name="tem_animal" value="Não haverá animal"><span>Não haverá animal</span></label>
+      <label class="opt"><input type="radio" name="tem_animal" value="Haverá animal"><span>Haverá animal</span></label>
+    </div>
+    <div class="grid">
+      <div class="fld"><label for="ani_nome">Nome do animal</label><input type="text" id="ani_nome" name="ani_nome"></div>
+      <div class="fld"><label for="ani_especie">Espécie</label><input type="text" id="ani_especie" name="ani_especie" placeholder="Cão, gato…"></div>
+      <div class="fld"><label for="ani_raca">Raça</label><input type="text" id="ani_raca" name="ani_raca"></div>
+      <div class="fld"><label for="ani_porte">Porte</label>
+        <select id="ani_porte" name="ani_porte">
+          <option value="">Selecione…</option><option>Pequeno</option><option>Médio</option><option>Grande</option>
+        </select>
+      </div>
+      <div class="fld"><label for="ani_cor">Cor</label><input type="text" id="ani_cor" name="ani_cor"></div>
+      <div class="fld"><label for="ani_qtd">Quantidade</label><input type="number" id="ani_qtd" name="ani_qtd" min="1" step="1"></div>
+      <div class="fld"><label for="ani_vacina">Carteira de vacinação atualizada?</label>
+        <select id="ani_vacina" name="ani_vacina">
+          <option value="">Selecione…</option><option>Sim</option><option>Não</option><option>Em atualização</option>
+        </select>
+      </div>
+      <div class="fld"><label for="ani_obs">Observações</label><input type="text" id="ani_obs" name="ani_obs"></div>
+    </div>
+  </section>
+
+  <!-- ================= 07 ================= -->
+  <section>
+    <h3 class="sec-title">07. Informações sobre a mudança</h3>
+    <div class="grid">
+      <div class="fld"><label for="mud_empresa">Empresa ou responsável</label><input type="text" id="mud_empresa" name="mud_empresa"></div>
+      <div class="fld"><label for="mud_tel">Telefone do responsável</label><input type="tel" id="mud_tel" name="mud_tel" inputmode="tel" data-mask="tel"></div>
+      <div class="fld"><label for="mud_placa">Placa do veículo da mudança</label><input type="text" id="mud_placa" name="mud_placa" maxlength="8" style="text-transform:uppercase"></div>
+      <div class="fld"><label for="mud_elevador">Necessidade de elevador/área comum?</label>
+        <select id="mud_elevador" name="mud_elevador"><option value="">Selecione…</option><option>Sim</option><option>Não</option></select>
+      </div>
+      <div class="fld"><label for="mud_grande">Móveis ou objetos de grande dimensão?</label>
+        <select id="mud_grande" name="mud_grande"><option value="">Selecione…</option><option>Sim</option><option>Não</option></select>
+      </div>
+      <div class="fld full"><label for="mud_obs">Descrição/observações</label><textarea id="mud_obs" name="mud_obs" rows="3"></textarea></div>
+    </div>
+    <p class="notes">O responsável deverá consultar previamente a administração sobre os dias, horários e procedimentos permitidos para realização da mudança.</p>
+  </section>
+
+  <!-- ================= 08 ================= -->
+  <section>
+    <h3 class="sec-title">08. Documentos anexados</h3>
+    <div class="opts" style="flex-direction:column;gap:2px">
+      <label class="opt"><input type="checkbox" name="docs" value="Documento oficial com foto do locatário"><span>Documento oficial com foto do locatário</span></label>
+      <label class="opt"><input type="checkbox" name="docs" value="CPF do locatário"><span>CPF do locatário</span></label>
+      <label class="opt"><input type="checkbox" name="docs" value="Documento do cônjuge/companheiro(a)"><span>Documento do cônjuge/companheiro(a)</span></label>
+      <label class="opt"><input type="checkbox" name="docs" value="Documentos dos ocupantes maiores"><span>Documentos dos ocupantes maiores</span></label>
+      <label class="opt"><input type="checkbox" name="docs" value="Certidão/documento dos menores"><span>Certidão/documento dos menores</span></label>
+      <label class="opt"><input type="checkbox" name="docs" value="Comprovante de endereço anterior"><span>Comprovante de endereço anterior</span></label>
+      <label class="opt"><input type="checkbox" name="docs" value="Contrato de locação/autorização do proprietário"><span>Contrato de locação/autorização do proprietário</span></label>
+      <label class="opt"><input type="checkbox" name="docs" value="Documento dos veículos"><span>Documento dos veículos</span></label>
+      <label class="opt"><input type="checkbox" name="docs" value="Carteira de vacinação dos animais"><span>Carteira de vacinação dos animais</span></label>
+      <label class="opt"><input type="checkbox" name="docs" value="Outros"><span>Outros:</span></label>
+    </div>
+    <div class="fld" style="margin-top:6px;max-width:420px">
+      <input type="text" id="docs_outros" name="docs_outros" placeholder="Especifique os outros documentos">
+    </div>
+  </section>
+
+  <!-- ================= 09 ================= -->
+  <section>
+    <h3 class="sec-title">09. Declaração, responsabilidade e LGPD</h3>
+    <div class="decl">
+      <p>Declaro que as informações prestadas são verdadeiras, completas e atualizadas. Comprometo-me a comunicar qualquer alteração nos ocupantes, veículos, animais, empregados, prestadores ou pessoas autorizadas. Responsabilizo-me pela conduta dos demais ocupantes, visitantes e pessoas por mim autorizadas, bem como pelo cumprimento da convenção, regimento interno, normas de segurança, silêncio, uso das áreas comuns, estacionamento e demais regras do Edifício Ilhas Gregas.</p>
+      <p>Autorizo a LD Imóveis e Negócios Imobiliários e a administração do Edifício Ilhas Gregas a coletarem, armazenarem e utilizarem os dados deste formulário exclusivamente para identificação dos moradores, controle de acesso, segurança, comunicação, administração da locação, cumprimento de obrigações legais e proteção do patrimônio e das pessoas, com acesso restrito aos responsáveis pela gestão e segurança.</p>
+    </div>
+    <label class="opt">
+      <input type="checkbox" id="aceite" name="aceite" required>
+      <span><b>Li e concordo</b> com a declaração e com o tratamento dos meus dados pessoais conforme descrito acima (LGPD – Lei 13.709/2018).</span>
+    </label>
+    <span class="err" id="aceite_err" style="display:none;color:#dc2626;font-size:12px">É necessário aceitar a declaração para concluir o cadastro.</span>
+  </section>
+
+  <!-- ================= 10 ================= -->
+  <section>
+    <h3 class="sec-title">10. Ciência das normas do edifício</h3>
+    <p class="sec-hint">Declaro que recebi orientação sobre os itens abaixo:</p>
+    <div class="opts" style="flex-direction:column;gap:2px">
+      <label class="opt"><input type="checkbox" name="normas" value="Horários de silêncio"><span>Horários de silêncio</span></label>
+      <label class="opt"><input type="checkbox" name="normas" value="Uso das áreas comuns"><span>Uso das áreas comuns</span></label>
+      <label class="opt"><input type="checkbox" name="normas" value="Entrada de visitantes e prestadores"><span>Entrada de visitantes e prestadores</span></label>
+      <label class="opt"><input type="checkbox" name="normas" value="Uso das vagas de garagem"><span>Uso das vagas de garagem</span></label>
+      <label class="opt"><input type="checkbox" name="normas" value="Procedimentos de mudança"><span>Procedimentos de mudança</span></label>
+      <label class="opt"><input type="checkbox" name="normas" value="Circulação de animais"><span>Circulação de animais</span></label>
+      <label class="opt"><input type="checkbox" name="normas" value="Segurança e controle de acesso"><span>Segurança e controle de acesso</span></label>
+      <label class="opt"><input type="checkbox" name="normas" value="Descarte de resíduos"><span>Descarte de resíduos</span></label>
+      <label class="opt"><input type="checkbox" name="normas" value="Conservação das áreas comuns"><span>Conservação das áreas comuns</span></label>
+    </div>
+  </section>
+
+  <!-- ================= 11 ================= -->
+  <section>
+    <h3 class="sec-title">11. Observações adicionais</h3>
+    <div class="fld">
+      <textarea id="obs" name="obs" rows="4" placeholder="Espaço livre para informações complementares."></textarea>
+    </div>
+  </section>
+
+  <!-- ================= 12 ================= -->
+  <section>
+    <h3 class="sec-title">12. Assinaturas</h3>
+    <div class="sigs">
+      <div class="sig-box">
+        <div class="flabel"><span>Locatário responsável</span><button type="button" class="clearsig" data-clear="sigLoc">limpar</button></div>
+        <canvas class="sig" id="sigLoc"></canvas>
+        <div class="sig-cap" id="sigLocCap">Assine com o dedo ou o mouse</div>
+        <div class="fld" style="margin-top:4px"><label for="sig_loc_data">Data</label><input type="date" id="sig_loc_data" name="sig_loc_data"></div>
+      </div>
+      <div class="sig-box">
+        <div class="flabel"><span>Cônjuge/Companheiro(a)</span><button type="button" class="clearsig" data-clear="sigConj">limpar</button></div>
+        <canvas class="sig" id="sigConj"></canvas>
+        <div class="sig-cap" id="sigConjCap">Assine com o dedo ou o mouse</div>
+        <div class="fld" style="margin-top:4px"><label for="sig_conj_nome">Nome do cônjuge/companheiro(a)</label><input type="text" id="sig_conj_nome" name="sig_conj_nome"></div>
+      </div>
+      <div class="sig-box">
+        <div class="flabel"><span>Proprietário/Representante</span></div>
+        <div class="sig-line"></div>
+        <div class="sig-cap">Assinatura</div>
+      </div>
+      <div class="sig-box">
+        <div class="flabel"><span>Responsável pelo recebimento</span></div>
+        <div class="sig-line"></div>
+        <div class="fld" style="margin-top:4px"><label for="sig_receb_data">Data do recebimento</label><input type="date" id="sig_receb_data" name="sig_receb_data"></div>
+      </div>
+    </div>
+  </section>
+
+  <p style="text-align:center;font-size:11.5px;color:var(--muted);margin:22px 0 4px">
+    LD Imóveis e Negócios Imobiliários • www.ldimoveis1.com.br • @ld.negocios
+  </p>
+  <p id="destinoInfo" style="text-align:center;font-size:11px;color:var(--muted);margin:0 0 6px"></p>
+</form>
+</div>
+
+<!-- ============ BARRA DE AÇÕES ============ -->
+<div class="toolbar">
+  <button type="button" class="btn primary" id="btnEnviar">
+    <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    <span class="lbl" id="btnEnviarLbl">Enviar por e-mail</span>
+  </button>
+  <button type="button" class="btn" id="btnPrint">
+    <svg viewBox="0 0 24 24"><path d="M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3zm-3 10H8v-5h8v5zM18 3H6v5h12V3z"/></svg>
+    <span class="lbl">Imprimir / PDF</span>
+  </button>
+  <button type="button" class="btn" id="btnResumo">
+    <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v18h14v-3h2v-2h-2v-2h2v-2h-2V9h2V7h-2V5h2V3a2 2 0 0 0-2-2zm-2 12H7v-2h7v2zm0-4H7V7h7v2z"/></svg>
+    <span class="lbl">Resumo</span>
+  </button>
+  <button type="button" class="btn ghost" id="btnLimpar" title="Apagar todos os dados">
+    <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+    <span class="lbl">Limpar</span>
+  </button>
+  <span class="saveflag" id="saveflag"></span>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="avisoArquivo" style="display:none;position:fixed;left:0;right:0;bottom:64px;z-index:39;
+  background:#fff8e1;border-top:1px solid #f0d48a;color:#7a5b00;font-size:12px;text-align:center;padding:7px 12px">
+  Envio automático indisponível: o arquivo foi aberto direto do computador. Publique o formulário online (link) ou use “Imprimir / PDF”.
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <header>
+      <h3>Resumo do cadastro</h3>
+      <button class="x" type="button" id="modalX">×</button>
+    </header>
+    <textarea id="resumoTexto" readonly></textarea>
+    <footer>
+      <button class="btn" type="button" id="btnBaixarTxt">Baixar .txt</button>
+      <button class="btn" type="button" id="btnBaixarJson">Baixar dados (.json)</button>
+      <button class="btn primary" type="button" id="btnCopiar">Copiar para WhatsApp</button>
+    </footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $  = function(s,r){ return (r||document).querySelector(s); };
+  var $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+  var LS_KEY = "ld_ilhas_gregas_form_v1";
+
+  /* ================== CONFIGURAÇÃO DE ENVIO ================== */
+  var CONFIG = {
+    email: "matheusslvdsz@gmail.com",                    // e-mail que recebe os cadastros
+    scriptURL: "https://script.google.com/macros/s/AKfycbzh151F_b7kMQM67gGbjcIlxJhXv4wpXcUuBqIxuBjiW0UvV0-k_pnIE_9fl_X81-natg/exec",
+    scriptToken: "ld-ilhas-gregas-2026-7f3a91",          // segurança do script
+    assunto: "Novo cadastro – Ed. Ilhas Gregas",
+    copia: ""                                            // opcional: e-mail em cópia
+  };
+  /* =========================================================== */
+
+  /* ---------------- Máscaras ---------------- */
+  function onlyDigits(v){ return (v||"").replace(/\D+/g,""); }
+  function maskCPF(v){
+    var d = onlyDigits(v).slice(0,11);
+    var out = d;
+    if(d.length > 9) out = d.slice(0,3)+"."+d.slice(3,6)+"."+d.slice(6,9)+"-"+d.slice(9);
+    else if(d.length > 6) out = d.slice(0,3)+"."+d.slice(3,6)+"."+d.slice(6);
+    else if(d.length > 3) out = d.slice(0,3)+"."+d.slice(3);
+    return out;
+  }
+  function maskTel(v){
+    var d = onlyDigits(v).slice(0,11);
+    if(d.length === 0) return "";
+    if(d.length <= 2) return "("+d;
+    var ddd = d.slice(0,2), rest = d.slice(2);
+    if(rest.length <= 4) return "("+ddd+") "+rest;
+    var cut = rest.length > 8 ? 5 : 4;
+    return "("+ddd+") "+rest.slice(0,cut)+"-"+rest.slice(cut);
+  }
+  function cpfValido(v){
+    var c = onlyDigits(v);
+    if(c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+    var s=0,i;
+    for(i=0;i<9;i++) s += parseInt(c[i],10)*(10-i);
+    var d1 = (s*10)%11; if(d1===10) d1=0;
+    if(d1 !== parseInt(c[9],10)) return false;
+    s=0;
+    for(i=0;i<10;i++) s += parseInt(c[i],10)*(11-i);
+    var d2 = (s*10)%11; if(d2===10) d2=0;
+    return d2 === parseInt(c[10],10);
+  }
+  function telValido(v){ var d=onlyDigits(v); return d.length===10 || d.length===11; }
+
+  function syncEmpty(el){
+    if(!el || !el.classList) return;
+    if(el.tagName === "SELECT" || el.type === "date"){
+      el.classList.toggle("is-empty", !el.value);
+    }
+  }
+  function syncAllEmpty(){ $$("select, input[type=date]").forEach(syncEmpty); }
+
+  document.addEventListener("input", function(e){
+    var el = e.target;
+    if(!el || !el.dataset) return;
+    var m = el.dataset.mask;
+    if(m === "cpf"){ el.value = maskCPF(el.value); }
+    if(m === "tel"){ el.value = maskTel(el.value); }
+    syncEmpty(el);
+  });
+  document.addEventListener("change", function(e){ syncEmpty(e.target); });
+
+  /* ---------------- Linhas dinâmicas ---------------- */
+  var ROWS = {
+    ocupantes: {
+      tbody: "#tblOcupantes",
+      label: "Ocupante",
+      cols: [
+        {k:"nome",   l:"Nome completo",           t:"text", ph:"Nome e sobrenome"},
+        {k:"cpf",    l:"CPF",                     t:"text", ph:"000.000.000-00", mask:"cpf"},
+        {k:"rg",     l:"RG/Certidão",             t:"text"},
+        {k:"nasc",   l:"Nascimento",              t:"date"},
+        {k:"parent", l:"Parentesco/Vínculo",      t:"text", ph:"Filho(a), cônjuge…"},
+        {k:"tel",    l:"Telefone",                t:"tel",  mask:"tel"},
+        {k:"prof",   l:"Profissão/Escola",        t:"text"}
+      ]
+    },
+    veiculos: {
+      tbody: "#tblVeiculos",
+      label: "Veículo",
+      cols: [
+        {k:"prop",  l:"Proprietário/Condutor", t:"text"},
+        {k:"modelo",l:"Marca/Modelo",          t:"text", ph:"Fiat Argo"},
+        {k:"cor",   l:"Cor",                   t:"text"},
+        {k:"ano",   l:"Ano",                   t:"text", im:"numeric", max:4},
+        {k:"placa", l:"Placa",                 t:"text", ph:"ABC1D23", max:8},
+        {k:"tipo",  l:"Tipo",                  t:"text", ph:"Carro/Moto"},
+        {k:"vaga",  l:"Vaga",                  t:"text"}
+      ]
+    }
+  };
+
+  function addRow(kind, values){
+    var cfg = ROWS[kind];
+    var box = $(cfg.tbody);
+    var n = $$(".tr", box).length + 1;
+    var tr = document.createElement("div");
+    tr.className = "tr";
+    tr.dataset.kind = kind;
+
+    var head = document.createElement("div");
+    head.className = "row-head";
+    head.style.gridColumn = "1/-1";
+    head.innerHTML = '<strong>'+cfg.label+' '+n+'</strong>' +
+      '<button type="button" class="btn-del" title="Remover">Remover</button>';
+    tr.appendChild(head);
+
+    cfg.cols.forEach(function(c,idx){
+      var td = document.createElement("label");
+      td.className = "td";
+      var s = document.createElement("span");
+      s.className = "th-m"; s.textContent = c.l;
+      var inp = document.createElement("input");
+      inp.type = c.t;
+      inp.dataset.k = c.k;
+      inp.dataset.idx = String(idx);
+      if(c.mask) inp.dataset.mask = c.mask;
+      if(c.ph) inp.placeholder = c.ph;
+      if(c.max) inp.maxLength = c.max;
+      if(c.im) inp.inputMode = c.im;
+      if(values && values[idx] != null) inp.value = values[idx];
+      td.appendChild(s); td.appendChild(inp);
+      tr.appendChild(td);
+    });
+
+    box.appendChild(tr);
+    return tr;
+  }
+
+  function renumber(kind){
+    var box = $(ROWS[kind].tbody);
+    $$(".tr", box).forEach(function(tr,i){
+      var s = $(".row-head strong", tr);
+      if(s) s.textContent = ROWS[kind].label + " " + (i+1);
+    });
+  }
+
+  document.addEventListener("click", function(e){
+    var add = e.target.closest ? e.target.closest("[data-add]") : null;
+    if(add){ var k = add.dataset.add; addRow(k); renumber(k); save(); return; }
+
+    var del = e.target.closest ? e.target.closest(".btn-del") : null;
+    if(del){
+      var tr = del.closest(".tr");
+      var kind = tr.dataset.kind;
+      tr.remove();
+      if(kind === "ocupantes" && $$(".tr", $("#tblOcupantes")).length === 0) addRow("ocupantes");
+      if(kind === "veiculos" && $$(".tr", $("#tblVeiculos")).length === 0) addRow("veiculos");
+      renumber(kind);
+      save();
+    }
+  });
+
+  /* ---------------- Assinaturas ---------------- */
+  var signs = {};
+  function initSign(canvasId){
+    var cv = document.getElementById(canvasId);
+    if(!cv) return null;
+    var ctx = cv.getContext("2d");
+    var drawing = false, has = false, lastX = 0, lastY = 0;
+
+    function fit(){
+      var r = cv.getBoundingClientRect();
+      var dpr = window.devicePixelRatio || 1;
+      if(r.width === 0) return;
+      var prev = has ? cv.toDataURL() : null;
+      cv.width  = Math.round(r.width * dpr);
+      cv.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#111";
+      if(prev){ var img = new Image(); img.onload = function(){ ctx.drawImage(img,0,0,r.width,r.height); }; img.src = prev; }
+    }
+    function pos(ev){
+      var r = cv.getBoundingClientRect();
+      var p = ev.touches ? ev.touches[0] : ev;
+      return { x: p.clientX - r.left, y: p.clientY - r.top };
+    }
+    function start(ev){
+      ev.preventDefault(); drawing = true; has = true;
+      var p = pos(ev); lastX = p.x; lastY = p.y;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x+0.1, p.y+0.1); ctx.stroke();
+    }
+    function move(ev){
+      if(!drawing) return;
+      ev.preventDefault();
+      var p = pos(ev);
+      ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y); ctx.stroke();
+      lastX = p.x; lastY = p.y;
+    }
+    function end(ev){ if(drawing){ drawing = false; save(); } }
+
+    cv.addEventListener("mousedown", start);
+    cv.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", end);
+    cv.addEventListener("touchstart", start, {passive:false});
+    cv.addEventListener("touchmove", move, {passive:false});
+    cv.addEventListener("touchend", end);
+    cv.addEventListener("pointerdown", function(e){ if(e.pointerType==="pen"){ cv.setPointerCapture(e.pointerId); start(e);} });
+    cv.addEventListener("pointermove", function(e){ if(e.pointerType==="pen") move(e); });
+    cv.addEventListener("pointerup", function(e){ if(e.pointerType==="pen") end(e); });
+
+    window.addEventListener("resize", fit);
+    fit();
+
+    return {
+      clear: function(){ ctx.clearRect(0,0,cv.width,cv.height); has = false; save(); },
+      dataURL: function(){
+        if(!has) return "";
+        try{
+          var L = 620;                            /* largura máxima da assinatura */
+          var r = cv.width / cv.height;
+          var c2 = document.createElement("canvas");
+          c2.width = Math.min(L, cv.width);
+          c2.height = Math.round(c2.width / r);
+          var x2 = c2.getContext("2d");
+          x2.fillStyle = "#fff"; x2.fillRect(0, 0, c2.width, c2.height);   /* fundo branco (JPEG não tem transparência) */
+          x2.drawImage(cv, 0, 0, c2.width, c2.height);
+          return c2.toDataURL("image/jpeg", 0.62);
+        }catch(e){ return cv.toDataURL("image/png"); }
+      },
+      load: function(url){
+        if(!url) return;
+        var img = new Image();
+        img.onload = function(){
+          var r = cv.getBoundingClientRect();
+          ctx.drawImage(img, 0, 0, r.width, r.height);
+          has = true;
+        };
+        img.src = url;
+      }
+    };
+  }
+  signs.sigLoc  = initSign("sigLoc");
+  signs.sigConj = initSign("sigConj");
+
+  document.addEventListener("click", function(e){
+    var b = e.target.closest ? e.target.closest("[data-clear]") : null;
+    if(b){ var s = signs[b.dataset.clear]; if(s) s.clear(); }
+  });
+
+  /* ---------------- Estado / rascunho ---------------- */
+  var saveTimer = null;
+  function collect(){
+    var data = { fields:{}, checks:{}, rows:{ocupantes:[],veiculos:[]}, sigs:{}, ts: Date.now() };
+    $$("input, select, textarea", $("#f")).forEach(function(el){
+      if(!el.name) return;
+      if(el.closest("[data-kind]")) return;                 // linhas tratadas à parte
+      if(el.type === "checkbox"){
+        if(!Array.isArray(data.checks[el.name])) data.checks[el.name] = [];
+        if(el.checked) data.checks[el.name].push(el.value || "on");
+      } else if(el.type === "radio"){
+        if(el.checked) data.checks[el.name] = el.value;
+      } else {
+        data.fields[el.name] = el.value;
+      }
+    });
+    ["ocupantes","veiculos"].forEach(function(kind){
+      $$(ROWS[kind].tbody + " .tr").forEach(function(tr){
+        var arr = [];
+        ROWS[kind].cols.forEach(function(c,i){
+          var el = $('input[data-idx="'+i+'"]', tr);
+          arr.push(el ? el.value : "");
+        });
+        data.rows[kind].push(arr);
+      });
+    });
+    ["sigLoc","sigConj"].forEach(function(k){
+      if(signs[k]) data.sigs[k] = signs[k].dataURL();
+    });
+    return data;
+  }
+
+  function apply(data){
+    if(!data) return;
+    Object.keys(data.fields || {}).forEach(function(n){
+      var el = document.getElementsByName(n)[0];
+      if(el) el.value = data.fields[n];
+    });
+    Object.keys(data.checks || {}).forEach(function(n){
+      var els = $$('[name="'+n+'"]');
+      var v = data.checks[n];
+      if(Array.isArray(v)){
+        els.forEach(function(el){ if(el.type === "checkbox") el.checked = v.indexOf(el.value || "on") > -1; });
+      } else {
+        els.forEach(function(el){ if(el.type === "radio") el.checked = (el.value === v); });
+      }
+    });
+    ["ocupantes","veiculos"].forEach(function(kind){
+      var box = $(ROWS[kind].tbody);
+      $$(".tr", box).forEach(function(tr){ tr.remove(); });
+      (data.rows && data.rows[kind] ? data.rows[kind] : []).forEach(function(arr){ addRow(kind, arr); });
+      if($$(".tr", box).length === 0) addRow(kind);
+      renumber(kind);
+    });
+    if(data.sigs){
+      setTimeout(function(){
+        if(signs.sigLoc)  signs.sigLoc.load(data.sigs.sigLoc);
+        if(signs.sigConj) signs.sigConj.load(data.sigs.sigConj);
+      }, 120);
+    }
+    syncVehicleLock();
+    syncAllEmpty();
+  }
+
+  function save(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try{
+        localStorage.setItem(LS_KEY, JSON.stringify(collect()));
+        var d = new Date();
+        if(!(window._enviadoTs && (Date.now() - window._enviadoTs) < 15000)){
+          $("#saveflag").textContent = "Rascunho salvo " + d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+        }
+      }catch(err){
+        $("#saveflag").textContent = "Não foi possível salvar rascunho";
+      }
+    }, 450);
+  }
+  document.addEventListener("input",  function(e){ if(e.target.closest("#f")) save(); });
+  document.addEventListener("change", function(e){ if(e.target.closest("#f")) save(); });
+
+  /* ---------------- Retorno do envio (?enviado=1) ---------------- */
+  document.addEventListener("DOMContentLoaded", function(){
+    if(!/[?&]enviado=1/.test(location.search)) return;
+    setTimeout(concluirEnvio, 400);
+    if(window.history && history.replaceState){
+      history.replaceState(null, "", location.pathname);
+    }
+  });
+
+  function toast(msg){
+    var t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("on");
+    clearTimeout(t._tm);
+    t._tm = setTimeout(function(){ t.classList.remove("on"); }, 2600);
+  }
+
+  /* ---------------- Bloqueio do bloco de veículos ---------------- */
+  function syncVehicleLock(){
+    var off = $("#semVeiculo").checked;
+    var box = $("#tblVeiculos");
+    box.style.opacity = off ? .45 : 1;
+    box.style.pointerEvents = off ? "none" : "auto";
+    $$("[data-add='veiculos']").forEach(function(b){ b.disabled = off; b.style.opacity = off ? .45 : 1; });
+  }
+  $("#semVeiculo").addEventListener("change", function(){ syncVehicleLock(); save(); });
+
+  /* ---------------- Validação ---------------- */
+  function markError(el, on){
+    if(!el) return;
+    el.classList.toggle("invalid", !!on);
+    var fld = el.closest(".fld");
+    if(fld) fld.classList.toggle("show-err", !!on);
+  }
+
+  function validate(showErrors){
+    var bad = [];
+    function check(el, ok){
+      if(!ok && el){ bad.push(el); if(showErrors) markError(el, true); }
+      else if(el && showErrors) markError(el, false);
+    }
+
+    var ap = $("#apartamento"); check(ap, ap.value.trim() !== "");
+    var nome = $("#loc_nome"); check(nome, nome.value.trim().split(/\s+/).length >= 2);
+    var cpf = $("#loc_cpf");   check(cpf, cpfValido(cpf.value));
+    var tel = $("#loc_tel");   check(tel, telValido(tel.value));
+    var em  = $("#loc_email"); check(em, /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(em.value.trim()));
+    var e1n = $("#em1_nome"), e1t = $("#em1_tel");
+    check(e1n, e1n.value.trim() !== "");
+    check(e1t, telValido(e1t.value));
+    var aceite = $("#aceite");
+    $("#aceite_err").style.display = (showErrors && !aceite.checked) ? "block" : "none";
+    if(!aceite.checked) bad.push(aceite);
+
+    return bad;
+  }
+
+  /* ---------------- Resumo ---------------- */
+  var SECS = [
+    ["01. Identificação do imóvel", ["apartamento","vaga","forma_locacao"]],
+    ["02. Locatário responsável", ["loc_nome","loc_nacionalidade","loc_estadocivil","loc_profissao","loc_nascimento","loc_cpf","loc_rg","loc_tel","loc_tel2","loc_email","loc_empresa","loc_cargo","loc_tel_empresa","loc_end_anterior","loc_cidade","loc_motivo"]],
+    ["04. Contatos de emergência", ["em1_nome","em1_parentesco","em1_tel","em1_tel2","em2_nome","em2_parentesco","em2_tel","em2_tel2"]],
+    ["06. Animais domésticos", ["tem_animal","ani_nome","ani_especie","ani_raca","ani_porte","ani_cor","ani_qtd","ani_vacina","ani_obs"]],
+    ["07. Mudança", ["mud_empresa","mud_tel","mud_placa","mud_elevador","mud_grande","mud_obs"]],
+    ["11. Observações adicionais", ["obs"]]
+  ];
+
+  function labelOf(el){
+    var fld = el.closest(".fld");
+    var lab = fld ? $("label", fld) : null;
+    var txt = lab ? lab.textContent : (el.name || "");
+    return txt.replace(/\s*\*$/,"").trim();
+  }
+
+  function resumo(){
+    var L = [];
+    L.push("CADASTRO DE NOVO INQUILINO – ED. ILHAS GREGAS");
+    L.push("LD Imóveis e Negócios Imobiliários • (94) 99179-2387");
+    L.push("Emitido em " + new Date().toLocaleString("pt-BR"));
+    L.push("");
+
+    SECS.forEach(function(s){
+      var title = s[0], keys = s[1], lines = [];
+      keys.forEach(function(k){
+        var el = document.getElementsByName(k)[0];
+        if(!el) return;
+        var v = "";
+        if(el.type === "radio"){
+          var c = $('[name="'+k+'"]:checked');
+          v = c ? c.value : "";
+        } else if(el.tagName === "SELECT"){
+          v = el.value;
+        } else {
+          v = el.value;
+        }
+        if(v && v.trim()) lines.push(labelOf(el) + ": " + v.trim());
+      });
+      if(lines.length){ L.push("— " + title + " —"); L.push.apply(L, lines); L.push(""); }
+    });
+
+    // ocupantes
+    var occ = $$("#tblOcupantes .tr").map(function(tr){
+      var vals = $$("input", tr).map(function(i){ return i.value.trim(); });
+      return vals.some(Boolean) ? vals : null;
+    }).filter(Boolean);
+    if(occ.length){
+      L.push("— 03. Ocupantes (" + occ.length + ") —");
+      occ.forEach(function(v,i){
+        L.push((i+1)+") " + (v[0]||"—") + " | CPF: " + (v[1]||"—") + " | RG: " + (v[2]||"—") +
+               " | Nasc.: " + (v[3]||"—") + " | Vínculo: " + (v[4]||"—") + " | Tel: " + (v[5]||"—") + " | Prof./Escola: " + (v[6]||"—"));
+      });
+      L.push("");
+    }
+
+    // veículos
+    var vei = $$("#tblVeiculos .tr").map(function(tr){
+      var vals = $$("input", tr).map(function(i){ return i.value.trim(); });
+      return vals.some(Boolean) ? vals : null;
+    }).filter(Boolean);
+    if($("#semVeiculo").checked){
+      L.push("— 05. Veículos —"); L.push("Não possui veículo."); L.push("");
+    } else if(vei.length){
+      L.push("— 05. Veículos (" + vei.length + ") —");
+      vei.forEach(function(v,i){
+        L.push((i+1)+") " + (v[1]||"—") + " " + (v[0]?"("+v[0]+")":"") + " | Cor: " + (v[2]||"—") + " | Ano: " + (v[3]||"—") +
+               " | Placa: " + (v[4]||"—") + " | Tipo: " + (v[5]||"—") + " | Vaga: " + (v[6]||"—"));
+      });
+      L.push("");
+    }
+
+    // documentos
+    var docs = $$('[name="docs"]:checked').map(function(c){ return c.value; });
+    var outros = $("#docs_outros").value.trim();
+    if(outros) docs = docs.map(function(d){ return d === "Outros" ? "Outros: " + outros : d; });
+    if(docs.length){ L.push("— 08. Documentos anexados —"); docs.forEach(function(d){ L.push("• " + d); }); L.push(""); }
+
+    // normas
+    var norm = $$('[name="normas"]:checked').map(function(c){ return c.value; });
+    if(norm.length){ L.push("— 10. Ciência das normas (" + norm.length + "/9) —"); norm.forEach(function(d){ L.push("• " + d); }); L.push(""); }
+
+    L.push("— 09. Declaração e LGPD —");
+    L.push($("#aceite").checked ? "ACEITE REGISTRADO: li e concordo com a declaração e o tratamento de dados (LGPD)." : "ACEITE NÃO REGISTRADO.");
+    L.push("");
+    if(signs.sigLoc && signs.sigLoc.dataURL())  L.push("Assinatura do locatário: registrada digitalmente no formulário.");
+    if(signs.sigConj && signs.sigConj.dataURL()) L.push("Assinatura do cônjuge/companheiro(a): registrada digitalmente no formulário.");
+    return L.join("\n");
+  }
+
+
+  /* ---------------- Geração do PDF anexo ---------------- */
+  var JSPDF_URLS = [
+    "/vendor/jspdf.umd.min.js",
+    "https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"
+  ];
+
+  function carregarJsPDF(){
+    if(window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    if(window.jsPDF) return Promise.resolve(window.jsPDF);
+    return new Promise(function(resolve, reject){
+      var i = 0;
+      (function proximo(){
+        if(i >= JSPDF_URLS.length) return reject(new Error("jsPDF indisponível"));
+        var sc = document.createElement("script");
+        sc.src = JSPDF_URLS[i++];
+        sc.async = true;
+        sc.onload = function(){
+          var J = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+          if(J) resolve(J); else proximo();
+        };
+        sc.onerror = proximo;
+        document.head.appendChild(sc);
+      })();
+    });
+  }
+
+  function limparTexto(t){
+    return String(t == null ? "" : t)
+      .replace(/[\u2013\u2014]/g, "-")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/\u2022/g, "-")
+      .replace(/\u00A0/g, " ");
+  }
+
+  function nomeArquivoPDF(){
+    var ap = onlyDigits(txt("apartamento")) || String(txt("apartamento")).replace(/[^\w]/g, "") || "semapto";
+    var primeiro = String(txt("loc_nome")).trim().split(" ")[0].replace(/[^\w]/g, "") || "cadastro";
+    var d = new Date(), p = function(n){ return (n < 10 ? "0" : "") + n; };
+    return "IlhasGregas_Apto" + ap + "_" + d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" +
+           p(d.getDate()) + "_" + primeiro + ".pdf";
+  }
+
+  function gerarPDF(){
+    return carregarJsPDF().then(function(JsPDF){
+      var doc = new JsPDF({ unit: "mm", format: "a4", compress: true });
+      var W = 210, H = 297, M = 16, LARG = W - M * 2, y = 38;
+
+      function novaPagina(){
+        doc.addPage();
+        doc.setFillColor(17, 17, 19); doc.rect(0, 0, W, 4, "F");
+        y = 16;
+      }
+      function garantir(h){ if(y + h > H - 22) novaPagina(); }
+
+      function texto(t, opt){
+        opt = opt || {};
+        var size = opt.size || 8.8, bold = !!opt.bold;
+        var cor = opt.cor || [40, 40, 46];
+        doc.setFont("helvetica", bold ? "bold" : "normal");
+        doc.setFontSize(size);
+        doc.setTextColor(cor[0], cor[1], cor[2]);
+        var linhas = doc.splitTextToSize(limparTexto(t), LARG - (opt.recuo || 0));
+        linhas.forEach(function(l){
+          garantir(6);
+          doc.text(l, M + (opt.recuo || 0), y);
+          y += size * 0.40 + 1.35;
+        });
+        y += (opt.espaco == null ? 0.9 : opt.espaco);
+      }
+
+      /* cabeçalho */
+      doc.setFillColor(17, 17, 19); doc.rect(0, 0, W, 26, "F");
+      doc.setFillColor(165, 18, 44); doc.rect(0, 26, W, 2, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(12.5);
+      doc.text("LD IMOVEIS E NEGOCIOS IMOBILIARIOS", M, 12);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7.8);
+      doc.text("Parauapebas / PA   -   (94) 99179-2387   -   @ld.negocios", M, 18.5);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+      doc.text("CADASTRO DE MORADORES", W - M, 12, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.text("EDIFICIO ILHAS GREGAS", W - M, 18.5, { align: "right" });
+
+      /* título */
+      var vaga = txt("vaga");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(17, 17, 19);
+      doc.text(limparTexto("Apartamento " + (txt("apartamento") || "-")) +
+               (vaga ? "   -   Vaga " + limparTexto(vaga) : ""), M, y);
+      y += 6.5;
+      texto("Recebido em " + new Date().toLocaleString("pt-BR") + "   -   Locatario: " +
+            (txt("loc_nome") || "-"), { size: 8.6, cor: [107, 107, 114], espaco: 1.5 });
+      doc.setDrawColor(220, 220, 222); doc.setLineWidth(0.4);
+      doc.line(M, y, W - M, y); y += 6;
+
+      /* corpo: reaproveita o resumo do formulário */
+      var linhas = resumo().split("\n");
+      if (/CADASTRO DE NOVO INQUILINO/.test(linhas[0] || "")) linhas = linhas.slice(3);
+
+      linhas.forEach(function(raw){
+        var cru = String(raw == null ? "" : raw).trim();
+        var t = limparTexto(raw).replace(/\s+$/, "");
+        if (!cru) { y += 1.6; return; }
+        var ehTitulo = /^[\u2014-]\s/.test(cru) && /[\u2014-]$/.test(cru) && cru.length > 6;
+        if (ehTitulo) {
+          y += 2.6; garantir(14);
+          doc.setFillColor(245, 245, 246); doc.rect(M, y - 4.3, LARG, 6.6, "F");
+          doc.setFillColor(165, 18, 44); doc.rect(M, y - 4.3, 1.3, 6.6, "F");
+          doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(17, 17, 19);
+          doc.text(limparTexto(cru.replace(/^[\u2014-]\s*/, "").replace(/\s*[\u2014-]$/, "")), M + 4.5, y);
+          y += 9;
+          return;
+        }
+        texto(t, { recuo: /^•|^\d\)/.test(cru) ? 4 : 0 });
+      });
+
+      /* assinaturas */
+      var sigs = [];
+      if (signs.sigLoc && signs.sigLoc.dataURL()) sigs.push(["Locatario responsavel", signs.sigLoc.dataURL()]);
+      if (signs.sigConj && signs.sigConj.dataURL()) sigs.push(["Conjuge / Companheiro(a)", signs.sigConj.dataURL()]);
+      if (sigs.length) {
+        garantir(50);
+        y += 3;
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(17, 17, 19);
+        doc.text("ASSINATURAS", M, y); y += 6;
+        sigs.forEach(function(sg){
+          garantir(34);
+          try { doc.addImage(sg[1], /^data:image\/jpeg/.test(sg[1]) ? "JPEG" : "PNG", M, y, 62, 24); } catch (e) {}
+          doc.setDrawColor(200, 200, 204); doc.setLineWidth(0.3);
+          doc.line(M, y + 25, M + 62, y + 25);
+          doc.setFont("helvetica", "normal"); doc.setFontSize(7.6); doc.setTextColor(107, 107, 114);
+          doc.text(limparTexto(sg[0]), M, y + 29);
+          y += 34;
+        });
+      }
+
+      /* rodapé em todas as páginas */
+      var total = doc.getNumberOfPages();
+      for (var p = 1; p <= total; p++) {
+        doc.setPage(p);
+        doc.setDrawColor(220, 220, 222); doc.setLineWidth(0.3);
+        doc.line(M, H - 16, W - M, H - 16);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(7.2); doc.setTextColor(120, 120, 126);
+        doc.text("LD Imoveis  -  gerado pelo formulario online em " + new Date().toLocaleString("pt-BR"), M, H - 11.5);
+        doc.text("Pagina " + p + " de " + total, W - M, H - 11.5, { align: "right" });
+      }
+      return doc;
+    });
+  }
+
+  /* ---------------- Envio por e-mail ---------------- */
+  function txt(name){
+    var el = document.getElementsByName(name)[0];
+    return el ? (el.value || "").trim() : "";
+  }
+  function radioTxt(name){
+    var c = $('[name="'+name+'"]:checked');
+    return c ? c.value : "";
+  }
+  function listaMarcada(name){
+    return $$('[name="'+name+'"]:checked').map(function(c){ return c.value; }).join("; ");
+  }
+  function linhasTxt(sel, cols){
+    var out = [];
+    $$(sel + " .tr").forEach(function(tr, i){
+      var v = $$("input", tr).map(function(inp){ return inp.value.trim(); });
+      if(!v.some(Boolean)) return;
+      var partes = [];
+      cols.forEach(function(c, idx){ if(v[idx]) partes.push(c + ": " + v[idx]); });
+      out.push((i+1) + ") " + partes.join(" | "));
+    });
+    return out.join("\n");
+  }
+
+  function payload(){
+    var p = {
+      _subject: CONFIG.assunto + " – Apto " + (txt("apartamento") || "—"),
+      _template: "table",
+      _captcha: "false",
+      "Nome": txt("loc_nome") || "—",
+      "E-mail do locatário": txt("loc_email") || "—",
+      "Telefone/WhatsApp": txt("loc_tel") || "—",
+      "CPF": txt("loc_cpf") || "—",
+      "Apartamento": txt("apartamento") || "—",
+      "Vaga de garagem": txt("vaga") || "—",
+      "Forma de locação": radioTxt("forma_locacao") || "—",
+      "RG e órgão expedidor": txt("loc_rg") || "—",
+      "Data de nascimento": txt("loc_nascimento") || "—",
+      "Estado civil": txt("loc_estadocivil") || "—",
+      "Nacionalidade": txt("loc_nacionalidade") || "—",
+      "Profissão": txt("loc_profissao") || "—",
+      "Telefone alternativo": txt("loc_tel2") || "—",
+      "Empresa / cargo": [txt("loc_empresa"), txt("loc_cargo")].filter(Boolean).join(" – ") || "—",
+      "Telefone da empresa": txt("loc_tel_empresa") || "—",
+      "Endereço anterior": txt("loc_end_anterior") || "—",
+      "Cidade/UF": txt("loc_cidade") || "—",
+      "Motivo da mudança": txt("loc_motivo") || "—",
+      "Contatos de emergência":
+        [ "1) " + [txt("em1_nome"), txt("em1_parentesco"), txt("em1_tel"), txt("em1_tel2")].filter(Boolean).join(" | "),
+          "2) " + [txt("em2_nome"), txt("em2_parentesco"), txt("em2_tel"), txt("em2_tel2")].filter(Boolean).join(" | ") ]
+        .filter(function(l){ return l.length > 4; }).join("\n") || "—",
+      "Ocupantes":
+        linhasTxt("#tblOcupantes", ["Nome","CPF","RG/Certidão","Nascimento","Parentesco","Telefone","Profissão/Escola"]) || "—",
+      "Veículos": $("#semVeiculo").checked ? "Não possui veículo"
+        : (linhasTxt("#tblVeiculos", ["Proprietário/Condutor","Marca/Modelo","Cor","Ano","Placa","Tipo","Vaga"]) || "—"),
+      "Animais": [
+        radioTxt("tem_animal"),
+        txt("ani_nome") && ("Nome: " + txt("ani_nome")),
+        txt("ani_especie") && ("Espécie: " + txt("ani_especie")),
+        txt("ani_raca") && ("Raça: " + txt("ani_raca")),
+        txt("ani_porte") && ("Porte: " + txt("ani_porte")),
+        txt("ani_cor") && ("Cor: " + txt("ani_cor")),
+        txt("ani_qtd") && ("Qtd: " + txt("ani_qtd")),
+        txt("ani_vacina") && ("Vacinação: " + txt("ani_vacina")),
+        txt("ani_obs") && ("Obs: " + txt("ani_obs"))
+      ].filter(Boolean).join(" | ") || "—",
+      "Mudança": [
+        txt("mud_empresa") && ("Empresa/resp.: " + txt("mud_empresa")),
+        txt("mud_tel") && ("Tel: " + txt("mud_tel")),
+        txt("mud_placa") && ("Placa: " + txt("mud_placa")),
+        txt("mud_elevador") && ("Elevador/área comum: " + txt("mud_elevador")),
+        txt("mud_grande") && ("Móveis grandes: " + txt("mud_grande")),
+        txt("mud_obs")
+      ].filter(Boolean).join(" | ") || "—",
+      "Documentos anexados": (function(){
+        var d = listaMarcada("docs");
+        if(txt("docs_outros")) d = d.replace("Outros", "Outros: " + txt("docs_outros"));
+        return d || "—";
+      })(),
+      "Ciência das normas": listaMarcada("normas") || "—",
+      "Observações": txt("obs") || "—",
+      "Aceite da declaração e LGPD": $("#aceite").checked ? "SIM – aceito em " + new Date().toLocaleString("pt-BR") : "NÃO",
+      "Assinaturas": [
+        (signs.sigLoc && signs.sigLoc.dataURL()) ? "Locatário: assinatura digital registrada" : null,
+        (signs.sigConj && signs.sigConj.dataURL()) ? "Cônjuge/companheiro(a): assinatura digital registrada" : null
+      ].filter(Boolean).join("; ") || "—",
+      "Resumo completo": resumo()
+    };
+    if(CONFIG.copia) p._cc = CONFIG.copia;
+    return p;
+  }
+
+  function maquinaDeEnvio(){
+    return location.protocol === "http:" || location.protocol === "https:";
+  }
+
+  function abrirMailto(assunto, corpo){
+    var limite = 1700;
+    var texto = corpo.length > limite ? corpo.slice(0, limite) + "\n\n[...] resumo completo no formulário / PDF." : corpo;
+    var url = "mailto:" + CONFIG.email +
+      "?subject=" + encodeURIComponent(assunto) +
+      "&body=" + encodeURIComponent(texto);
+    window.location.href = url;
+  }
+
+  /* ---------------- Diagnóstico em tela (?diag=1) ---------------- */
+  var DIAG = /[?&]diag=1/.test(location.search);
+  function log(){
+    if(!DIAG) return;
+    var box = document.getElementById("ld_diag");
+    if(!box){
+      box = document.createElement("div");
+      box.id = "ld_diag";
+      box.style.cssText = "position:fixed;left:0;right:0;bottom:0;max-height:46%;overflow:auto;z-index:99999;" +
+        "background:#111;color:#0f0;font:11px/1.45 monospace;padding:8px;white-space:pre-wrap;border-top:2px solid #a5122c";
+      document.body.appendChild(box);
+    }
+    var t = new Date().toLocaleTimeString("pt-BR");
+    box.textContent += "[" + t + "] " + Array.prototype.join.call(arguments, " ") + "\n";
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function enviando(on){
+    var b = $("#btnEnviar"), l = $("#btnEnviarLbl");
+    b.disabled = !!on;
+    b.style.opacity = on ? .7 : 1;
+    l.textContent = on ? "Enviando…" : "Enviar por e-mail";
+  }
+
+
+  /* ---------------- Envio para o Google Script (com PDF) ---------------- */
+  function enviarComAnexo(doc, assunto){
+    var dados = new URLSearchParams();
+    dados.append("token", CONFIG.scriptToken);
+    dados.append("assunto", assunto);
+    dados.append("nomeArquivo", nomeArquivoPDF());
+    dados.append("resumo", resumo());
+
+    if(doc){
+      try{
+        var uri = doc.output("datauristring");
+        var b64 = uri.substring(uri.indexOf("base64,") + 7);
+        dados.append("pdf", b64);
+        log("pdf base64:", Math.round(b64.length / 1024) + " KB");
+      }catch(e){ log("ERRO ao extrair PDF:", e.message); }
+    } else {
+      log("sem PDF (envio so de texto)");
+    }
+
+    var corpo = dados.toString();
+    log("corpo:", Math.round(corpo.length / 1024) + " KB");
+
+    var lbl = $("#btnEnviarLbl");
+    var concluido = false;
+
+    function ok(){
+      if(concluido) return;
+      concluido = true;
+      concluirEnvio();
+    }
+    function tentarDeNovo(motivo){
+      if(concluido) return;
+      enviando(false);
+      if(lbl) lbl.textContent = "Enviar por e-mail";
+      log("FALHOU:", motivo);
+      toast("O envio não completou. Confira o sinal e toque em Enviar de novo.");
+    }
+
+    /* envio medido: XHR com tempo suficiente para o upload do PDF */
+    log("envio via XHR | timeout 180s");
+    var x = new XMLHttpRequest();
+    x.open("POST", CONFIG.scriptURL, true);
+    x.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    x.timeout = 180000;
+    x.onload = function(){
+      log("XHR status:", x.status);
+      if(x.status >= 200 && x.status < 400){ ok(); }
+      else { tentarDeNovo("status " + x.status); }
+    };
+    x.onerror   = function(){ log("XHR erro");   tentarDeNovo("erro de rede"); };
+    x.ontimeout = function(){ log("XHR timeout"); tentarDeNovo("demorou mais de 3 minutos"); };
+    try{ x.send(corpo); }
+    catch(e){ log("XHR excecao:", e.message); tentarDeNovo("excecao"); }
+  }
+
+  /* ---------------- Confirmação do envio (na própria página) ---------------- */
+  function concluirEnvio(){
+    enviando(false);
+    var l = $("#btnEnviarLbl"); if(l) l.textContent = "Enviar por e-mail";
+    try{
+      localStorage.removeItem(LS_KEY);
+      var fl = $("#saveflag"); if(fl) fl.textContent = "Enviado em " + new Date().toLocaleString("pt-BR");
+    }catch(e){}
+    toast("Cadastro enviado! A LD vai conferir e liberar o acesso na portaria.");
+  }
+
+  function enviarEmail(forceTest){
+    var bad = validate(true);
+    if(bad.length && !forceTest){
+      var first = bad[0];
+      if(first && first.scrollIntoView) first.scrollIntoView({behavior:"smooth", block:"center"});
+      toast("Confira " + bad.length + " campo(s) antes de enviar.");
+      return;
+    }
+    if(!maquinaDeEnvio()){
+      toast("Arquivo aberto localmente — abrindo seu e-mail…");
+      abrirMailto(CONFIG.assunto + (txt("apartamento") ? " – Apto " + txt("apartamento") : ""), resumo());
+      return;
+    }
+
+    var lbl = $("#btnEnviarLbl");
+    var assunto = forceTest
+      ? "Teste – formulário Ed. Ilhas Gregas"
+      : CONFIG.assunto + " – Apto " + (txt("apartamento") || "—");
+
+    enviando(true);
+
+    if(forceTest){
+      if(lbl) lbl.textContent = "Enviando… (não feche)";
+      enviarComAnexo(null, assunto);
+      return;
+    }
+
+    if(lbl) lbl.textContent = "Gerando PDF…";
+    log("iniciando geracao do PDF");
+    gerarPDF().then(function(doc){
+      log("PDF gerado");
+      if(lbl) lbl.textContent = "Enviando… (não feche)";
+      window._enviadoTs = Date.now();
+      enviarComAnexo(doc, assunto);
+    }).catch(function(err){
+      log("ERRO no PDF:", err && err.message);
+      toast("Não foi possível gerar o PDF. Enviando sem anexo…");
+      enviarComAnexo(null, assunto);
+    });
+  }
+
+
+  /* ---------------- Ações ---------------- */
+  function copyText(txt){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(txt);
+    }
+    return new Promise(function(res, rej){
+      try{
+        var ta = document.createElement("textarea");
+        ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta); res();
+      }catch(e){ rej(e); }
+    });
+  }
+
+  function download(name, text, mime){
+    var blob = new Blob([text], {type: mime || "text/plain;charset=utf-8"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  }
+
+  function nomeArquivo(){
+    var n = ($("#loc_nome").value || "inquilino").trim().toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+    var ap = ($("#apartamento").value || "").trim().replace(/[^a-zA-Z0-9]+/g,"-");
+    return "cadastro-" + n + (ap ? "-apt-" + ap : "");
+  }
+
+  $("#btnEnviar").addEventListener("click", function(){ enviarEmail(false); });
+
+  var _bt = document.getElementById("btnTeste");
+  if(_bt) _bt.addEventListener("click", function(){ enviarEmail(true); });
+  // gatilho interno de teste (sem botão na tela): /cadastro/?teste=1
+  if(/[?&]teste=1/.test(location.search)) setTimeout(function(){ enviarEmail(true); }, 800);
+
+  $("#btnPrint").addEventListener("click", function(){
+    var bad = validate(true);
+    if(bad.length){
+      var first = bad[0];
+      if(first && first.scrollIntoView) first.scrollIntoView({behavior:"smooth", block:"center"});
+      toast(bad.length + (bad.length === 1 ? " campo precisa de atenção" : " campos precisam de atenção"));
+      return;
+    }
+    save();
+    window.print();
+  });
+
+  $("#btnResumo").addEventListener("click", function(){
+    $("#resumoTexto").value = resumo();
+    $("#modal").classList.add("on");
+  });
+  $("#modalX").addEventListener("click", function(){ $("#modal").classList.remove("on"); });
+  $("#modal").addEventListener("click", function(e){ if(e.target === this) this.classList.remove("on"); });
+
+  $("#btnCopiar").addEventListener("click", function(){
+    copyText($("#resumoTexto").value).then(function(){ toast("Resumo copiado — cole no WhatsApp"); })
+      .catch(function(){ toast("Selecione o texto e copie manualmente"); });
+  });
+  $("#btnBaixarTxt").addEventListener("click", function(){
+    download(nomeArquivo() + ".txt", $("#resumoTexto").value);
+    toast("Arquivo .txt baixado");
+  });
+  $("#btnBaixarJson").addEventListener("click", function(){
+    download(nomeArquivo() + ".json", JSON.stringify(collect(), null, 2), "application/json");
+    toast("Dados .json baixados");
+  });
+
+  $("#btnLimpar").addEventListener("click", function(){
+    if(!confirm("Apagar todos os dados preenchidos deste formulário?")) return;
+    try{ localStorage.removeItem(LS_KEY); }catch(e){}
+    location.reload();
+  });
+
+  /* ---------------- Inicialização ---------------- */
+  addRow("ocupantes"); addRow("ocupantes"); addRow("ocupantes");
+  addRow("veiculos");  addRow("veiculos");
+
+  var saved = null;
+  try{ saved = JSON.parse(localStorage.getItem(LS_KEY) || "null"); }catch(e){}
+  if(saved){
+    apply(saved);
+    $("#saveflag").textContent = "Rascunho recuperado";
+  }
+
+  // data de hoje no campo de data da assinatura, se vazio
+  var hoje = new Date().toISOString().slice(0,10);
+  ["sig_loc_data"].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el && !el.value) el.value = hoje;
+  });
+
+  syncVehicleLock();
+  syncAllEmpty();
+
+  $("#destinoInfo").textContent = "Cadastros enviados para " + CONFIG.email;
+  var di2 = document.getElementById("destinoInfo2");
+  if(di2) di2.textContent = CONFIG.email;
+  if(!maquinaDeEnvio()){
+    $("#avisoArquivo").style.display = "block";
+    document.querySelector(".wrap").style.paddingBottom = "190px";
+  }
+
+  window.addEventListener("beforeprint", function(){ save(); });
+})();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a58d90835ef2a429',t:'MTc5NDQwMjkxMw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a58d90835ef2a429',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

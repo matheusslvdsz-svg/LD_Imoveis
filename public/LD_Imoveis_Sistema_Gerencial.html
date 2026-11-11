@@ -718,6 +718,36 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
         .aud-muted{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#b9c0cb}
         .aud-nota{margin:12px 0 0;font-size:12px;color:var(--text-muted,#9aa3b2)}
         @media(max-width:640px){.aud-kpis{grid-template-columns:repeat(2,1fr)}.aud-kpis b{font-size:18px}}
+
+        /* Central de Pendências — v2.0.0 */
+        .pend-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0}
+        .pend-kpi{background:var(--bg-card,#141821);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px}
+        .pend-kpi span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted,#9aa3b2)}
+        .pend-kpi b{font-size:22px;line-height:1.3}
+        .pend-kpi.critica b{color:#ff8b8b}
+        .pend-kpi.alta b{color:#e8c07c}
+        .pend-kpi.media b{color:#8fc0ff}
+        .pend-lista{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+        .pend-item{display:flex;gap:12px;align-items:center;background:var(--bg-card,#141821);border:1px solid rgba(255,255,255,.08);border-left-width:3px;border-radius:10px;padding:12px 14px}
+        .pend-item.critica{border-left-color:#d63031}
+        .pend-item.alta{border-left-color:#e6aa3c}
+        .pend-item.media{border-left-color:#5aa0ff}
+        .pend-corpo{flex:1;min-width:0}
+        .pend-titulo{font-weight:700;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+        .pend-detalhe{font-size:12.5px;color:var(--text-muted,#9aa3b2);margin-top:2px;word-break:break-word}
+        .pend-tempo{font-size:11.5px;color:var(--text-muted,#9aa3b2);white-space:nowrap;text-align:right}
+        .pend-selo{display:inline-block;padding:2px 8px;border-radius:999px;font-size:9.5px;font-weight:700;letter-spacing:.05em;border:1px solid transparent}
+        .pend-selo.critica{background:rgba(214,48,49,.16);border-color:rgba(214,48,49,.5);color:#ff9aa0}
+        .pend-selo.alta{background:rgba(230,170,60,.14);border-color:rgba(230,170,60,.45);color:#e8c07c}
+        .pend-selo.media{background:rgba(90,160,255,.14);border-color:rgba(90,160,255,.4);color:#8fc0ff}
+        .pend-vazio{background:var(--bg-card,#141821);border:1px dashed rgba(255,255,255,.14);border-radius:10px;padding:26px 18px;text-align:center;color:var(--text-muted,#9aa3b2);font-size:13px}
+        .pend-nota{margin:12px 0 0;font-size:12px;color:var(--text-muted,#9aa3b2)}
+        @media(max-width:640px){
+          .pend-kpis{grid-template-columns:repeat(2,1fr)}
+          .pend-item{flex-direction:column;align-items:flex-start;gap:6px}
+          .pend-tempo{text-align:left}
+        }
+
     </style></head>
 <body>
 
@@ -771,6 +801,7 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
         <div class="nav">
             <div class="nav-title">Geral</div>
             <a class="nav-link active" data-aba="dashboard" onclick="navegar('dashboard', this)"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a class="nav-link" data-aba="pendencias" onclick="navegar('pendencias', this)"><i class="fas fa-triangle-exclamation"></i> Pendências</a>
             <a class="nav-link" data-aba="auditoria" data-admin-only="1" onclick="navegar('auditoria', this)"><i class="fas fa-rotate-left"></i><span>Auditoria e Controle Geral</span><b>ADMIN</b></a>
             <a class="nav-link nav-autorizacoes" data-aba="usuarios" data-admin-only="1" onclick="navegar('usuarios', this)"><i class="fas fa-user-shield"></i><span>Autorizações</span><b>ADMIN</b></a>
             <a class="nav-link" data-aba="imoveis" onclick="navegar('imoveis', this)"><i class="fas fa-building"></i> Imóveis</a>
@@ -1249,6 +1280,42 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
             </section>
 
             <!-- TAB: AUDITORIA -->
+            <!-- TAB: PENDÊNCIAS -->
+            <section class="tab" id="tab-pendencias">
+                <div class="header">
+                    <div>
+                        <h1>Central de <span>Pendências</span></h1>
+                        <p style="color:var(--text-muted)">O que está atrasado agora, com quem resolve. Calculado a partir do que já está cadastrado — nada é marcado à mão.</p>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="renderizarPendencias()"><i class="fas fa-rotate"></i> Atualizar</button>
+                </div>
+                <div class="pend-kpis">
+                    <div class="pend-kpi critica"><span>Críticas</span><b id="pendKpiCritica">0</b></div>
+                    <div class="pend-kpi alta"><span>Altas</span><b id="pendKpiAlta">0</b></div>
+                    <div class="pend-kpi media"><span>Médias</span><b id="pendKpiMedia">0</b></div>
+                    <div class="pend-kpi"><span>Total</span><b id="pendKpiTotal">0</b></div>
+                </div>
+                <div class="consulta-toolbar">
+                    <label><i class="fas fa-search"></i><input id="pendBusca" placeholder="Pesquisar imóvel, contrato, documento ou chamado" oninput="renderizarPendencias()"></label>
+                    <select id="pendArea" onchange="renderizarPendencias()">
+                        <option value="">Todas as áreas</option>
+                        <option value="contratos">Contratos</option>
+                        <option value="laudos">Laudos e documentos</option>
+                        <option value="fechamento">Fechamento</option>
+                        <option value="manutencoes">Manutenções</option>
+                    </select>
+                    <select id="pendNivel" onchange="renderizarPendencias()">
+                        <option value="">Todos os níveis</option>
+                        <option value="critica">Críticas</option>
+                        <option value="alta">Altas</option>
+                        <option value="media">Médias</option>
+                    </select>
+                    <span id="pendResumo">0 pendências</span>
+                </div>
+                <div id="listaPendencias" class="pend-lista"></div>
+                <p class="pend-nota">Esta tela não grava nada. A pendência desaparece quando o registro é corrigido de verdade — contrato encerrado, laudo emitido, fechamento gerado ou chamado concluído.</p>
+            </section>
+
             <section class="tab" id="tab-auditoria">
                 <div class="header">
                     <div><h1>Auditoria e <span>Controle Geral</span></h1>
@@ -1733,6 +1800,7 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, getDocs, query, orderBy, setDoc, getDoc, getDocFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { calcularPendencias, resumirPendencias } from './js/pendencias-core.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAunB_Fo3p4BxWk-acN4jToGPOIgMAQqYk",
@@ -1750,7 +1818,7 @@ const db = getFirestore(app);
 /* ========================= 2. ESTADO GLOBAL ========================= */
 const state = {
     imoveis: [], inquilinos: [], proprietarios: [], contratos: [],
-    financeiro: [], manutencoes: [], leads: [], eventos: [], fechamentos: [], historicoContratos: [], auditoriaSistema: []
+    financeiro: [], manutencoes: [], leads: [], eventos: [], fechamentos: [], historicoContratos: [], auditoriaSistema: [], inspecoes: [], documentosOficiais: []
 };
 
 let fotosTemporarias = [];
@@ -1896,11 +1964,11 @@ setTimeout(() => { try { window.abrirAbaDoLink(); } catch (e) { /* noop */ } }, 
 
 const ADMIN_PRINCIPAL = 'matheusslvdsz@gmail.com';
 const PERFIS = {
- admin:{nome:'Administrador',abas:['dashboard','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','financeiro','fechamento','manutencao','inspecoes','usuarios','auditoria'],grava:true},
- financeiro:{nome:'Financeiro',abas:['dashboard','imoveis','inquilinos','proprietarios','contratos','financeiro','fechamento','inspecoes'],grava:true},
- corretor:{nome:'Corretor',abas:['dashboard','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','inspecoes'],grava:false},
- manutencao:{nome:'Manutenção',abas:['dashboard','imoveis','fotos','agenda','manutencao','inspecoes'],grava:true},
- consulta:{nome:'Consulta',abas:['dashboard','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','financeiro','fechamento','manutencao','inspecoes'],grava:false}
+ admin:{nome:'Administrador',abas:['dashboard','pendencias','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','financeiro','fechamento','manutencao','inspecoes','usuarios','auditoria'],grava:true},
+ financeiro:{nome:'Financeiro',abas:['dashboard','pendencias','imoveis','inquilinos','proprietarios','contratos','financeiro','fechamento','inspecoes'],grava:true},
+ corretor:{nome:'Corretor',abas:['dashboard','pendencias','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','inspecoes'],grava:false},
+ manutencao:{nome:'Manutenção',abas:['dashboard','pendencias','imoveis','fotos','agenda','manutencao','inspecoes'],grava:true},
+ consulta:{nome:'Consulta',abas:['dashboard','pendencias','imoveis','fotos','agenda','inquilinos','proprietarios','crm','contratos','financeiro','fechamento','manutencao','inspecoes'],grava:false}
 };
 let perfilLogado=null, usuariosSistema=[], unsubUsuarios=null, unsubPerfilAtual=null, bloqueioForcado=false;
 function idUsuario(email){return String(email||'').trim().toLowerCase()}
@@ -2031,6 +2099,8 @@ function escutarBancoDeDados() {
         ['contratos', (docs) => { state.contratos = ordenarPor('inicio')(docs); renderizarContratos(); }],
         ['historicoContratos', (docs) => { state.historicoContratos = ordenarPor('criadoEm')(docs); renderizarContratos(); }],
         ['auditoriaSistema', (docs) => { state.auditoriaSistema = docs; renderizarAuditoria(); }],
+        ['inspecoes', (docs) => { state.inspecoes = docs; }],
+        ['documentosOficiais', (docs) => { state.documentosOficiais = docs; }],
         ['financeiro', (docs) => { state.financeiro = ordenarPor('data')(docs); renderizarFinanceiro(); }],
         ['fechamentos', (docs) => { state.fechamentos = ordenarPor('criadoEm')(docs); window.renderizarFechamentos(); }],
         ['manutencoes', (docs) => { state.manutencoes = docs; renderizarManutencoes(); }],
@@ -2042,9 +2112,9 @@ function escutarBancoDeDados() {
     const perfil = perfilLogado?.perfil || '';
     const colecoesPorPerfil = {
         admin: fontes.map(([nome]) => nome),
-        financeiro: ['imoveis','inquilinos','proprietarios','contratos','historicoContratos','financeiro','fechamentos','manutencoes','eventos'],
-        corretor: ['imoveis','inquilinos','proprietarios','contratos','leadsCorretores','eventos'],
-        manutencao: ['imoveis','inquilinos','proprietarios','contratos','manutencoes'],
+        financeiro: ['imoveis','inquilinos','proprietarios','contratos','historicoContratos','financeiro','fechamentos','manutencoes','eventos','inspecoes','documentosOficiais'],
+        corretor: ['imoveis','inquilinos','proprietarios','contratos','leadsCorretores','eventos','inspecoes','documentosOficiais'],
+        manutencao: ['imoveis','inquilinos','proprietarios','contratos','manutencoes','inspecoes','documentosOficiais'],
         consulta: ['imoveis','inquilinos','proprietarios','contratos','historicoContratos','manutencoes']
     };
     const permitidas = new Set(colecoesPorPerfil[perfil] || []);
@@ -2055,6 +2125,7 @@ function escutarBancoDeDados() {
                 marcarNuvemOk();
                 aplicar(snap.docs.map(d => ({ id: d.id, ...d.data() })));
                 atualizarDashboard();   // qualquer dado novo reflete no painel
+                if (window.renderizarPendencias) window.renderizarPendencias();
             },
             (erro) => marcarNuvemErro(nome, erro)
         ));
@@ -2111,6 +2182,7 @@ window.navegar = (aba, elemento) => {
     if (aba === 'agenda') renderizarCalendario();
     if (aba === 'fotos') renderFotos();
     if (aba === 'financeiro') popularSelectsFin();
+    if (aba === 'pendencias' && window.renderizarPendencias) window.renderizarPendencias();
     if (aba === 'fechamento') {
         popularSelectsFechamento();
         window.renderizarFechamentos();
@@ -2166,6 +2238,61 @@ window.limparFiltrosAuditoria=()=>{
   if($('audAte'))$('audAte').value='';
   window.renderizarAuditoria();
 };
+/* ========================= CENTRAL DE PENDÊNCIAS (somente leitura) ========================= */
+const PEND_NIVEL_TEXTO = { critica: 'CRÍTICA', alta: 'ALTA', media: 'MÉDIA' };
+
+function pendenciasVisiveis() {
+  const q = normalizarVinculo($('pendBusca')?.value || '');
+  const area = $('pendArea')?.value || '';
+  const nivel = $('pendNivel')?.value || '';
+  return devolverPendencias()
+    .filter(p => !area || p.area === area)
+    .filter(p => !nivel || p.nivel === nivel)
+    .filter(p => !q || normalizarVinculo([p.titulo, p.detalhe, p.area].join(' ')).includes(q));
+}
+
+function devolverPendencias() {
+  try {
+    return calcularPendencias({
+      contratos: state.contratos,
+      imoveis: state.imoveis,
+      inspecoes: state.inspecoes,
+      documentosOficiais: state.documentosOficiais,
+      fechamentos: state.fechamentos,
+      manutencoes: state.manutencoes
+    }, { perfil: perfilLogado?.perfil || 'admin', hoje: hojeISO() });
+  } catch (erro) {
+    console.error('[Pendências]', erro);
+    return [];
+  }
+}
+
+window.renderizarPendencias = () => {
+  const lista = pendenciasVisiveis();
+  const resumo = resumirPendencias(lista);
+  if ($('pendKpiCritica')) $('pendKpiCritica').textContent = resumo.critica;
+  if ($('pendKpiAlta')) $('pendKpiAlta').textContent = resumo.alta;
+  if ($('pendKpiMedia')) $('pendKpiMedia').textContent = resumo.media;
+  if ($('pendKpiTotal')) $('pendKpiTotal').textContent = resumo.total;
+  if ($('pendResumo')) $('pendResumo').textContent = resumo.total + (resumo.total === 1 ? ' pendência' : ' pendências');
+  const box = $('listaPendencias');
+  if (!box) return;
+  if (!lista.length) {
+    box.innerHTML = '<div class="pend-vazio"><b>Nada atrasado com os filtros atuais.</b><br>Quando um contrato vencer, um laudo ficar em rascunho ou um fechamento ficar em aberto, o item aparece aqui.</div>';
+    return;
+  }
+  box.innerHTML = lista.map(p => '<div class="pend-item ' + p.nivel + '">'
+    + '<div class="pend-corpo">'
+    + '<div class="pend-titulo"><span class="pend-selo ' + p.nivel + '">' + PEND_NIVEL_TEXTO[p.nivel] + '</span>' + esc(p.titulo) + '</div>'
+    + '<div class="pend-detalhe">' + esc(p.detalhe) + '</div>'
+    + '</div>'
+    + '<div class="pend-tempo">' + (p.prazoDias !== undefined ? 'em ' + p.prazoDias + ' dias' : (p.diasAtraso || 0) + ' dias') + '<br>'
+    + '<button class="btn btn-outline btn-sm" onclick="navegar(\'' + p.aba + '\')">' + esc(p.acao) + '</button></div>'
+    + '</div>').join('');
+};
+
+window.__calcularPendencias = calcularPendencias;
+
 window.renderizarAuditoria=()=>{
   const todas=state.auditoriaSistema||[];
   const lista=listaAuditoriaFiltrada();

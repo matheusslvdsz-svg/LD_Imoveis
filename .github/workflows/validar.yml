@@ -1,0 +1,78 @@
+name: Validação
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: validar-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testes:
+    name: HTML, unitários e E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Obter o código
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci || npm install
+
+      - name: Verificar blocos JavaScript do HTML
+        run: npm run check:html
+
+      - name: Testes unitários
+        run: npm test
+
+      - name: Preparar navegador do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Testes de ponta a ponta
+        run: npm run test:e2e
+
+      - name: Guardar relatório em caso de falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-playwright
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
+  higiene:
+    name: Higiene do repositório
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Obter o código
+        uses: actions/checkout@v4
+
+      - name: Conferir espaços e conflitos de merge
+        run: |
+          git diff --check $(git rev-list --max-parents=0 HEAD) HEAD
+          if git grep -nE '^(<<<<<<<|>>>>>>>|=======)$' -- .; then
+            echo "Marcador de conflito encontrado."; exit 1
+          fi
+
+      - name: Procurar credenciais no que foi versionado
+        run: |
+          if git ls-files | grep -Ei '(\.pem$|\.p12$|serviceAccount|cofre.*preenchid|backup.*\.zip$|\.env$)'; then
+            echo "Arquivo sensível versionado."; exit 1
+          fi
+          echo "Nenhum arquivo sensível encontrado."
