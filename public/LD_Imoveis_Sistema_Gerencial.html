@@ -658,9 +658,10 @@ button:focus-visible,.btn:focus-visible,a:focus-visible,input:focus-visible,sele
 table{width:100%}th{letter-spacing:.35px}td,th{vertical-align:middle}
 img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:#0a0a0a}::-webkit-scrollbar-thumb{background:#3a3a3a;border:2px solid #0a0a0a;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:var(--red-main,var(--red,#d90b16))}
 .ld-versao{position:fixed;right:8px;bottom:6px;z-index:2;font-size:8px;letter-spacing:.7px;color:#666;pointer-events:none;text-transform:uppercase}
+.ld-versao-item{font-size:8px;letter-spacing:.7px;color:#666;pointer-events:none;text-transform:uppercase}
 @media(max-width:760px){.content{padding-left:12px!important;padding-right:12px!important}.header{gap:12px}.header h1{font-size:clamp(1.55rem,7vw,2.1rem)}.form-grid{grid-template-columns:1fr!important}.form-full{grid-column:auto!important}.modal-card{width:96vw!important;max-height:94vh!important}.table-container{overflow-x:auto}.topbar{padding-left:12px!important;padding-right:12px!important}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-@media print{.ld-versao{display:none!important}button,.btn{box-shadow:none!important}}
+@media print{.ld-versao,.ld-versao-item{display:none!important}button,.btn{box-shadow:none!important}}
 
 
 /* AUTORIZAÇÕES EM DESTAQUE */
@@ -780,7 +781,7 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
                 </div>
             </form>
             <div style="margin-top:20px; font-size:0.75rem; color:var(--text-muted);">
-                Acesso restrito. Peça o seu cadastro ao administrador do Firebase.<div class="ld-versao" style="margin-top:10px; font-size:0.7rem; letter-spacing:0.08em; color:var(--text-muted); opacity:0.75;">SISTEMA LD IMÓVEIS · v2.0.0</div>
+                Acesso restrito. Peça o seu cadastro ao administrador do Firebase.<div class="ld-versao-item" style="margin-top:10px; font-size:0.7rem; letter-spacing:0.08em; color:var(--text-muted); opacity:0.75;">SISTEMA LD IMÓVEIS · v2.0.0</div>
             </div>
         </div>
     </div>
@@ -829,7 +830,7 @@ img{max-width:100%}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollba
                 <div style="color:var(--red-main); font-size:0.75rem; cursor:pointer; font-weight:700;" onclick="fazerLogout()">
                     <i class="fas fa-sign-out-alt"></i> Sair do Sistema
                 </div>
-                <div class="ld-versao" style="font-size:0.65rem; letter-spacing:0.06em; color:var(--text-muted); opacity:0.6; margin-top:4px;">v2.0.0</div>
+                <div class="ld-versao-item" style="font-size:0.65rem; letter-spacing:0.06em; color:var(--text-muted); opacity:0.6; margin-top:4px;">v2.0.0</div>
             </div>
         </div>
     </aside>
@@ -4604,5 +4605,5 @@ window.renderFilaFotos = renderFilaFotos;
     window.atualizarPreviewFechamento();
 })();
 </script>
-<div class="ld-versao">LD Sistemas · versão 2026</div></body>
+<div class="ld-versao">LD Sistemas · v2.0.0</div></body>
 </html>
