@@ -2200,7 +2200,8 @@ window.navegar = (aba, elemento) => {
 
 window.addEventListener('hashchange', () => window.abrirAbaDoLink());
 
-async function registrarAuditoria({colecao,registroId,acao,antes=null,depois=null,motivo='',reversivel=true}){return addDoc(collection(db,'auditoriaSistema'),{colecao,registroId,acao,antes,depois,motivo,usuario:auth.currentUser?.email||'',criadoEm:new Date().toISOString(),reversivel,revertida:false})}
+async function registrarAuditoria({colecao,registroId,acao,antes=null,depois=null,motivo='',reversivel=true,revertidaDe=null}){return addDoc(collection(db,'auditoriaSistema'),{colecao,registroId,acao,antes,depois,motivo,usuario:auth.currentUser?.email||'',criadoEm:new Date().toISOString(),reversivel,revertida:false,revertidaDe})}
+function reversaoDe(id){return (state.auditoriaSistema||[]).find(x=>x.revertidaDe===id)||null}
 function motivoObrigatorio(texto){const m=prompt(texto+'\n\nInforme o motivo da alteração:');return m&&m.trim()?m.trim():null}
 function audResultado(a){
   if(a.acao==='EXCLUSÃO')return 'Registro excluído do banco';
@@ -2305,13 +2306,13 @@ window.renderizarAuditoria=()=>{
   if(!tb)return;
   if(!lista.length){tb.innerHTML=linhaVazia(6,'Nenhuma ação auditada com os filtros atuais.');return}
   tb.innerHTML=lista.map(a=>{
-    const botao=(a.reversivel&&!a.revertida)
-      ?('<button class="btn btn-outline btn-sm" onclick="reverterAuditoria('+a.id+')"><i class="fas fa-rotate-left"></i> Reverter</button>')
+    const botao=(a.reversivel&&!reversaoDe(a.id))
+      ?('<button class="btn btn-outline btn-sm" onclick="reverterAuditoria(\''+a.id+'\')"><i class="fas fa-rotate-left"></i> Reverter</button>')
       :'—';
     return '<tr>'
       +'<td>'+esc(a.criadoEm?new Date(a.criadoEm).toLocaleString('pt-BR'):'')+'<small class="consulta-mini">'+esc(a.usuario||'')+'</small></td>'
       +'<td><b>'+esc(a.colecao||'')+'</b><small class="consulta-mini">'+esc(a.registroId||'')+'</small></td>'
-      +'<td>'+audSelo(a.acao)+(a.revertida?'<small class="consulta-mini" style="color:#7ce8a1">REVERTIDA</small>':'')+'</td>'
+      +'<td>'+audSelo(a.acao)+(reversaoDe(a.id)?'<small class="consulta-mini" style="color:#7ce8a1">REVERTIDA</small>':'')+'</td>'
       +'<td>'+esc(audResultado(a))+'</td>'
       +'<td>'+esc(a.motivo||'')+'</td>'
       +'<td>'+botao+'</td>'
@@ -2326,7 +2327,7 @@ window.exportarAuditoriaCSV=()=>{
     linhas.push([
       a.criadoEm?new Date(a.criadoEm).toLocaleString('pt-BR'):'',
       a.usuario||'',a.colecao||'',a.registroId||'',a.acao||'',
-      audResultado(a),a.motivo||'',a.revertida?'Sim':'Nao'
+      audResultado(a),a.motivo||'',reversaoDe(a.id)?'Sim':'Nao'
     ].map(celulaCSV).join(';'));
   });
   const blob=new Blob(['\uFEFF'+linhas.join('\n')],{type:'text/csv;charset=utf-8;'});
@@ -2384,7 +2385,7 @@ window.reverterAuditoria=async id=>{
   if(perfilLogado?.perfil!=='admin')return mostrarAlerta('Apenas administradores podem reverter.','erro');
   const a=state.auditoriaSistema.find(x=>x.id===id);
   if(!a)return mostrarAlerta('Registro de auditoria não encontrado. Atualize a página (Ctrl+F5) e tente novamente.','erro');
-  if(a.revertida)return mostrarAlerta('Esta ação já foi revertida.','erro');
+  if(reversaoDe(a.id))return mostrarAlerta('Esta ação já foi revertida.','erro');
   const temCopia=!!(a.antes&&typeof a.antes==='object'&&Object.keys(a.antes).length);
   if(a.acao==='EXCLUSÃO'&&!temCopia)return mostrarAlerta('Esta exclusão foi registrada sem cópia do documento original (auditoria antiga). Não é possível restaurar automaticamente; cadastre o registro novamente.','erro');
   if(a.acao!=='CRIAÇÃO'&&!temCopia)return mostrarAlerta('Esta ação não guardou o estado anterior e não pode ser revertida.','erro');
@@ -2400,8 +2401,7 @@ window.reverterAuditoria=async id=>{
       const conferencia=await getDoc(ref);
       if(!conferencia.exists())throw new Error('O documento não foi gravado em '+a.colecao+'/'+a.registroId);
     }
-    await updateDoc(doc(db,'auditoriaSistema',id),{revertida:true,revertidaEm:new Date().toISOString(),revertidaPor:auth.currentUser?.email||'',motivoReversao:motivo});
-    await registrarAuditoria({colecao:a.colecao,registroId:a.registroId,acao:'REVERSÃO',antes:a.depois??null,depois:a.antes??null,motivo,reversivel:false});
+    await registrarAuditoria({colecao:a.colecao,registroId:a.registroId,acao:'REVERSÃO',antes:a.depois??null,depois:a.antes??null,motivo,reversivel:false,revertidaDe:id});
     mostrarAlerta('Ação revertida com sucesso!','sucesso');
   }catch(erro){
     console.error('[LD Imóveis] Falha ao reverter auditoria',a,erro);

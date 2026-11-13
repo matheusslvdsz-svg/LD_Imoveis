@@ -170,7 +170,9 @@ service cloud.firestore {
                     && resource.data.status == 'rascunho'
                     && request.resource.data.status == 'emitido'
                     && request.resource.data.emitidoPor == email()
-                    && request.resource.data.emitidoEm is string;
+                    && request.resource.data.emitidoEm is string
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                    .hasOnly(['status', 'emitidoPor', 'emitidoEm', 'dadosEmitidos', 'origemColecao', 'origemId', 'atualizadoEm', 'atualizadoPor']);
 
       // Cancelamento de rascunho ou emitido: exclusivamente administrador e com motivo.
       allow update: if admin()
@@ -181,7 +183,9 @@ service cloud.firestore {
                     && request.resource.data.canceladoPor == email()
                     && request.resource.data.canceladoEm is string
                     && request.resource.data.motivoCancelamento is string
-                    && request.resource.data.motivoCancelamento.size() >= 5;
+                    && request.resource.data.motivoCancelamento.size() >= 5
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                    .hasOnly(['status', 'canceladoPor', 'canceladoEm', 'motivoCancelamento', 'atualizadoEm', 'atualizadoPor']);
 
       // Substituição: original fica terminal e aponta para um novo código.
       allow update: if admin()
@@ -194,7 +198,9 @@ service cloud.firestore {
                     && request.resource.data.substituidoPor == email()
                     && request.resource.data.substituidoEm is string
                     && request.resource.data.motivoSubstituicao is string
-                    && request.resource.data.motivoSubstituicao.size() >= 5;
+                    && request.resource.data.motivoSubstituicao.size() >= 5
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                    .hasOnly(['status', 'substituidoPor', 'substituidoPorCodigo', 'substituidoEm', 'motivoSubstituicao', 'atualizadoEm', 'atualizadoPor']);
 
       // Documento oficial nunca é apagado nem reativado após estado terminal.
       allow delete: if false;
@@ -204,7 +210,9 @@ service cloud.firestore {
       allow create: if ativo()
                     && request.resource.data.usuario == email()
                     && request.resource.data.criadoEm is string;
-      allow update: if admin();
+      // A-02 (auditoria 12/11/2026): registro de auditoria e IMUTAVEL.
+      // Reversao nunca sobrescreve: e um evento novo, com autor, motivo e data.
+      allow update: if false;
       allow delete: if false;
     }
 
